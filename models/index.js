@@ -27,8 +27,8 @@ db.Profile.belongsTo(db.User, { foreignKey: 'user_id', targetKey: 'id' });
 db.Post.belongsToMany(db.Hashtag, { through: 'PostHashtag' });
 db.Hashtag.belongsToMany(db.Post, { through: 'PostHashtag' });
 
-db.Post.belongsToMany(db.User, { through: 'Like' });
-db.User.belongsToMany(db.Post, { through: 'Like' });
+// db.Post.belongsToMany(db.User, { through: 'Like' });
+// db.User.belongsToMany(db.Post, { through: 'Like' });
 
 db.User.belongsToMany(db.User, {
   foreignKey: 'followingId',

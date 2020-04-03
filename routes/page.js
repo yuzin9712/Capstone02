@@ -20,27 +20,28 @@ router.get('/join', isNotLoggedIn, (req, res) => {
 
 router.get('/', (req, res, next) => {
     Post.findAll({
-        include: [{
-            model: User,
-            attributes: ['id', 'name'],
-        }],
-        order: [['createdAt', 'DESC']],
+        include: 
+            {
+                model: User,
+                attributes: ['id', 'name'],
+            },
+            order: [['createdAt', 'DESC']],
     })
     .then((posts) => {
-        // res.render('main', {
-        //     title: 'example',
-        //     twits: posts,
-        //     user: req.user,
-        //     loginError: req.flash('loginError'),
-        // });
-        // console.log('1번', posts);
-        console.log(`posts= ${JSON.stringify(posts)}`);
-        res.send(posts);
+        res.render('main', {
+            title: 'example',
+            twits: posts,
+            user: req.user,
+            loginError: req.flash('loginError'),
+        });
+        console.log('1번', JSON.stringify(posts));
+        // console.log(`posts= ${JSON.stringify(posts)}`);
     })
     .catch((err) => {
         console.error(err);
         next(err);
     });
+    // console.log(JSON.stringify(req.user));
 });
 
 // router.get('/', (req, res, next) => {
@@ -51,5 +52,27 @@ router.get('/', (req, res, next) => {
 //         loginError: req.flash('loginError'),
 //     });
 // });
+
+/**내가 올린 글 보기 */
+router.get('/mypost', (req, res, next) => {
+    Post.findAll({ 
+        where: { userId: req.user.id },
+        order: [['createdAt', 'DESC']],
+    })
+    .then((posts) => {
+        res.render('post', {
+            title: 'example',
+            twits: posts,
+            user: req.user,
+            loginError: req.flash('loginError'),
+        });
+        // console.log(`posts= ${JSON.stringify(posts)}`);
+    })
+    .catch((err) => {
+        console.error(err);
+        next(err);
+    });
+    // console.log(JSON.stringify(req.user));
+});
 
 module.exports = router;

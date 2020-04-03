@@ -72,7 +72,7 @@ router.get('/hashtag', async(req, res, next) => {
         let posts = [];
 
         if (hashtag) {
-            posts = await hashtag.getPosts({ include: [{model: User}] });
+            posts = await hashtag.getPosts({ include: [{ model: User }] });
         }
         return res.render('main', {
             title: `${tags} 찾기`,
@@ -84,5 +84,32 @@ router.get('/hashtag', async(req, res, next) => {
         return next(err);
     }
 });
+
+/**게시물 수정할 때 정보 보내주기
+ * 글 올린 사람과 요청한 사람이 같은지 확인해야하나?
+ */
+router.get('/:id', isLoggedIn, async(req, res, next) => {
+
+    const post = await Post.findOne({ where: { id: parseInt(req.params.id, 10) } });
+
+    try {
+        if (req.user.id !== post.userId) {
+            console.log('아냐 다른 사람이야@!!');
+            alert('다른 사용자의 게시글 입니다.');
+            res.redirect('/');
+        }      
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
+});
+
+/**게시물의 글 수정 --> 사진 수정도 가능해야 할까? */
+router.put('/:id', isLoggedIn, async(req, res, next) => {
+
+})
+
+/**게시글 좋아요 누르기 - 누른 사람, 누른 게시물, 좋아요 수 -- */
+
 
 module.exports = router;
