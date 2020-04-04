@@ -47,9 +47,9 @@ router.post('/', isLoggedIn, upload2.none(), async (req, res, next) => {
             const result = await Promise.all(hashtags.map(tag => Hashtag.findOrCreate({
                 where: { title: tag.slice(1).toLowerCase() },
             })));
-            console.log("1번: " , result);
-            await post.addHashtags(result.map(r => r[0]));
-            console.log("2번: ", result.map(r => r[0]));
+            // console.log("1번: ", result);
+            await post.addHashtags(result.map(r => r[0])); //2차원 배열에서 1차원 배열로 만들어줌
+            // console.log("2번: ", result.map(r => r[0]));
         }
         res.redirect('/');
     } catch (err) {
@@ -58,6 +58,7 @@ router.post('/', isLoggedIn, upload2.none(), async (req, res, next) => {
     }
 });
 
+/**태그 검색 */
 router.get('/hashtag', async(req, res, next) => {
     const tags = req.query.hashtag; //url로 query문 보낼 때
 
@@ -95,9 +96,9 @@ router.get('/:id', isLoggedIn, async(req, res, next) => {
     try {
         if (req.user.id !== post.userId) {
             console.log('아냐 다른 사람이야@!!');
-            alert('다른 사용자의 게시글 입니다.');
             res.redirect('/');
-        }      
+        }
+        res.send(post);      
     } catch (err) {
         console.error(err);
         next(err);
@@ -105,8 +106,55 @@ router.get('/:id', isLoggedIn, async(req, res, next) => {
 });
 
 /**게시물의 글 수정 --> 사진 수정도 가능해야 할까? */
-router.put('/:id', isLoggedIn, async(req, res, next) => {
+/**put vs patch 
+ * put 은 자원의 전체 교체, 자원내 모든 필드 필요
+ * patch 는 자원의 부분교체, 자원 내 일부 필드 필요 -- 사진은 수정안되니까 patch로 하겠음
+ */
+router.patch('/:id', isLoggedIn, async(req, res, next) => {
 
+    const post = await findOne({ where: { id: req.params.id }});
+
+    try {
+        Post.update({ content: req.body.content }, { where: { id: req.params.id }});
+
+        const hashtags = req.body.content.match(/#[^\s#]*/g);
+        if(hashtags) {
+            const result = await Promise.all(hashtags.map(tag => Hashtag.findOrCreate({
+                where: { title: tag.slice(1).toLowerCase() },
+            })));
+
+            //해시태그 수정 --> 원래있던 태그와의 관계를 삭제하고 새로운 태그 재생성하는 방식??
+            //태그를 수정하지 않으면 낭비아닌가?
+            await post.removeHashtags({ where: { postId: post.id }});
+            await post.addHashtags(result.map(r => r[0]));
+        }
+        res.redirect('/');
+} catch (err) {
+    console.error(err);
+    next(err);
+}
+});
+
+/**게시물 삭제 - 게시물 아이디를 파라미터로 보냄
+ * 교차테이블과 포스트테이블에 있는걸 삭제해야 ... 해시태그 테이블은 냅둬도될까?
+*/
+router.delete('/:id', async(req, res, next) => {
+
+    const post = Post.findOne({ where: { id: req.params.id }});
+
+    if (post.userId !== req.user.id) {
+        console.error('다른 사람 게시물이야!!');
+        res.redirect('/'); //메인화면으로 리다이렉트
+    }
+    
+    Post.destroy({ where: { id: req.params.id } })
+    .then((result) => {
+        res.redirect('/');
+    })
+    .catch((err) => {
+        console.error(err);
+        next(err);
+    })
 })
 
 /**게시글 좋아요 누르기 - 누른 사람, 누른 게시물, 좋아요 수 -- */
