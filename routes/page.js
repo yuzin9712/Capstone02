@@ -1,6 +1,6 @@
 const express = require('express');
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
-const { Post, User } = require('../models');
+const { Post, User, Closet } = require('../models');
 
 const router = express.Router();
 
@@ -18,6 +18,7 @@ router.get('/join', isNotLoggedIn, (req, res) => {
     });
 });
 
+/**전체 사람들 글 조회하기 */
 router.get('/', (req, res, next) => {
     Post.findAll({
         include: 
@@ -34,8 +35,8 @@ router.get('/', (req, res, next) => {
             user: req.user,
             loginError: req.flash('loginError'),
         });
-        console.log('1번', JSON.stringify(posts));
-        // console.log(`posts= ${JSON.stringify(posts)}`);
+        // console.log('1번', JSON.stringify(posts));
+        console.log(`posts= ${JSON.stringify(posts)}`);
     })
     .catch((err) => {
         console.error(err);
@@ -44,14 +45,12 @@ router.get('/', (req, res, next) => {
     // console.log(JSON.stringify(req.user));
 });
 
-// router.get('/', (req, res, next) => {
-//     res.render('main', {
-//         title: 'zz',
-//         twits:[],
-//         user: req.user,
-//         loginError: req.flash('loginError'),
-//     });
-// });
+/**친구들 + 나 올린글 보기 */
+router.get('/followpost', (req, res, next) => {
+    Post.findAll({
+/**수정중 */
+    })
+})
 
 /**내가 올린 글 보기 */
 router.get('/mypost', (req, res, next) => {
@@ -63,6 +62,28 @@ router.get('/mypost', (req, res, next) => {
         res.render('post', {
             title: 'example',
             twits: posts,
+            user: req.user,
+            loginError: req.flash('loginError'),
+        });
+        // console.log(`posts= ${JSON.stringify(posts)}`);
+    })
+    .catch((err) => {
+        console.error(err);
+        next(err);
+    });
+    // console.log(JSON.stringify(req.user));
+});
+
+/**옷장테스트 */
+router.get('/mycloset', (req, res, next) => {
+    Closet.findAll({ 
+        where: { userId: req.user.id },
+        order: [['createdAt', 'DESC']],
+    })
+    .then((closets) => {
+        res.render('closet', {
+            title: 'example',
+            twits: closets,
             user: req.user,
             loginError: req.flash('loginError'),
         });

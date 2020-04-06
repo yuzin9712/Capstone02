@@ -18,6 +18,7 @@ db.Hashtag = require('./hashtag')(sequelize, Sequelize);
 db.Post = require('./post')(sequelize, Sequelize);
 db.Review = require('./review')(sequelize, Sequelize);
 db.Cart = require('./cart')(sequelize, Sequelize);
+db.Closet = require('./closet')(sequelize, Sequelize);
 
 /** 1:1 관계 */
 db.User.hasOne(db.Profile, { foreignKey: 'user_id', sourceKey: 'id' });
@@ -26,6 +27,9 @@ db.Profile.belongsTo(db.User, { foreignKey: 'user_id', targetKey: 'id' });
 /** N:M 관계 */
 db.Post.belongsToMany(db.Hashtag, { through: 'PostHashtag' });
 db.Hashtag.belongsToMany(db.Post, { through: 'PostHashtag' });
+
+db.Closet.belongsToMany(db.Product, { through: 'ClosetProduct'});
+db.Product.belongsToMany(db.Closet, { through: 'ClosetProduct' });
 
 // db.Post.belongsToMany(db.User, { through: 'Like' });
 // db.User.belongsToMany(db.Post, { through: 'Like' });
@@ -56,5 +60,8 @@ db.Cart.belongsTo(db.User);
 
 db.Product.hasMany(db.Cart);
 db.Cart.belongsTo(db.Product);
+
+db.User.hasMany(db.Closet);
+db.Closet.belongsTo(db.User);
 
 module.exports = db;

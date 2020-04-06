@@ -21,15 +21,9 @@ router.post('/:id/follow', isLoggedIn, async(req, res, next) => {
  * 버튼을 눌렀을 때 끊고자하는 대상의 아이디를 내가 얻을 수 있는가?
 */
 router.get('/:id/follow', isLoggedIn, async(req, res, next) => {
-    const user = await User.findOne({where: { id: req.user.id } });
-
-    if(!user) {
-        res.redirect('/');
-    }
-
     try {
-        /**수정 */
-
+        const user = await User.findOne({where: { id: req.user.id } });
+        await user.removeFollowing(parseInt(req.params.id, 10));
         res.send('success');
     } catch (err) {
         console.error(err);

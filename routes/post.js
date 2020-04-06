@@ -43,12 +43,14 @@ router.post('/', isLoggedIn, upload2.none(), async (req, res, next) => {
             userId: req.user.id,
         });
         const hashtags = req.body.content.match(/#[^\s#]*/g);
+        console.log('이게해시태그임!!!!!!!!!!!!!!!!!!! ', hashtags); //[ '#토끼', '#귀여웡' ] 이렇게출력되네
+
         if(hashtags) {
             const result = await Promise.all(hashtags.map(tag => Hashtag.findOrCreate({
                 where: { title: tag.slice(1).toLowerCase() },
             })));
             // console.log("1번: ", result);
-            await post.addHashtags(result.map(r => r[0])); //2차원 배열에서 1차원 배열로 만들어줌
+            await post.addHashtags(result.map(r => r[0])); //2차원 배열에서 1차원 배열로 만들어줌?
             // console.log("2번: ", result.map(r => r[0]));
         }
         res.redirect('/');
@@ -135,7 +137,7 @@ router.patch('/:id', isLoggedIn, async(req, res, next) => {
 }
 });
 
-/**게시물 삭제 - 게시물 아이디를 파라미터로 보냄
+/**게시물 삭제 - 게시물 아이디를 파라미터로 보냄 //확인필요
  * 교차테이블과 포스트테이블에 있는걸 삭제해야 ... 해시태그 테이블은 냅둬도될까?
 */
 router.delete('/:id', async(req, res, next) => {
@@ -155,7 +157,7 @@ router.delete('/:id', async(req, res, next) => {
         console.error(err);
         next(err);
     })
-})
+});
 
 /**게시글 좋아요 누르기 - 누른 사람, 누른 게시물, 좋아요 수 -- */
 
