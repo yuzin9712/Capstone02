@@ -1,7 +1,6 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 const AWS = require('aws-sdk');
 const multerS3 = require('multer-s3');
 
@@ -50,7 +49,8 @@ router.post('/', isLoggedIn, upload2.none(), async (req, res, next) => {
 
         const result = await Promise.all(products.map(product => Product.findOne({
             where: { id: product },
-        })));
+        }))); //id 맞는 제품들을 조회하겠다!!
+        
         // console.log("1번: ", result);
         await closet.addProducts(result.map(r => r[0])); //2차원 배열에서 1차원 배열로 만들어줌?
         // console.log("2번: ", result.map(r => r[0]));
@@ -63,28 +63,40 @@ router.post('/', isLoggedIn, upload2.none(), async (req, res, next) => {
     }
 });
 
-/**해당 코디에 사용된 제품 불러오기!!!! */
-router.get('/:id', isLoggedIn, async(req, res, next) => {
+/**해당 글에 사용된 제품 불러오기?? */
+router.get('/:id/products', isLoggedIn, async(req, res, next) => {
 
     try {
-        // const hashtag = await Hashtag.findOne({ where: { title: tags } });
+        const closet = await Closet.findOne({ where: { id: parseInt(req.params.id, 10) } });
 
-        // let posts = [];
+        let products = [];
 
-        // if (hashtag) {
-        //     posts = await hashtag.getPosts({ include: [{ model: User }] });
-        // }
-        // return res.render('main', {
-        //     title: `${tags} 찾기`,
-        //     user: req.user,
-        //     twits: posts,
-        // });
+        if (closet) {
+            products = await closet.getProducts({});
+        }
+        return res.send(products);
         
     } catch (err) {
         console.error(err);
         return next(err);
     }
-    
+});
+
+/*선택한 게시물 조회하기 얘는 조회하는 사람과 옷장주인이 같은 사람인지 확인해야함 */
+router.get('/:id', isLoggedIn, async (req, res, next) => {
+
+    const closet = await Closet.findOne({ where: { id: parseInt(req.params.id,10), userId: req.user.id }});
+
+    try {
+        if (!closet) {
+            console.log('다른사람꺼보지마ㅡㅡ');
+            res.redirect('/');
+        }
+        res.send(closet);      
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
 })
 
 module.exports = router;

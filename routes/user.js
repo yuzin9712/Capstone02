@@ -20,7 +20,7 @@ router.post('/:id/follow', isLoggedIn, async(req, res, next) => {
 /**팔로우 끊기
  * 버튼을 눌렀을 때 끊고자하는 대상의 아이디를 내가 얻을 수 있는가?
 */
-router.get('/:id/follow', isLoggedIn, async(req, res, next) => {
+router.delete('/:id/follow', isLoggedIn, async(req, res, next) => {
     try {
         const user = await User.findOne({where: { id: req.user.id } });
         await user.removeFollowing(parseInt(req.params.id, 10));

@@ -25,6 +25,8 @@ module.exports = (passport) => {
                        }],
                     })
             .then((user) => {
+                console.log('전체!!',user.Followings);
+                console.log('여기여기칭구들!!!!!!!!!!!!!!!!!!', JSON.stringify(user));
                 done(null, user)
             })
             .catch((err) => {

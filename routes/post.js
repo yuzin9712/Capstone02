@@ -72,10 +72,12 @@ router.get('/hashtag', async(req, res, next) => {
     try {
         const hashtag = await Hashtag.findOne({ where: { title: tags } });
 
+        console.log('해시태그 찾을때는!?!?!!!', hashtag);
+
         let posts = [];
 
         if (hashtag) {
-            posts = await hashtag.getPosts({ include: [{ model: User }] });
+            posts = await hashtag.getPosts({ include: [{ model: User }], ordered: [['createdAt', 'DESC']] });
         }
         return res.render('main', {
             title: `${tags} 찾기`,
@@ -88,16 +90,16 @@ router.get('/hashtag', async(req, res, next) => {
     }
 });
 
-/**게시물 수정할 때 정보 보내주기
- * 글 올린 사람과 요청한 사람이 같은지 확인해야하나?
+/**게시물 수정할 때 정보 보내주기/조회할때도 사용가능하겠군
+ * 글 올린 사람과 요청한 사람이 같은지 확인해야하나? ㄴㄴ
  */
 router.get('/:id', isLoggedIn, async(req, res, next) => {
 
     const post = await Post.findOne({ where: { id: parseInt(req.params.id, 10) } });
 
     try {
-        if (req.user.id !== post.userId) {
-            console.log('아냐 다른 사람이야@!!');
+        if (!post) {
+            console.log('없는 글인데??????');
             res.redirect('/');
         }
         res.send(post);      
@@ -112,42 +114,44 @@ router.get('/:id', isLoggedIn, async(req, res, next) => {
  * put 은 자원의 전체 교체, 자원내 모든 필드 필요
  * patch 는 자원의 부분교체, 자원 내 일부 필드 필요 -- 사진은 수정안되니까 patch로 하겠음
  */
-router.patch('/:id', isLoggedIn, async(req, res, next) => {
+// router.patch('/:id', isLoggedIn, async(req, res, next) => {
 
-    const post = await findOne({ where: { id: req.params.id }});
+//     const post = await findOne({ where: { id: req.params.id }});
 
-    try {
-        Post.update({ content: req.body.content }, { where: { id: req.params.id }});
+//     try {
+//         Post.update({ content: req.body.content }, { where: { id: req.params.id }});
 
-        const hashtags = req.body.content.match(/#[^\s#]*/g);
-        if(hashtags) {
-            const result = await Promise.all(hashtags.map(tag => Hashtag.findOrCreate({
-                where: { title: tag.slice(1).toLowerCase() },
-            })));
+//         const hashtags = req.body.content.match(/#[^\s#]*/g);
+//         if(hashtags) {
+//             const result = await Promise.all(hashtags.map(tag => Hashtag.findOrCreate({
+//                 where: { title: tag.slice(1).toLowerCase() },
+//             })));
 
-            //해시태그 수정 --> 원래있던 태그와의 관계를 삭제하고 새로운 태그 재생성하는 방식??
-            //태그를 수정하지 않으면 낭비아닌가?
-            await post.removeHashtags({ where: { postId: post.id }});
-            await post.addHashtags(result.map(r => r[0]));
-        }
-        res.redirect('/');
-} catch (err) {
-    console.error(err);
-    next(err);
-}
-});
+//             //해시태그 수정 --> 원래있던 태그와의 관계를 삭제하고 새로운 태그 재생성하는 방식??
+//             //태그를 수정하지 않으면 낭비아닌가?
+//             await post.removeHashtags({ where: { postId: post.id }});
+//             await post.addHashtags(result.map(r => r[0]));
+//         }
+//         res.redirect('/');
+// } catch (err) {
+//     console.error(err);
+//     next(err);
+// }
+// });
 
 /**게시물 삭제 - 게시물 아이디를 파라미터로 보냄 //확인필요
- * 교차테이블과 포스트테이블에 있는걸 삭제해야 ... 해시태그 테이블은 냅둬도될까?
+ * 교차테이블과 포스트테이블에 있는걸 삭제해야
+ * 안해도됨 왜냐하면 어차피 진짜게시글이 삭제되는게아니고 deleted에 시간이 저장되어
+ * 조회 x
 */
-router.delete('/:id', async(req, res, next) => {
+router.delete('/:id', (req, res, next) => {
 
     const post = Post.findOne({ where: { id: req.params.id }});
 
-    if (post.userId !== req.user.id) {
-        console.error('다른 사람 게시물이야!!');
-        res.redirect('/'); //메인화면으로 리다이렉트
-    }
+    // if (post.userId !== req.user.id) {
+    //     console.error('다른 사람 게시물이야!!');
+    //     res.redirect('/'); //메인화면으로 리다이렉트
+    // }
     
     Post.destroy({ where: { id: req.params.id } })
     .then((result) => {
