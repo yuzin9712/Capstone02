@@ -50,10 +50,10 @@ router.post('/', isLoggedIn, upload2.none(), async (req, res, next) => {
         const result = await Promise.all(products.map(product => Product.findOne({
             where: { id: product },
         }))); //id 맞는 제품들을 조회하겠다!!
-        
-        // console.log("1번: ", result);
-        await closet.addProducts(result.map(r => r[0])); //2차원 배열에서 1차원 배열로 만들어줌?
-        // console.log("2번: ", result.map(r => r[0]));
+        //
+        console.log("1번: ???????????????????", result);
+        await closet.addProducts(result);
+        // console.log("2번: !!!!!!!!!!!!!!!!!!", result.map(r => r[0]));
         
         //relation 테이블에 제품의 아이디가 담기게 하기
         res.redirect('/mycloset');
@@ -97,6 +97,10 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
         console.error(err);
         next(err);
     }
+});
+
+router.delete('/:id', isLoggedIn, async (req, res, next) => {
+    //삭제하기!!!
 })
 
 module.exports = router;
