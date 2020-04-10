@@ -96,7 +96,9 @@ router.get('/followpost', isLoggedIn, async(req, res, next) => {
 
 })
 
-/**내가 올린 글 보기 */
+/**내가 올린 글 보기 
+ * 
+*/
 router.get('/mypost', (req, res, next) => {
     Post.findAll({ 
         where: { userId: req.user.id },
@@ -118,7 +120,9 @@ router.get('/mypost', (req, res, next) => {
     // console.log(JSON.stringify(req.user));
 });
 
-/**옷장테스트 */
+/**옷장테스트 
+ * 나의 옷장 게시물 전체 조회
+*/
 router.get('/mycloset', (req, res, next) => {
     Closet.findAll({ 
         where: { userId: req.user.id },

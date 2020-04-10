@@ -31,9 +31,6 @@ db.Hashtag.belongsToMany(db.Post, { through: 'PostHashtag' });
 db.Closet.belongsToMany(db.Product, { through: 'ClosetProduct'});
 db.Product.belongsToMany(db.Closet, { through: 'ClosetProduct' });
 
-// db.Post.belongsToMany(db.User, { through: 'Like' });
-// db.User.belongsToMany(db.Post, { through: 'Like' });
-
 db.User.belongsToMany(db.User, {
   foreignKey: 'followingId',
   as: 'Followers',
@@ -45,8 +42,10 @@ db.User.belongsToMany(db.User, {
   through: 'Follow',
 });
 
+db.User.belongsToMany(db.Post, { through : 'Like' });
+
 /**1:N 관계 */
-db.User.hasMany(db.Post);
+// db.User.hasMany(db.Post);
 db.Post.belongsTo(db.User);
 
 db.Category.hasMany(db.Product);

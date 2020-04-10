@@ -76,7 +76,7 @@ router.get('/hashtag', async(req, res, next) => {
 
         let posts = [];
 
-        if (hashtag) {
+        if (hashtag) { //최신순 정렬이 먹히는지 확인할 것!! - 확인하면 지워라
             posts = await hashtag.getPosts({ include: [{ model: User }], ordered: [['createdAt', 'DESC']] });
         }
         return res.render('main', {
@@ -95,6 +95,7 @@ router.get('/hashtag', async(req, res, next) => {
  */
 router.get('/:id', isLoggedIn, async(req, res, next) => {
 
+    console.log('하나의 게시글 조회');
     const post = await Post.findOne({ where: { id: parseInt(req.params.id, 10) } });
 
     try {
@@ -144,11 +145,11 @@ router.get('/:id', isLoggedIn, async(req, res, next) => {
  * 안해도됨 왜냐하면 어차피 진짜게시글이 삭제되는게아니고 deleted에 시간이 저장되어
  * 조회 x
 */
-router.delete('/:id', (req, res, next) => {
+router.delete('/:id', isLoggedIn, (req, res, next) => {
 
     const post = Post.findOne({ where: { id: req.params.id }});
 
-    // if (post.userId !== req.user.id) {
+    // if (post.userId !== req.user.id) { --> 먹히는지확인할것!!!!!
     //     console.error('다른 사람 게시물이야!!');
     //     res.redirect('/'); //메인화면으로 리다이렉트
     // }
@@ -164,6 +165,20 @@ router.delete('/:id', (req, res, next) => {
 });
 
 /**게시글 좋아요 누르기 - 누른 사람, 누른 게시물, 좋아요 수 -- */
+router.get('/like/:id', isLoggedIn, async (req, res, next) => {
+
+    const post = await Post.findOne({ where: { id: parseInt(req.params.id, 10) } });
+
+    try {
+        await post.addUsers(req.user.id);
+        res.redirect('/');
+    }
+    catch (err) {
+        console.error(err);
+        next(err);
+    }
+    
+})
 
 
 module.exports = router;
