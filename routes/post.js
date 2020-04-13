@@ -115,30 +115,30 @@ router.get('/:id', isLoggedIn, async(req, res, next) => {
  * put 은 자원의 전체 교체, 자원내 모든 필드 필요
  * patch 는 자원의 부분교체, 자원 내 일부 필드 필요 -- 사진은 수정안되니까 patch로 하겠음
  */
-// router.patch('/:id', isLoggedIn, async(req, res, next) => {
+router.patch('/:id', isLoggedIn, async(req, res, next) => {
 
-//     const post = await findOne({ where: { id: req.params.id }});
+    const post = await findOne({ where: { id: req.params.id }});
 
-//     try {
-//         Post.update({ content: req.body.content }, { where: { id: req.params.id }});
+    try {
+        Post.update({ content: req.body.content }, { where: { id: req.params.id }});
 
-//         const hashtags = req.body.content.match(/#[^\s#]*/g);
-//         if(hashtags) {
-//             const result = await Promise.all(hashtags.map(tag => Hashtag.findOrCreate({
-//                 where: { title: tag.slice(1).toLowerCase() },
-//             })));
+        const hashtags = req.body.content.match(/#[^\s#]*/g);
+        if(hashtags) {
+            const result = await Promise.all(hashtags.map(tag => Hashtag.findOrCreate({
+                where: { title: tag.slice(1).toLowerCase() },
+            })));
 
-//             //해시태그 수정 --> 원래있던 태그와의 관계를 삭제하고 새로운 태그 재생성하는 방식??
-//             //태그를 수정하지 않으면 낭비아닌가?
-//             await post.removeHashtags({ where: { postId: post.id }});
-//             await post.addHashtags(result.map(r => r[0]));
-//         }
-//         res.redirect('/');
-// } catch (err) {
-//     console.error(err);
-//     next(err);
-// }
-// });
+            //해시태그 수정 --> 원래있던 태그와의 관계를 삭제하고 새로운 태그 재생성하는 방식??
+            //태그를 수정하지 않으면 낭비아닌가?
+            await post.removeHashtags({ where: { postId: post.id }});
+            await post.addHashtags(result.map(r => r[0]));
+        }
+        res.redirect('/');
+} catch (err) {
+    console.error(err);
+    next(err);
+}
+});
 
 /**게시물 삭제 - 게시물 아이디를 파라미터로 보냄 //확인필요
  * 교차테이블과 포스트테이블에 있는걸 삭제해야
@@ -163,22 +163,6 @@ router.delete('/:id', isLoggedIn, (req, res, next) => {
         next(err);
     })
 });
-
-/**게시글 좋아요 누르기 - 누른 사람, 누른 게시물, 좋아요 수 -- */
-router.get('/like/:id', isLoggedIn, async (req, res, next) => {
-
-    const post = await Post.findOne({ where: { id: parseInt(req.params.id, 10) } });
-
-    try {
-        await post.addUsers(req.user.id);
-        res.redirect('/');
-    }
-    catch (err) {
-        console.error(err);
-        next(err);
-    }
-    
-})
 
 
 module.exports = router;

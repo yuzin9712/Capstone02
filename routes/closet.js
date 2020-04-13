@@ -101,6 +101,21 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
 
 router.delete('/:id', isLoggedIn, async (req, res, next) => {
     //삭제하기!!!
-})
+    const closet = await Closet.findOne({ where: { id: parseInt(req.params.id,10), userId: req.user.id }});
+
+    try {
+        if (!closet) {
+            console.log('다른사람꺼보지마ㅡㅡ');
+            res.redirect('/');
+        }
+        
+        Closet.destroy({ where: {id: parseInt(req.params.id, 10)} }); //굳이 이렇게 같이 삭제해야하냐?
+
+        res.send('success');      
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
+});
 
 module.exports = router;
