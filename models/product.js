@@ -20,10 +20,6 @@ module.exports = (sequelize, DataTypes) => (
         img: {
             type: DataTypes.STRING(200),
             allowNull: true,
-        },
-        cnt: {
-            type: DataTypes.INTEGER.UNSIGNED,
-            defaultValue: 0,
         }
     }, {
         timestamps: true,

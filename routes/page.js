@@ -1,15 +1,17 @@
 const express = require('express');
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
-const { Post, User, Closet } = require('../models');
+const { Post, User, Closet, Design, Product, PostComment, Hashtag } = require('../models');
+const db = require('../models');
 
 const router = express.Router();
 
 
-/**회원가입 - 로그인 안했을시에만 */
+/**마이 페이지 이동 - 어떤 내용이 나와야하나? */
 router.get('/profile', isLoggedIn, (req, res) => {
     res.render('profile', { title: '내 정보', user: req.user });
 });
 
+/**회원가입 페이지 이동*/
 router.get('/join', isNotLoggedIn, (req, res) => {
     res.render('join', {
         title: '회원가입',
@@ -21,20 +23,40 @@ router.get('/join', isNotLoggedIn, (req, res) => {
 /**전체 사람들 글 조회하기 */
 router.get('/', (req, res, next) => {
     Post.findAll({
-        include: 
+        include: [
             {
                 model: User,
                 attributes: ['id', 'name'],
             },
-            order: [['createdAt', 'DESC']],
+            {
+                model: PostComment,
+                attributes: ['id','img','content'],
+                include: {
+                    model: User,
+                    attributes: ['id', 'name'],
+                },
+                order: [['createdAt', 'DESC']],
+            },
+        ],
+        attributes: {
+            include: [
+                [
+                    db.sequelize.literal(`(
+                        SELECT COUNT(*) FROM postLikes AS reaction WHERE reaction.postId = post.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                    'likecount'
+                ]
+            ]
+        },
+        order: [['createdAt', 'DESC']],
     })
     .then((posts) => {
-        res.render('main', {
-            title: 'example',
-            twits: posts,
-            user: req.user,
-            loginError: req.flash('loginError'),
-        });
+        // res.render('main', {
+        //     title: 'example',
+        //     twits: posts,
+        //     user: req.user,
+        //     loginError: req.flash('loginError'),
+        // });
+        res.send(posts);
         // console.log('1번', JSON.stringify(posts));
         console.log(`posts= ${JSON.stringify(posts)}`);
     })
@@ -45,72 +67,66 @@ router.get('/', (req, res, next) => {
     // console.log(JSON.stringify(req.user));
 });
 
-/**친구들 글 보기 - 내꺼도나와야하나?????
- * 최신순정렬로 어케하지 ㅠㅠ?
-*/
-router.get('/followpost', isLoggedIn, async(req, res, next) => {
-    
-    const follows = req.user.Followings;
+router.get('/design', (req, res, next) => {
+    Design.findAll({
+        include: [{
+            model: Hashtag,
+            attributes: ['title'],
+            through: {
+                attributes: []
+            }
+        },{
+            model: Closet,
+            attributes: ['id'],
+            include: [{
+                model: Product,
+                through: {
+                    attributes: []
+                }
+            }]
+        },{
+            model: User,
+            attributes: ['id', 'name']
+        }],
+        order: [['createdAt', 'DESC']],
+    })
+    .then((designs) => {
+        res.send(designs);
+    })
+    .catch((err) => {
+        console.error(err);
+        next(err);
+    })
+});
 
-    const result = await Promise.all(follows.map(follow => Post.findAll({ 
-        include: { model: User, attributes: ['id', 'name']},
-        where: { userId: follow.id },
-        // where: {
-        //     userId: {
-        //         [Op.or]: [ follow.id, req.user.id ] //왜안됨 ㅡㅡ
-        //     }
-        // },
-        order: [['createdAt', 'DESC']]
-    })));
-
-    console.log("이건뭘까요오~!~!~~!~~!~!~!~!: ", JSON.stringify(result.map(r=>r[0])));
-
-    res.render('main', {
-            title: 'example',
-            twits: result.map(r=>r[0]).reverse(), //최신순 정렬이 안먹혀서 지금이렇게함 ㅠㅠ
-            user: req.user,
-            loginError: req.flash('loginError'),
-        });
-
-    // Post.findAll({
-    //     include: [{
-    //         model: User,
-    //         attributes: ['id', 'name'],
-    //         as: 'Followers',
-    //     }],
-    //     order: [['createdAt', 'DESC']]
-    // })
-    // .then((posts) => {
-    //     // res.render('main', {
-    //     //     title: 'example',
-    //     //     twits: posts,
-    //     //     user: req.user,
-    //     //     loginError: req.flash('loginError'),
-    //     // });
-    //     console.log('ㅡㅡㅡㅡㅡㅡㅡㅡ이거ㅡㅡㅡㅡㅡㅡㅡㅡㅡ', JSON.stringify(posts));
-    // })
-    // .catch((err) => {
-    //     console.error(err);
-    //     next(err);
-    // })
-
-})
-
-/**내가 올린 글 보기 
- * 
-*/
-router.get('/mypost', (req, res, next) => {
+/**패션 케어 커뮤니티 페이지 메인 화면 -> 현재 좋아요 수는 구현 x */
+router.get('/post', (req, res, next) => {
     Post.findAll({ 
-        where: { userId: req.user.id },
+        include: [
+            {
+                model: User,
+                attributes: ['id', 'name'],
+            },
+            {
+                model: PostComment,
+                attributes: ['id','img','content'],
+                include: {
+                    model: User,
+                    attributes: ['id', 'name'],
+                },
+                order: [['createdAt', 'DESC']],
+            },
+        ],
         order: [['createdAt', 'DESC']],
     })
     .then((posts) => {
-        res.render('post', {
-            title: 'example',
-            twits: posts,
-            user: req.user,
-            loginError: req.flash('loginError'),
-        });
+        // res.render('post', {
+        //     title: 'example',
+        //     twits: posts,
+        //     user: req.user,
+        //     loginError: req.flash('loginError'),
+        // });
+        res.send(posts);
         // console.log(`posts= ${JSON.stringify(posts)}`);
     })
     .catch((err) => {
@@ -120,21 +136,27 @@ router.get('/mypost', (req, res, next) => {
     // console.log(JSON.stringify(req.user));
 });
 
-/**옷장테스트 
- * 나의 옷장 게시물 전체 조회
-*/
-router.get('/mycloset', (req, res, next) => {
-    Closet.findAll({ 
-        where: { userId: req.user.id },
+/*나의 옷장 메인 페이지*/
+router.get('/closet', (req, res, next) => {
+    Closet.findAll({
+        include: {
+            model: Product, //사용된 제품 정보도 같이 나온다.
+            attributes: ['id', 'seller', 'pname', 'img', 'price', 'description'],
+            through: {
+                 attributes: []//relation table의 attribute는 안뽑히게함!
+            }
+        },
+        where: { userId: 2 },
         order: [['createdAt', 'DESC']],
     })
     .then((closets) => {
-        res.render('closet', {
-            title: 'example',
-            twits: closets,
-            user: req.user,
-            loginError: req.flash('loginError'),
-        });
+        res.send(closets);
+        //     res.render('closet', {
+        //     title: 'example',
+        //     twits: closets,
+        //     user: req.user,
+        //     loginError: req.flash('loginError'),
+        // });
         // console.log(`posts= ${JSON.stringify(posts)}`);
     })
     .catch((err) => {

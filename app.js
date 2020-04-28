@@ -5,6 +5,7 @@ const path = require('path');
 const session = require('express-session');
 const flash = require('connect-flash');
 const passport = require('passport')
+const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const pageRouter = require('./routes/page');
@@ -13,6 +14,8 @@ const postsRouter = require('./routes/post');
 const usersRouter = require('./routes/user');
 const closetsRouter = require('./routes/closet');
 const likesRouter = require('./routes/like');
+const commentRouter = require('./routes/comment');
+const designRouter = require('./routes/design');
 const {sequelize} = require('./models');
 const passportConfig = require('./passport');
 
@@ -24,6 +27,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.set('port', process.env.PORT || 8001);
 
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
@@ -42,12 +47,14 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/', pageRouter);
+app.use('/', pageRouter); //바꿔라~
 app.use('/auth', authRouter);
 app.use('/post', postsRouter);
 app.use('/user', usersRouter);
 app.use('/closet', closetsRouter);
 app.use('/like', likesRouter);
+app.use('/comment', commentRouter);
+app.use('/design', designRouter);
 
 app.use((req, res, next) => {
     const err = new Error('Not Found');

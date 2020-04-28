@@ -1,58 +1,88 @@
 const express = require('express');
 
-const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
-const { Post, User } = require('../models');
+const { isLoggedIn } = require('./middlewares');
+const { Post, PostLike, Design, DesignLike } = require('../models');
 
 const router = express.Router();
 
-/**좋아요 누른 게시물만 나와!!!!!! */
-router.get('/', isLoggedIn, async(req, res, next) => {
-    
-    try {
-        const user = await User.findOne({where: { id: req.user.id } });
-
-        let likes = [];
-    
-        if(user) {
-            likes = await user.getPosts({});
-        }
-        return res.send(likes);
-    } catch (err) {
-        console.error(err);
-        next(err);
-    }
-
-});
-
-/**좋아요 수 세기 찾아봐 ㅠㅠㅠㅠㅠㅠ 미쳣어 */
-
-/**좋아요 누르기 */
-router.get('/:id', isLoggedIn, async(req, res, next) => {
+/**커뮤니티 게시글 좋아요 누르기 */
+router.get('/post/:id',  async(req, res, next) => {
     try {
         console.log('---------좋아요 누르기------------');
-        const user = await User.findOne({ where: { id: req.user.id } });
 
-        await user.addPosts(parseInt(req.params.id, 10));
+        const post = await Post.findOne({ where: {id: parseInt(req.params.id, 10)}});
 
-        res.send('success');
+        if(post) {
+            await PostLike.create({
+                userId: 2,
+                postId: parseInt(req.params.id, 10)
+            });
+        }
+
+        res.redirect('/');
     } catch (err) {
         console.error(err);
         next(err);
     }
 });
 
-/**좋아요 취소하기 */
-router.delete('/:id', isLoggedIn, async(req, res, next) => {
+/**커뮤니티 게시글 좋아요 취소하기 */
+router.delete('/post/:id', async(req, res, next) => {
     try {
         console.log('---------좋아요 취소하기------------');
-        const user = await User.findOne({ where: { id: req.user.id } });
 
-        await user.removePosts(parseInt(req.params.id, 10));
-        res.send('success');
+        await PostLike.destroy({
+            where: {
+                userId: 2,
+                postId: parseInt(req.params.id, 10),
+            }
+        });
+
+        res.redirect('/');
     } catch (err) {
         console.error(err);
         next(err);
     }
 });
+
+/**커뮤니티 게시글 좋아요 누르기 */
+// router.get('/design/:id', isLoggedIn, async(req, res, next) => {
+//     try {
+//         console.log('---------좋아요 누르기------------');
+
+//         const design = await Design.findOne({ where: {id: parseInt(req.params.id, 10)}});
+
+//         if(post) {
+//             await Like.create({
+//                 userId: req.user.id,
+//                 designId: parseInt(req.params.id, 10)
+//             });
+//         }
+
+//         res.redirect('/');
+//     } catch (err) {
+//         console.error(err);
+//         next(err);
+//     }
+// });
+
+// /**커뮤니티 게시글 좋아요 취소하기 */
+// router.delete('/design/:id', async(req, res, next) => {
+//     try {
+//         console.log('---------좋아요 취소하기------------');
+
+//         await Like.destroy({
+//             where: {
+//                 userId: 2,
+//                 postId: parseInt(req.params.id, 10),
+//             }
+//         });
+
+//         res.send('success');
+//     } catch (err) {
+//         console.error(err);
+//         next(err);
+//     }
+// });
 
 module.exports = router;

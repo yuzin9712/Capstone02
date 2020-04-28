@@ -16,17 +16,17 @@ module.exports = (passport) => {
         User.findOne({ where: { id },
                        include: [{
                            model: User,
-                           attributes: ['id', 'name'],
+                           attributes: ['id','name'],
                            as: 'Followers',
                        }, {
                            model: User,
-                           attributes: ['id', 'name'],
+                           attributes: ['id','name'],
                            as: 'Followings',
                        }],
                     })
             .then((user) => {
                 console.log('전체!!',user.Followings);
-                console.log('여기여기칭구들!!!!!!!!!!!!!!!!!!', JSON.stringify(user));
+                console.log('여기여기칭구들!!!!!!!!!!!!!!!!!!', JSON.stringify(user.Followings));
                 done(null, user)
             })
             .catch((err) => {
