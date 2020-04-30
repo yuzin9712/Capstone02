@@ -7,7 +7,7 @@ const multerS3 = require('multer-s3');
 const db = require('../models');
 const Op = db.sequelize.Op;
 
-const { Post, Hashtag, User, PostLike, PostComment } = require('../models');
+const { Post, PImg, User, PostLike, PostComment, Closet } = require('../models');
 const { isLoggedIn } = require('./middlewares');
 
 const router = express.Router();
@@ -17,8 +17,6 @@ AWS.config.update({
     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
     region: 'ap-northeast-2',
 });
-
-/**사용자가 올린 게시물 조회!!!! */
 
 const upload = multer({
     storage: multerS3({
@@ -31,55 +29,67 @@ const upload = multer({
     limits: { fileSize: 125 * 1024 * 1024 }, //25MB
 });
 
-router.post('/img', isLoggedIn, upload.single('img'), (req, res, next) => {
-    console.log('/img로 들어왔음!!!');
-    console.log(req.file); // single일때: 이미지 하나는 req.file로 나머지 정보는 req.body로 옴 // 속성 하나에 이미지 여러개 올렸음 --> array == 이미지들은 req.files로 나머지는 req.body로 접근!!
-                          // 속성 여러 개에 이미지를 하나씩 업로드했다면 fields를 사용
-    const originalUrl = req.file.location;
-    const url = originalUrl.replace(/\/original\//, '/thumb/');
-    res.json({ url : originalUrl })
-    // res.json({ url: req.file.location }); //S3버킷에 이미지주소
-});
+/**사용자가 올린 게시물 조회!!!! */
 
-// router.post('/img/arr', upload.array('img', 5), (req, res, next) => { //최대 5개까지 올림
-//     console.log('/img 여러개 들어옴!!');
-//     console.log(req.files);
-
-//     res.json({url: req.files});
-// })
-
+// router.post('/img', upload.single('img'), (req, res, next) => {
+//     console.log('/img로 들어왔음!!!');
+//     console.log(req.file); // single일때: 이미지 하나는 req.file로 나머지 정보는 req.body로 옴 // 속성 하나에 이미지 여러개 올렸음 --> array == 이미지들은 req.files로 나머지는 req.body로 접근!!
+//                           // 속성 여러 개에 이미지를 하나씩 업로드했다면 fields를 사용
+//     // const originalUrl = req.file.location;
+//     // const url = originalUrl.replace(/\/original\//, '/thumb/');
+//     // res.json({ url : originalUrl })
+//     console.log('success');
+//     // res.json({ url: req.file.location }); //S3버킷에 이미지주소
+// });
+ 
 const upload2 = multer();
 
-router.post('/', isLoggedIn, upload2.none(), async (req, res, next) => {
+/**패션 케어 커뮤니티에 게시물 올리기 */
+router.post('/', upload.array('img', 3), async (req, res, next) => {
     try {
+        const localImgs = req.files; //로컬에서 올린 이미지들 ..
+        
+        const closetImgs = [8, 14]; //s3에서 선택한 옷장 이미지의 아이디 값들이 배열로 들어올 예정!
+
         const post = await Post.create({
-            content: req.body.content,
-            img: req.body.url, //이미지가 업로드 됐으면 그 이미지 주소도 req.body.url로 옴
-            userId: req.user.id
+            title: req.body.title,
+            content: req.body.content, //이미지가 업로드 됐으면 그 이미지 주소도 req.body.url로 옴
+            userId: 2
         });
 
-        
-        // console.log('이미지뭔데!!?!?!??!?!?!?!?!^^^^^^^^!!!!!!', req.body.url);
+        //로컬 사진 url 저장하는 부분 -> 확인 필요!!!
+        if(localImgs !== undefined) {
+            const locals = await Promise.all(localImgs.map(img => PImg.create({
+                img: img.location,
+                //closetId에는 null값이겠쥬
+            })));
+    
+            await post.addPImgs(locals.map(r=>Number(r.id))); //relation 테이블에 방금 저장한 로컬 이미지 값 아이디를 넣겠음!
+        }
 
-        // const hashtags = req.body.content.match(/#[^\s#]*/g);
-        // console.log('이게해시태그임!!!!!!!!!!!!!!!!!!! ', hashtags); //[ '#토끼', '#귀여웡' ] 이렇게출력되네
+        if(closetImgs !== undefined) {
+        //옷장 사진 url 저장하는 부분
+        const closets = await Promise.all(closetImgs.map(img => Closet.findOne({
+            where: { id: img },
+        }))); //id 맞는 옷장 정보들을 조회하겠다!!
 
-        // if(hashtags) {
-        //     const result = await Promise.all(hashtags.map(tag => Hashtag.findOrCreate({
-        //         where: { title: tag.slice(1).toLowerCase() },
-        //     })));
-        //     // console.log("1번: ", result);
-        //     await post.addHashtags(result.map(r => r[0])); //2차원 배열에서 1차원 배열로 만들어줌?
-        //     // console.log("2번: ", result.map(r => r[0]));
-        // }
-        res.redirect('/');
+        const nonlocals = await Promise.all(closets.map(closet => PImg.create({
+            img: closet.img,
+            closetId: closet.id
+        })));
+
+        await post.addPimgs(nonlocals.map(r=>Number(r.id)));
+        }
+
+        res.send('success');
+
     } catch (err) {
         console.error(err);
         next(err);
     }
 });
 
-/**팔로우 맺은 게시물 조회 */
+/**팔로우 맺은 게시물 조회*/
 router.get('/followpost', isLoggedIn, async(req, res, next) => {
     
     const follows = req.user.Followings; //팔로우하는 애들의 아이디값 배열이여야함[{"id":10,"name":"유저1","Follow":{"createdAt":"2020-04-07T11:00:10.000Z","updatedAt":"2020-04-07T11:00:10.000Z","followingId":10,"followerId":2}},{"id":11,"name":"user2","Follow":{"createdAt":"2020-04-07T11:18:18.000Z","updatedAt":"2020-04-07T11:18:18.000Z","followingId":11,"followerId":2}}]
@@ -91,7 +101,10 @@ router.get('/followpost', isLoggedIn, async(req, res, next) => {
         {
             model: User,
             attributes: ['id', 'name'],
-        },
+        },{
+            model: PImg,
+            // limit: 1,
+        }
     ],
     order: [['createdAt', 'DESC']],
     where: { userId: follows.map(r=>Number(r.id)) },
@@ -208,5 +221,7 @@ router.delete('/:id', isLoggedIn, async (req, res, next) => {
         next(err);
     }
 });
+
+
 
 module.exports = router;

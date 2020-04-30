@@ -50,13 +50,13 @@ router.get('/', (req, res, next) => {
         order: [['createdAt', 'DESC']],
     })
     .then((posts) => {
-        // res.render('main', {
-        //     title: 'example',
-        //     twits: posts,
-        //     user: req.user,
-        //     loginError: req.flash('loginError'),
-        // });
-        res.send(posts);
+            res.render('main', {
+            title: 'example',
+            twits: posts,
+            user: req.user,
+            loginError: req.flash('loginError'),
+        });
+        // res.send({posts});
         // console.log('1번', JSON.stringify(posts));
         console.log(`posts= ${JSON.stringify(posts)}`);
     })
@@ -67,36 +67,79 @@ router.get('/', (req, res, next) => {
     // console.log(JSON.stringify(req.user));
 });
 
-router.get('/design', (req, res, next) => {
-    Design.findAll({
-        include: [{
-            model: Hashtag,
-            attributes: ['title'],
-            through: {
-                attributes: []
-            }
-        },{
-            model: Closet,
-            attributes: ['id'],
+router.get('/design', async (req, res, next) => {
+
+    try {
+        const designs = await Design.findAll({
             include: [{
-                model: Product,
+                model: Hashtag,
+                attributes: ['title'],
                 through: {
                     attributes: []
                 }
-            }]
-        },{
-            model: User,
-            attributes: ['id', 'name']
-        }],
-        order: [['createdAt', 'DESC']],
-    })
-    .then((designs) => {
-        res.send(designs);
-    })
-    .catch((err) => {
+            },{
+                model: Closet,
+                attributes: ['id'],
+                include: [{
+                    model: Product,
+                    through: {
+                        attributes: []
+                    }
+                }]
+            },{
+                model: User,
+                attributes: ['id', 'name']
+            }],
+            // attributes: {
+            //     include: [
+            //         [
+            //             db.sequelize.literal(`(
+            //                 SELECT COUNT(*) FROM designLikes AS reaction WHERE reaction.postId = post.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+            //             'likecount'
+            //         ]
+            //     ]
+            // },
+            order: [['createdAt', 'DESC']],
+        });
+
+        const bestDesigns = await Design.findAll({
+            include: [{
+                model: Hashtag,
+                attributes: ['title'],
+                through: {
+                    attributes: []
+                }
+            },{
+                model: Closet,
+                attributes: ['id'],
+                include: [{
+                    model: Product,
+                    through: {
+                        attributes: []
+                    }
+                }]
+            },{
+                model: User,
+                attributes: ['id', 'name']
+            }],
+            attributes: {
+                include: [
+                    [
+                        db.sequelize.literal(`(
+                            SELECT COUNT(*) FROM designLikes AS reaction WHERE reaction.designId = design.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                        'likecount'
+                    ]
+                ]
+            },
+            order: [[db.sequelize.literal('likecount'), 'DESC']],
+            limit: 3, //best상단 3개 고정!!
+        });
+
+        res.send({designs, bestDesigns});
+    } catch (err) {
         console.error(err);
         next(err);
-    })
+    }
 });
 
 /**패션 케어 커뮤니티 페이지 메인 화면 -> 현재 좋아요 수는 구현 x */
@@ -136,8 +179,8 @@ router.get('/post', (req, res, next) => {
     // console.log(JSON.stringify(req.user));
 });
 
-/*나의 옷장 메인 페이지*/
-router.get('/closet', (req, res, next) => {
+/*나의 옷장 페이지*/
+router.get('/closet', isLoggedIn, (req, res, next) => {
     Closet.findAll({
         include: {
             model: Product, //사용된 제품 정보도 같이 나온다.
@@ -146,18 +189,18 @@ router.get('/closet', (req, res, next) => {
                  attributes: []//relation table의 attribute는 안뽑히게함!
             }
         },
-        where: { userId: 2 },
+        where: { userId: req.user.id },
         order: [['createdAt', 'DESC']],
     })
     .then((closets) => {
-        res.send(closets);
-        //     res.render('closet', {
-        //     title: 'example',
-        //     twits: closets,
-        //     user: req.user,
-        //     loginError: req.flash('loginError'),
-        // });
-        // console.log(`posts= ${JSON.stringify(posts)}`);
+        // res.send(closets);
+            res.render('closet', {
+            title: 'example',
+            twits: closets,
+            user: req.user,
+            loginError: req.flash('loginError'),
+        });
+        console.log(`posts= ${JSON.stringify(posts)}`);
     })
     .catch((err) => {
         console.error(err);

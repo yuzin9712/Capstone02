@@ -16,6 +16,9 @@ const closetsRouter = require('./routes/closet');
 const likesRouter = require('./routes/like');
 const commentRouter = require('./routes/comment');
 const designRouter = require('./routes/design');
+const productRouter = require('./routes/product');
+const cartRouter = require('./routes/cart');
+
 const {sequelize} = require('./models');
 const passportConfig = require('./passport');
 
@@ -27,7 +30,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.set('port', process.env.PORT || 8001);
 
-app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.json({ type: 'application/json'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -47,6 +50,12 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.all('/*', function(req, res, next) { //이미지 권한문제의 핵심 나중에 서버쪽 사람들한테 이걸 붙이라고 해라!!!!!!!!!!!!!//
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    next();
+});
+
 app.use('/', pageRouter); //바꿔라~
 app.use('/auth', authRouter);
 app.use('/post', postsRouter);
@@ -55,6 +64,8 @@ app.use('/closet', closetsRouter);
 app.use('/like', likesRouter);
 app.use('/comment', commentRouter);
 app.use('/design', designRouter);
+app.use('/product', productRouter);
+app.use('/cart', cartRouter);
 
 app.use((req, res, next) => {
     const err = new Error('Not Found');

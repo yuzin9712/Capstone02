@@ -6,67 +6,111 @@ const { User, Closet, Design, DesignLike, Hashtag, Product } = require('../model
 
 const router = express.Router();
 
-router.post('/:id', async (req, res, next) => { //이렇게 보낼 수가 있는지 물어보기
-    //선택한 옷장의 아이디 값, 작성한 해시태그 내용
-    //해시태그내용은 어떻게 보낼거임? 배열로 ['1번태그,'2번'] 인지 아니면 #으로 보낼건지 현재 후자로 진행중..
-    try {
-        const closet = await Closet.findOne({ where: { id: parseInt(req.params.id, 10)} });
+/**태그로 추천 디자인 게시물 검색*/ //
+router.post('/hashtag', async (req, res, next) => {
+    const tags = req.body.hashtag;
 
-        if(!closet) {
-            res.send('없는 게시물인데..?');
-        } else {
-            const design = await Design.create({
-                img: closet.img,
-                userId: 2,
-                closetId: parseInt(req.params.id, 10)
-            });
-
-            const hashtags = req.body.content.match(/#[^\s#]*/g);
-            console.log('이게해시태그임!!!!!!!!!!!!!!!!!!! ', hashtags); //[ '#토끼', '#귀여웡' ] 이렇게출력되네
-
-            if(hashtags) {
-            const result = await Promise.all(hashtags.map(tag => Hashtag.findOrCreate({
-                where: { title: tag.slice(1).toLowerCase() },
-            })));
-            // console.log("1번: ", result);
-            await design.addHashtags(result.map(r => r[0])); //2차원 배열에서 1차원 배열로 만들어줌?
-            // console.log("2번: ", result.map(r => r[0]));
-            res.send('success');
-        }}
-    } catch (err) {
-        console.error(err);
-        next(err);
+    if (!tags)
+    {
+        return res.redirect('/'); //보내는 태그 없을 시 메인페이지로 리다이렉트
     }
 
+    try {
+        const hashtag = await Hashtag.findOne({ where: { title: tags } });
+
+        console.log('해시태그 찾을때는!?!?!!!', hashtag);
+
+        let designs = [];
+
+        if (hashtag) { //최신순 정렬이 먹히는지 확인할 것!! - 확인하면 지워라
+            // designs = await hashtag.getDesigns({ include: [{ model: User }], ordered: [['createdAt', 'DESC']] });
+
+            await hashtag.getDesigns({
+                include: [{
+                    model: Hashtag,
+                    attributes: ['title'],
+                    through: {
+                        attributes: []
+                    }
+                },{
+                    model: Closet,
+                    attributes: ['id'],
+                    include: [{
+                        model: Product,
+                        through: {
+                            attributes: []
+                        }
+                    }]
+                },{
+                    model: User,
+                    attributes: ['id', 'name']
+                }],
+                attributes: {
+                    include: [
+                        [
+                            db.sequelize.literal(`(
+                                SELECT COUNT(*) FROM designLikes AS reaction WHERE reaction.designId = design.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                            'likecount'
+                        ]
+                    ]
+                }, //DesignHashtag 에서 뽑히는 것 지우는 법 알아보깅..
+                order: [[db.sequelize.literal('likecount'), 'DESC']],
+            })
+            .then((designs) => {
+                res.send(designs);
+            })
+            .catch((err) => {
+                console.error(err);
+                next(err);
+            })
+        }
+    } catch (err) {
+        console.error(err);
+        return next(err);
+    }
 });
 
-/**태그로 추천 디자인 게시물 검색 */ //??왜안됨..?
-// router.post('/hashtag', async (req, res, next) => {
-//     const tags =  req.body.keyword;
-//     res.send(tags);
-
-//     // if (!tags)
-//     // {
-//     //     return res.redirect('/'); //보내는 태그 없을 시 메인페이지로 리다이렉트
-//     // }
-
-//     // try {
-//     //     const hashtag = await Hashtag.findOne({ where: { title: tags } });
-
-//     //     console.log('해시태그 찾을때는!?!?!!!', hashtag);
-
-//     //     let designs = [];
-
-//     //     if (hashtag) { //최신순 정렬이 먹히는지 확인할 것!! - 확인하면 지워라
-//     //         designs = await hashtag.getDesigns({ include: [{ model: User }], ordered: [['createdAt', 'DESC']] });
-//     //     }
-
-//     //     res.send(designs);
-//     // } catch (err) {
-//     //     console.error(err);
-//     //     return next(err);
-//     // }
-// });
+/**좋아요 많이 받은 순 게시물 조회 */
+router.get('/best', async(req, res, next) => {
+    Design.findAll({
+        include: [{
+            model: Hashtag,
+            attributes: ['title'],
+            through: {
+                attributes: []
+            }
+        },{
+            model: Closet,
+            attributes: ['id'],
+            include: [{
+                model: Product,
+                through: {
+                    attributes: []
+                }
+            }]
+        },{
+            model: User,
+            attributes: ['id', 'name']
+        }],
+        attributes: {
+            include: [
+                [
+                    db.sequelize.literal(`(
+                        SELECT COUNT(*) FROM designLikes AS reaction WHERE reaction.designId = design.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                    'likecount'
+                ]
+            ]
+        },
+        order: [[db.sequelize.literal('likecount'), 'DESC']],
+    })
+    .then((designs) => {
+        res.send(designs);
+    })
+    .catch((err) => {
+        console.error(err);
+        next(err);
+    })
+});
 
 /**팔로우 맺은 게시물 조회 */
 router.get('/followpost', isLoggedIn, async(req, res, next) => {
@@ -267,6 +311,41 @@ router.delete('/:id', async (req, res, next) => {
         await design.destroy({});
         res.send('success');
 
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
+
+});
+
+/**추천 코디 업로드 */
+router.post('/:id', async (req, res, next) => { //이렇게 보낼 수가 있는지 물어보기
+    //선택한 옷장의 아이디 값, 작성한 해시태그 내용
+    //해시태그내용은 어떻게 보낼거임? 배열로 ['1번태그,'2번'] 인지 아니면 #으로 보낼건지 현재 후자로 진행중..
+    try {
+        const closet = await Closet.findOne({ where: { id: parseInt(req.params.id, 10)} });
+
+        if(!closet) {
+            res.send('없는 게시물인데..?');
+        } else {
+            const design = await Design.create({
+                img: closet.img,
+                userId: 2,
+                closetId: parseInt(req.params.id, 10)
+            });
+
+            const hashtags = req.body.content.match(/#[^\s#]*/g);
+            console.log('이게해시태그임!!!!!!!!!!!!!!!!!!! ', hashtags); //[ '#토끼', '#귀여웡' ] 이렇게출력되네
+
+            if(hashtags) {
+            const result = await Promise.all(hashtags.map(tag => Hashtag.findOrCreate({
+                where: { title: tag.slice(1).toLowerCase() },
+            })));
+            // console.log("1번: ", result);
+            await design.addHashtags(result.map(r => r[0])); //2차원 배열에서 1차원 배열로 만들어줌?
+            // console.log("2번: ", result.map(r => r[0]));
+            res.send('success');
+        }}
     } catch (err) {
         console.error(err);
         next(err);

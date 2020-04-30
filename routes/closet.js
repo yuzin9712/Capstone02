@@ -20,46 +20,43 @@ const upload = multer({
         s3: new AWS.S3(),
         bucket: 'swcap02',
         key(req, file, cb) {
-            cb(null, `closet/${Date.now()}${path.basename(file.originalname)}`);
+            cb(null, `closet/${Date.now()}${path.basename(file.originalname)}.PNG`);
         },
     }),
     limits: { fileSize: 25 * 1024 * 1024 }, //25MB
 });
 
 /**옷장 이미지 S3에 업로드 */
-router.post('/img', isLoggedIn, upload.single('img'), (req, res, next) => {
-    console.log('/img로 들어왔음!!!');
-    console.log(req.file);
-    res.json({ url: req.file.location }); //S3버킷에 이미지주소 front에 보내서 미리보기로 보여주는 역할
-});
+// router.post('/img', upload.single('image'), (req, res, next) => {
+//     console.log('/img로 들어왔음!!!');
+//     console.log(req.file);
+//     console.log('success');
+//     // res.json({ url: req.file.location }); //S3버킷에 이미지주소 front에 보내서 미리보기로 보여주는 역할
+// });
 
 const upload2 = multer();
 
 /**나의 옷장에 사진과 함께 사용된 제품 아이디 저장*/
-router.post('/', isLoggedIn, upload2.none(), async (req, res, next) => {
+router.post('/', isLoggedIn, async (req, res, next) => {
     try {
-        console.log('---------------시작------------')
+        console.log('---------------시작------------'); 
         //사용된 물품의 아이디를 배열로 받아온다 ? 그리고 받아온 사진도 저장한다.
         const closet = await Closet.create({
-            img: req.body.url,
+            img: req.file.location,
             userId: req.user.id,
         });
+        // console.log(req.file);
+        const url = req.body.product; //url이 여러개 담겨있음
+        const products = url.split(','); //얘가 상품 url이 담긴 배열이고                                                             
 
-        // const products = [ 1, 3, 5, 6 ]; //사용된 제품의 아이디를 배열로 담아와서 저장하겠다.
-        const products = ['testurl', 'testtest'];//이미지 url 배열이 들어오기로 되었음!!!                                                                 
-
-        //그러면 imgbycolor테이블에서 img url이 받아온 값과 같은 걸 찾아내고...
+        //그러면 imgbycolor테이블에서 img url이 받아온 값과 같은 걸 찾아내고.
         const result = await Promise.all(products.map(product => ImgByColor.findOne({
             where: { img: product },
         }))); //id 맞는 제품들을 조회하겠다!!
-        //
-        // res.send(result);
-        // console.log("1번: ???????????????????", result);
-        await closet.addProducts(result.map(r=>Number(r.productId)));
-        // console.log("2번: !!!!!!!!!!!!!!!!!!", result.map(r => r[0]));
+
+        await closet.addProducts(result.map(r=>Number(r.productId))); //relation 테이블에 제품의 아이디가 담기게 하기
         
-        //relation 테이블에 제품의 아이디가 담기게 하기
-        res.redirect('/closet');
+        res.send('success');
     } catch (err) {
         console.error(err);
         next(err);

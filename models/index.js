@@ -19,7 +19,7 @@ db.Post = require('./post')(sequelize, Sequelize);
 db.Review = require('./review')(sequelize, Sequelize);
 db.Cart = require('./cart')(sequelize, Sequelize);
 db.Closet = require('./closet')(sequelize, Sequelize);
-// db.PImg = require('./pimg')(sequelize, Sequelize);
+db.PImg = require('./Pimg')(sequelize, Sequelize);
 db.PostLike = require('./postLike')(sequelize, Sequelize);
 db.PostComment = require('./postComment')(sequelize, Sequelize);
 db.Design = require('./design')(sequelize, Sequelize);
@@ -35,8 +35,8 @@ db.Profile.belongsTo(db.User, { foreignKey: 'user_id', targetKey: 'id' });
 db.Design.belongsToMany(db.Hashtag, { through: 'DesignHashtag' });
 db.Hashtag.belongsToMany(db.Design, { through: 'DesignHashtag' });
 
-// db.Post.belongsToMany(db.Img, { through: 'PostImg' });
-// db.Img.belongsToMany(db.Post, { through: 'PostImg' });
+db.Post.belongsToMany(db.PImg, { through: 'PostImg' });
+db.PImg.belongsToMany(db.Post, { through: 'PostImg' });
 
 db.Closet.belongsToMany(db.Product, { onDelete: 'cascade', through: 'ClosetProduct' });
 db.Product.belongsToMany(db.Closet, { through: 'ClosetProduct' });
@@ -53,7 +53,9 @@ db.User.belongsToMany(db.User, {
 });
 
 /**1:N 관계 */
-// db.Closet.hasMany(db.)
+db.Closet.hasMany(db.PImg);
+db.PImg.belongsTo(db.Closet);
+
 db.Product.hasMany(db.ImgByColor);
 db.ImgByColor.belongsTo(db.Product);
 
