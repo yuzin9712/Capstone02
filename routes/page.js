@@ -90,15 +90,15 @@ router.get('/design', async (req, res, next) => {
                 model: User,
                 attributes: ['id', 'name']
             }],
-            // attributes: {
-            //     include: [
-            //         [
-            //             db.sequelize.literal(`(
-            //                 SELECT COUNT(*) FROM designLikes AS reaction WHERE reaction.postId = post.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
-            //             'likecount'
-            //         ]
-            //     ]
-            // },
+            attributes: {
+                include: [
+                    [
+                        db.sequelize.literal(`(
+                            SELECT COUNT(*) FROM designLikes AS reaction WHERE reaction.designId = design.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                        'likecount'
+                    ]
+                ]
+            },
             order: [['createdAt', 'DESC']],
         });
 
@@ -142,7 +142,7 @@ router.get('/design', async (req, res, next) => {
     }
 });
 
-/**패션 케어 커뮤니티 페이지 메인 화면 -> 현재 좋아요 수는 구현 x */
+/**패션 케어 커뮤니티 페이지 메인 화면 */
 router.get('/post', (req, res, next) => {
     Post.findAll({ 
         include: [
@@ -160,6 +160,15 @@ router.get('/post', (req, res, next) => {
                 order: [['createdAt', 'DESC']],
             },
         ],
+        attributes: {
+            include: [
+                [
+                    db.sequelize.literal(`(
+                        SELECT COUNT(*) FROM postLikes AS reaction WHERE reaction.postId = post.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                    'likecount'
+                ]
+            ]
+        },
         order: [['createdAt', 'DESC']],
     })
     .then((posts) => {

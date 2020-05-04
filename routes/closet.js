@@ -27,17 +27,17 @@ const upload = multer({
 });
 
 /**옷장 이미지 S3에 업로드 */
-// router.post('/img', upload.single('image'), (req, res, next) => {
-//     console.log('/img로 들어왔음!!!');
-//     console.log(req.file);
-//     console.log('success');
-//     // res.json({ url: req.file.location }); //S3버킷에 이미지주소 front에 보내서 미리보기로 보여주는 역할
-// });
+router.post('/img', upload.single('img'), (req, res, next) => {
+    console.log('/img로 들어왔음!!!');
+    console.log(req.file);
+    console.log('success');
+    // res.json({ url: req.file.location }); //S3버킷에 이미지주소 front에 보내서 미리보기로 보여주는 역할
+});
 
 const upload2 = multer();
 
 /**나의 옷장에 사진과 함께 사용된 제품 아이디 저장*/
-router.post('/', isLoggedIn, async (req, res, next) => {
+router.post('/',isLoggedIn, upload.single('image'), async (req, res, next) => {
     try {
         console.log('---------------시작------------'); 
         //사용된 물품의 아이디를 배열로 받아온다 ? 그리고 받아온 사진도 저장한다.

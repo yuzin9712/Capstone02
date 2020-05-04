@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => (
-    sequelize.define('postComment', {
-        content: {
+    sequelize.define('Cimg', {
+        img: {
             type: DataTypes.STRING(200),
             allowNull: true,
         }

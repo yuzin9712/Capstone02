@@ -139,6 +139,15 @@ router.get('/followpost', isLoggedIn, async(req, res, next) => {
             model: User,
             attributes: ['id', 'name']
         }],
+        attributes: {
+            include: [
+                [
+                    db.sequelize.literal(`(
+                        SELECT COUNT(*) FROM designLikes AS reaction WHERE reaction.designId = design.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                    'likecount'
+                ]
+            ]
+        },
     order: [['createdAt', 'DESC']],
     where: { userId: follows.map(r=>Number(r.id)) },
     })
@@ -177,6 +186,15 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
             model: User,
             attributes: ['id', 'name']
         }],
+        attributes: {
+            include: [
+                [
+                    db.sequelize.literal(`(
+                        SELECT COUNT(*) FROM designLikes AS reaction WHERE reaction.designId = design.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                    'likecount'
+                ]
+            ]
+        },
     order: [['createdAt', 'DESC']],
     where: { id: likes.map(r => Number(r.designId)) },
     })
@@ -211,6 +229,15 @@ router.get('/user', isLoggedIn, async (req, res, next) => {
             model: User,
             attributes: ['id', 'name']
         }],
+        attributes: {
+            include: [
+                [
+                    db.sequelize.literal(`(
+                        SELECT COUNT(*) FROM designLikes AS reaction WHERE reaction.designId = design.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                    'likecount'
+                ]
+            ]
+        },
     order: [['createdAt', 'DESC']],
     where: { userId: req.user.id },
     })
