@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => (
             allowNull: false,
             defaultValue: 1,
         },
-        price: {
+        total: {
             type: DataTypes.INTEGER.UNSIGNED,
             allowNull: false,
             defaultValue: 0,

@@ -4,7 +4,7 @@ const path = require('path');
 const AWS = require('aws-sdk');
 const multerS3 = require('multer-s3');
 
-const { PostComment, Post } = require('../models');
+const { PostComment, Post, CImg, Closet } = require('../models');
 const { isLoggedIn } = require('./middlewares');
 
 const router = express.Router();
@@ -29,31 +29,63 @@ const upload = multer({
 });
 
 /**댓글 이미지 S3에 업로드 */
-router.post('/img', isLoggedIn, upload.single('img'), (req, res, next) => {
-    console.log('/img로 들어왔음!!!');
-    console.log(req.file);
-    res.json({ url: req.file.location }); //S3버킷에 이미지주소
-});
+// router.post('/img', isLoggedIn, upload.single('img'), (req, res, next) => {
+//     console.log('/img로 들어왔음!!!');
+//     console.log(req.file);
+//     res.json({ url: req.file.location }); //S3버킷에 이미지주소
+// });
 
 const upload2 = multer();
 
-/**나의 옷장에 사진과 함께 사용된 제품 아이디 저장*/
-router.post('/post/:id', isLoggedIn, upload2.none(), async (req, res, next) => {
-
-    const post = await Post.findOne({ where: { id: parseInt(req.params.id, 10) } }); //게시물의 아이디값
+/**나의 옷장에 사진과 함께 사용된 제품 아이디 저장 - 게시물 아이디가 파라미터로*/
+router.post('/post/:id', upload.array('img'), async (req, res, next) => {
 
     try {
-        if(post) {
-            const comment = await PostComment.create({
-                userId: req.user.id,
-                content: req.body.content,
-                img: req.body.url,
-                postId: parseInt(req.params.id, 10),
-            });
+        const post = await Post.findOne({ where: { id: parseInt(req.params.id, 10) } }); //게시물의 아이디값
+
+        if(post == undefined) {
+            res.send('게시물이 없다!!');
         } else {
-            console.log('없는 글이니까 메인페이지로 이동하셈');
+            const localImgs = req.files; //로컬에서 올린 이미지들 ..
+        
+        const closetImgs = []; //s3에서 선택한 옷장 이미지의 아이디 값들이 배열로 들어올 예정!
+
+        const postComment = await PostComment.create({
+            content: req.body.content, //이미지가 업로드 됐으면 그 이미지 주소도 req.body.url로 옴
+            userId: 12,
+            postId: parseInt(req.params.id, 10)
+        });
+
+        //로컬 사진 url 저장하는 부분 -> 확인 필요!!!
+        if(localImgs !== undefined) {
+
+            console.log(localImgs); //확인할때사용
+
+            const locals = await Promise.all(localImgs.map(img => CImg.create({
+                img: img.location,
+                //closetId에는 null값이겠쥬
+            })));
+    
+            await postComment.addCImgs(locals.map(r=>Number(r.id))); //relation 테이블에 방금 저장한 로컬 이미지 값 아이디를 넣겠음!
         }
-        res.redirect('/'); //커뮤니티 메인 페이지로 이동
+
+        if(closetImgs !== undefined) {
+        //옷장 사진 url 저장하는 부분
+        const closets = await Promise.all(closetImgs.map(img => Closet.findOne({
+            where: { id: img },
+        }))); //id 맞는 옷장 정보들을 조회하겠다!!
+
+        const nonlocals = await Promise.all(closets.map(closet => CImg.create({
+            img: closet.img,
+            closetId: closet.id
+        })));
+
+        await postComment.addCimgs(nonlocals.map(r=>Number(r.id)));
+        }
+
+        res.send('댓글 등록 성공!!!');
+        }
+
     } catch (err) {
         console.error(err);
         next(err);
@@ -61,26 +93,55 @@ router.post('/post/:id', isLoggedIn, upload2.none(), async (req, res, next) => {
     
 });
 
-/**게시물 댓글 삭제 */
+/**게시물 댓글 삭제 - 댓글 아이디가 파라미터로 온다.*/
 router.delete('/post/:id', async (req, res, next) => {
     
-    const postcomment = await PostComment.findOne({ where: { id: parseInt(req.params.id, 10), userId: req.user.id } }); //댓글의 아이디값
+    // try {
+    //     const postComment = await PostComment.findOne({ 
+    //         include: [{
+    //             model: CImg,
+    //             attributes: ['id'],
+    //             through: {
+    //                 attributes: []
+    //             }
+    //         }],
+    //         where: { id: req.params.id, userId: 2 }});
+
+    //         if(postComment == undefined) {
+    //             res.send('없는 댓글!!');
+    //         } else {
+    //             console.log(postComment.Cimgs.map(r=>Number(r.id)));
+
+    //             //연결된 사진도 삭제해버림
+    //             await postComment.removeCImgs(postComment.Cimgs.map(r=>Number(r.id))); //다대다 관계의 가운데 테이블은 직접 접근할 수 없음!!!!
+    //             await postComment.destroy({});
+    //             res.send('success');
+    //         }
+    // } catch (err) {
+    //     console.error(err);
+    //     next(err);
+    // }
+    
+});
+
+/**댓글 내용 수정하기 - 댓글의 아이디값이 파라미터로 와야함!!*/
+router.put('/post/:id', async (req, res, next) => {
+    const postComment = await PostComment.findOne({ where: { id: parseInt(req.params.id, 10), userId: 2 }});
 
     try {
-        if(postcomment) {
-
-            postcomment.destroy({});
-            res.send('success');
-
+        if(postComment == undefined) {
+            res.send('댓글이없음~!~!~!~');
         } else {
-            console.log('없는 댓글이니까 메인페이지로 이동하셈');
-            res.redirect('/');
+            postComment.update({
+                content: req.body.content
+            });
+
+            res.send('success');
         }
     } catch (err) {
         console.error(err);
         next(err);
     }
-    
 });
 
 module.exports = router;

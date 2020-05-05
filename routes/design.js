@@ -22,9 +22,10 @@ router.post('/hashtag', async (req, res, next) => {
 
         let designs = [];
 
-        if (hashtag) { //최신순 정렬이 먹히는지 확인할 것!! - 확인하면 지워라
-            // designs = await hashtag.getDesigns({ include: [{ model: User }], ordered: [['createdAt', 'DESC']] });
-
+        if(hastag == undefined) {
+            console.log('그런거없음!!');
+            res.send('no tag!!');
+        } else {
             await hashtag.getDesigns({
                 include: [{
                     model: Hashtag,
@@ -113,7 +114,7 @@ router.get('/best', async(req, res, next) => {
 });
 
 /**팔로우 맺은 게시물 조회 */
-router.get('/followpost', isLoggedIn, async(req, res, next) => {
+router.get('/followpost', async(req, res, next) => {
     
     const follows = req.user.Followings; //팔로우하는 애들의 아이디값 배열이여야함[{"id":10,"name":"유저1","Follow":{"createdAt":"2020-04-07T11:00:10.000Z","updatedAt":"2020-04-07T11:00:10.000Z","followingId":10,"followerId":2}},{"id":11,"name":"user2","Follow":{"createdAt":"2020-04-07T11:18:18.000Z","updatedAt":"2020-04-07T11:18:18.000Z","followingId":11,"followerId":2}}]
     console.log('이게무ㅓ냐??????????', follows.map(r=>Number(r.id))); //팔로우하는 애들의 아이디 값을 배열로 만듬!!!!!
@@ -161,7 +162,7 @@ router.get('/followpost', isLoggedIn, async(req, res, next) => {
 });
 
 /**좋아요한 게시물 조회 */
-router.get('/like', isLoggedIn, async (req, res, next) => {
+router.get('/like', async (req, res, next) => {
 
     const likes = await DesignLike.findAll({ where: { userId: req.user.id }});
     console.log('이게무ㅓ냐??????????', likes.map(r=>Number(r.designId)));
@@ -208,7 +209,7 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
 });
 
 /**사용자가 올린 게시물 조회!!!! */
-router.get('/user', isLoggedIn, async (req, res, next) => {
+router.get('/user', async (req, res, next) => {
     Design.findAll({
         include: [{
             model: Hashtag,

@@ -27,27 +27,30 @@ const upload = multer({
 });
 
 /**옷장 이미지 S3에 업로드 */
-router.post('/img', upload.single('img'), (req, res, next) => {
-    console.log('/img로 들어왔음!!!');
-    console.log(req.file);
-    console.log('success');
-    // res.json({ url: req.file.location }); //S3버킷에 이미지주소 front에 보내서 미리보기로 보여주는 역할
-});
+// router.post('/img', upload.single('img'), (req, res, next) => {
+//     console.log('/img로 들어왔음!!!');
+//     console.log(req.file);
+//     console.log('success');
+//     // res.json({ url: req.file.location }); //S3버킷에 이미지주소 front에 보내서 미리보기로 보여주는 역할
+// });
 
 const upload2 = multer();
 
 /**나의 옷장에 사진과 함께 사용된 제품 아이디 저장*/
-router.post('/',isLoggedIn, upload.single('image'), async (req, res, next) => {
+router.post('/', upload.single('image'), async (req, res, next) => {
     try {
         console.log('---------------시작------------'); 
         //사용된 물품의 아이디를 배열로 받아온다 ? 그리고 받아온 사진도 저장한다.
         const closet = await Closet.create({
             img: req.file.location,
-            userId: req.user.id,
+            userId: 2
         });
-        // console.log(req.file);
+        console.log(req.file);
         const url = req.body.product; //url이 여러개 담겨있음
-        const products = url.split(','); //얘가 상품 url이 담긴 배열이고                                                             
+        const products = url.split(','); //얘가 상품 url이 담긴 배열이고  
+        
+        console.log(url);
+        console.log(products);
 
         //그러면 imgbycolor테이블에서 img url이 받아온 값과 같은 걸 찾아내고.
         const result = await Promise.all(products.map(product => ImgByColor.findOne({

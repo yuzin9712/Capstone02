@@ -56,7 +56,7 @@ app.all('/*', function(req, res, next) { //이미지 권한문제의 핵심 나�
     next();
 });
 
-app.use('/', pageRouter); //바꿔라~
+app.use('/page', pageRouter); //바꿔라~
 app.use('/auth', authRouter);
 app.use('/post', postsRouter);
 app.use('/user', usersRouter);

@@ -7,7 +7,7 @@ const multerS3 = require('multer-s3');
 const db = require('../models');
 const Op = db.sequelize.Op;
 
-const { Post, PImg, User, PostLike, PostComment, Closet } = require('../models');
+const { Post, PImg, User, PostLike, PostComment, Closet, Product, CImg } = require('../models');
 const { isLoggedIn } = require('./middlewares');
 
 const router = express.Router();
@@ -59,6 +59,9 @@ router.post('/', upload.array('img', 3), async (req, res, next) => {
 
         //로컬 사진 url 저장하는 부분 -> 확인 필요!!!
         if(localImgs !== undefined) {
+
+            console.log(localImgs); //확인할때사용
+
             const locals = await Promise.all(localImgs.map(img => PImg.create({
                 img: img.location,
                 //closetId에는 null값이겠쥬
@@ -98,16 +101,35 @@ router.get('/followpost', isLoggedIn, async(req, res, next) => {
 
     Post.findAll({
         include: [
-        {
-            model: User,
-            attributes: ['id', 'name'],
-        },{
-            model: PImg,
-            // limit: 1,
-        }
-    ],
-    order: [['createdAt', 'DESC']],
-    where: { userId: follows.map(r=>Number(r.id)) },
+            {
+                model: User,
+                attributes: ['id', 'name'],
+            },
+            { //대표이미지하나가 안 뽑히고 다나옴,,,,
+                model: PImg,
+                attributes: ['id','img'],
+                through: {
+                    attributes: []
+                },
+                // limit: 1 //안먹히넴
+            },
+        ],
+        attributes: {
+            include: [
+                [
+                    db.sequelize.literal(`(
+                        SELECT COUNT(*) FROM postLikes AS reaction WHERE reaction.postId = post.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                    'likecount'
+                ],
+                [
+                    db.sequelize.literal(`(
+                        SELECT COUNT(*) FROM postComments AS comment WHERE comment.postId = post.id AND comment.deletedAt IS NULL)`), //댓글 수 구하기!!!!
+                    'commentcount'
+                ]
+            ]
+        },
+        order: [['createdAt', 'DESC']],
+        where: { userId: follows.map(r=>Number(r.id)) },
     })
     .then((posts) => {
         res.send(posts);
@@ -126,13 +148,35 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
 
     Post.findAll({
         include: [
-        {
-            model: User,
-            attributes: ['id', 'name'],
+            {
+                model: User,
+                attributes: ['id', 'name'],
+            },
+            { //대표이미지하나가 안 뽑히고 다나옴,,,,
+                model: PImg,
+                attributes: ['id','img'],
+                through: {
+                    attributes: []
+                },
+                // limit: 1 //안먹히넴
+            },
+        ],
+        attributes: {
+            include: [
+                [
+                    db.sequelize.literal(`(
+                        SELECT COUNT(*) FROM postLikes AS reaction WHERE reaction.postId = post.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                    'likecount'
+                ],
+                [ 
+                    db.sequelize.literal(`(
+                        SELECT COUNT(*) FROM postComments AS comment WHERE comment.postId = post.id AND comment.deletedAt IS NULL)`), //댓글 수 구하기!!!!
+                    'commentcount'
+                ]
+            ]
         },
-    ],
-    order: [['createdAt', 'DESC']],
-    where: { id: likes.map(r => Number(r.postId)) },
+        order: [['createdAt', 'DESC']],
+        where: { id: likes.map(r => Number(r.postId)) },
     })
     .then((posts) => {
         res.send(posts);
@@ -143,23 +187,115 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
     })
 });
 
-/**게시물 내용 상세 조회 */
-router.get('/:id', isLoggedIn, async(req, res, next) => { //게시물 아이디
+/**사용자가 올린 커뮤니티 게시글 조회 */
+router.get('/user', async (req, res, next) => {
+
+    await Post.findAll({ 
+        include: [
+            {
+                model: User,
+                attributes: ['id', 'name'],
+            },
+            { //대표이미지하나가 안 뽑히고 다나옴,,,,
+                model: PImg,
+                attributes: ['id','img'],
+                through: {
+                    attributes: []
+                },
+                // limit: 1 //안먹히넴
+            },
+        ],
+        attributes: {
+            include: [
+                [
+                    db.sequelize.literal(`(
+                        SELECT COUNT(*) FROM postLikes AS reaction WHERE reaction.postId = post.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                    'likecount'
+                ],
+                [ //댓글수?
+                    db.sequelize.literal(`(
+                        SELECT COUNT(*) FROM postComments AS comment WHERE comment.postId = post.id AND comment.deletedAt IS NULL)`), //댓글 수 구하기!!!!
+                    'commentcount'
+                ]
+            ]
+        },
+        order: [['createdAt', 'DESC']],
+        where: { userId: req.user.id }
+    })
+    .then((posts) => {
+        res.send(posts);
+    })
+    .catch((err) => {
+        console.error(err);
+        next(err);
+    });
+
+})
+
+/**게시물 내용 상세 조회 - 게시물 아이디가 파라미터로 */
+router.get('/:id', async(req, res, next) => { //게시물 아이디
 
     Post.findOne({ 
         include: [{
             model: User,
             attributes: ['id', 'name'],
         },{
-            //댓글과 함께
-            model: PostComment,
-            attributes: ['id','img','content'],
+            model: PImg,
+            attributes: ['img', 'closetId'],
+            through: {
+                attributes: []
+            },
             include: {
+                model: Closet,
+                attributes: ['id'],
+                include: [{
+                    model: Product,
+                    through: {
+                        attributes: []
+                    }
+                }]
+            }
+        },
+        {
+            model: PostComment,
+            attributes: ['id', 'content'],
+            include: [{
                 model: User,
                 attributes: ['id', 'name'],
-            },
+            },{
+                model: CImg,
+                attributes: ['img', 'closetId'],
+                through: {
+                    attributes: []
+                },
+                include: {
+                    model: Closet,
+                    attributes: ['id'],
+                    include: [{
+                        model: Product,
+                        through: {
+                            attributes: []
+                        }
+                    }]
+                }
+            },],
             order: [['createdAt', 'DESC']],
-        },],
+        },
+    ],
+    attributes: {
+        include: [
+            [
+                db.sequelize.literal(`(
+                    SELECT COUNT(*) FROM postLikes AS reaction WHERE reaction.postId = post.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                'likecount'
+            ],
+            [ 
+                db.sequelize.literal(`(
+                    SELECT COUNT(*) FROM postComments AS comment WHERE comment.postId = post.id AND comment.deletedAt IS NULL)`), //댓글 수 구하기!!!!
+                'commentcount'
+            ]
+        ]
+    },
         order: [['createdAt', 'DESC']],
         where: { id: parseInt(req.params.id, 10)}
     })
@@ -172,56 +308,59 @@ router.get('/:id', isLoggedIn, async(req, res, next) => { //게시물 아이디
     })
 });
 
-/**게시물의 글 수정 --> 사진 수정도 가능해야 할까? */
+/**게시물의 글 수정 */
 /**put vs patch 
  * put 은 자원의 전체 교체, 자원내 모든 필드 필요
  * patch 는 자원의 부분교체, 자원 내 일부 필드 필요 -- 사진은 수정안되니까 patch로 하겠음
  */
-// router.patch('/:id', isLoggedIn, async(req, res, next) => {
+router.put('/:id', async(req, res, next) => {
 
-//     const post = await findOne({ where: { id: req.params.id }});
-
-//     try {
-//         Post.update({ content: req.body.content }, { where: { id: req.params.id }});
-
-//         const hashtags = req.body.content.match(/#[^\s#]*/g);
-//         if(hashtags) {
-//             const result = await Promise.all(hashtags.map(tag => Hashtag.findOrCreate({
-//                 where: { title: tag.slice(1).toLowerCase() },
-//             })));
-
-//             // //해시태그 수정 --> 원래있던 태그와의 관계를 삭제하고 새로운 태그 재생성하는 방식??
-//             // //태그를 수정하지 않으면 낭비아닌가?
-//             await post.removeHashtags({ where: { postId: post.id }});
-//             // await post.addHashtags(result.map(r => r[0]));
-//         }
-//         res.redirect('/');
-// } catch (err) {
-//     console.error(err);
-//     next(err);
-// }
-// });
-
-/**커뮤니티에 등록된 게시물 삭제*/
-router.delete('/:id', isLoggedIn, async (req, res, next) => {
-
-    const post = await Post.findOne({ where: { id: req.params.id, userId: req.user.id }});
+    const post = await Post.findOne({ where: { id: parseInt(req.params.id, 10), userId: req.user.id  }});
 
     try {
-        if(!post) {
-            console.log('그런거 없으니까 메인화면으로 돌아가');
-            res.redirect('/');
+
+        if(post == undefined) {
+            res.send('없는 게시물!');
+        }
+        else {
+            post.update({ title: req.body.title, content: req.body.content });
+            res.send('수정완료');
         }
 
-        post.destroy({}); //deletedAt에 시간 표시됨
-        res.send('success');
+} catch (err) {
+    console.error(err);
+    next(err);
+}
+});
 
+/**커뮤니티에 등록된 게시물 삭제*/
+router.delete('/:id', async (req, res, next) => {
+
+    try {
+        const post = await Post.findOne({ 
+            include: [{
+                model: PImg,
+                attributes: ['id'],
+                through: {
+                    attributes: []
+                }
+            }],
+            where: { id: req.params.id, userId: 2 }});
+
+            if(post == undefined) {
+                res.send('없는 게시물');
+            } else {
+                console.log(post.Pimgs.map(r=>Number(r.id)));
+
+                //연결된 사진도 삭제해버림
+                await post.removePImgs(post.Pimgs.map(r=>Number(r.id))); //다대다 관계의 가운데 테이블은 직접 접근할 수 없음!!!!
+                await post.destroy({});
+                res.send('success');
+            }
     } catch (err) {
         console.error(err);
         next(err);
     }
 });
-
-
 
 module.exports = router;
