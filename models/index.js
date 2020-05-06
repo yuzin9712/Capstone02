@@ -29,6 +29,8 @@ db.Order = require('./order')(sequelize, Sequelize);
 db.OrderDetail = require('./orderDetail')(sequelize, Sequelize);
 db.Delivery = require('./delivery')(sequelize, Sequelize);
 db.CImg = require('./Cimg')(sequelize, Sequelize);
+db.Room = require('./room')(sequelize, Sequelize);
+db.ChatLine = require('./chatLine')(sequelize, Sequelize);
 
 /** 1:1 관계 */
 db.User.hasOne(db.Profile, { foreignKey: 'user_id', sourceKey: 'id' });
@@ -58,7 +60,25 @@ db.User.belongsToMany(db.User, {
   through: 'Follow',
 });
 
+db.User.belongsToMany(db.User, {
+  foreignKey: 'user1Id',
+  as: 'User2',
+  through: db.Room
+});
+
+db.User.belongsToMany(db.User, {
+  foreignKey: 'user2Id',
+  as: 'User1',
+  through: db.Room
+});
+
 /**1:N 관계 */
+db.Room.hasMany(db.ChatLine);
+db.ChatLine.belongsTo(db.Room);
+
+db.User.hasMany(db.ChatLine);
+db.ChatLine.belongsTo(db.User);
+
 db.User.hasMany(db.Order);
 db.Order.belongsTo(db.User);
 

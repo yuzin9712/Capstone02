@@ -18,6 +18,7 @@ const commentRouter = require('./routes/comment');
 const designRouter = require('./routes/design');
 const productRouter = require('./routes/product');
 const cartRouter = require('./routes/cart');
+const messageRouter = require('./routes/message');
 
 const {sequelize} = require('./models');
 const passportConfig = require('./passport');
@@ -66,6 +67,7 @@ app.use('/comment', commentRouter);
 app.use('/design', designRouter);
 app.use('/product', productRouter);
 app.use('/cart', cartRouter);
+app.use('/message', messageRouter);
 
 app.use((req, res, next) => {
     const err = new Error('Not Found');

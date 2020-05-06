@@ -169,12 +169,12 @@ router.get('/post', async (req, res, next) => {
                 attributes: ['id', 'name'],
             },
             { //대표이미지하나가 안 뽑히고 다나옴,,,,
-                model: PImg,
+                model: PImg, limit: 1,
                 attributes: ['id','img'],
                 through: {
                     attributes: []
                 },
-                // limit: 1 //안먹히넴
+                // limit: 1
             },
         ],
         attributes: {

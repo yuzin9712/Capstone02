@@ -1,8 +1,9 @@
 module.exports = (sequelize, DataTypes) => (
-    sequelize.define('message', {
-        line: {
-            type: DataTypes.STRING(200),
-            allowNull: true,
+    sequelize.define('room', {
+        id: {
+            type: DataTypes.INTEGER.UNSIGNED,
+            primaryKey: true,
+            autoIncrement: true
         },
     }, {
         timestamps: true,
