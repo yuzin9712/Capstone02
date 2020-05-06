@@ -96,31 +96,31 @@ router.post('/post/:id', upload.array('img'), async (req, res, next) => {
 /**게시물 댓글 삭제 - 댓글 아이디가 파라미터로 온다.*/
 router.delete('/post/:id', async (req, res, next) => {
     
-    // try {
-    //     const postComment = await PostComment.findOne({ 
-    //         include: [{
-    //             model: CImg,
-    //             attributes: ['id'],
-    //             through: {
-    //                 attributes: []
-    //             }
-    //         }],
-    //         where: { id: req.params.id, userId: 2 }});
+    try {
+        const postComment = await PostComment.findOne({ 
+            include: [{
+                model: CImg,
+                attributes: ['id'],
+                through: {
+                    attributes: []
+                }
+            }],
+            where: { id: parseInt(req.params.id, 10), userId: 2 }});
 
-    //         if(postComment == undefined) {
-    //             res.send('없는 댓글!!');
-    //         } else {
-    //             console.log(postComment.Cimgs.map(r=>Number(r.id)));
+            if(postComment == undefined) {
+                res.send('없는 댓글!!');
+            } else {
+                console.log(postComment.Cimgs.map(r=>Number(r.id)));
 
-    //             //연결된 사진도 삭제해버림
-    //             await postComment.removeCImgs(postComment.Cimgs.map(r=>Number(r.id))); //다대다 관계의 가운데 테이블은 직접 접근할 수 없음!!!!
-    //             await postComment.destroy({});
-    //             res.send('success');
-    //         }
-    // } catch (err) {
-    //     console.error(err);
-    //     next(err);
-    // }
+                //연결된 사진도 삭제해버림
+                await postComment.removeCimgs(postComment.Cimgs.map(r=>Number(r.id))); //다대다 관계의 가운데 테이블은 직접 접근할 수 없음!!!!
+                await postComment.destroy({});
+                res.send('success');
+            }
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
     
 });
 

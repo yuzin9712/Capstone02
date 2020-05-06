@@ -353,7 +353,8 @@ router.delete('/:id', async (req, res, next) => {
                 console.log(post.Pimgs.map(r=>Number(r.id)));
 
                 //연결된 사진도 삭제해버림
-                await post.removePImgs(post.Pimgs.map(r=>Number(r.id))); //다대다 관계의 가운데 테이블은 직접 접근할 수 없음!!!!
+                //테이블이름의 맨 앞글자를 대문자로한거 + 진짜 테이블 이름
+                await post.removePimgs(post.Pimgs.map(r=>Number(r.id))); //다대다 관계의 가운데 테이블은 직접 접근할 수 없음!!!!
                 await post.destroy({});
                 res.send('success');
             }
