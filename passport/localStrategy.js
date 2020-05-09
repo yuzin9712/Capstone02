@@ -9,6 +9,7 @@ module.exports = (passport) => {
         passwordField: 'password',
     }, async (email, password, done) => {
         try {
+            console.log(email, password);
             const exUser = await User.findOne({where: {email}});
             console.log(exUser);
 

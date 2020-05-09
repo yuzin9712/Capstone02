@@ -73,6 +73,9 @@ db.User.belongsToMany(db.User, {
 });
 
 /**1:N 관계 */
+db.Order.hasMany(db.Delivery);
+db.Delivery.belongsTo(db.Order);
+
 db.Room.hasMany(db.ChatLine);
 db.ChatLine.belongsTo(db.Room);
 

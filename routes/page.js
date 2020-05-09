@@ -169,7 +169,7 @@ router.get('/post', async (req, res, next) => {
                 attributes: ['id', 'name'],
             },
             { //대표이미지하나가 안 뽑히고 다나옴,,,,
-                model: PImg, limit: 1,
+                model: PImg,
                 attributes: ['id','img'],
                 through: {
                     attributes: []
@@ -212,7 +212,7 @@ router.get('/post', async (req, res, next) => {
 
 /*나의 옷장 페이지*/
 router.get('/closet', async (req, res, next) => {
-    console.log(req.user);
+    console.log('요청한사람이누구냐????????',req.user);
 
     await Closet.findAll({
         include: {

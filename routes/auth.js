@@ -49,7 +49,8 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
                 console.error(loginErr);
                 return next(loginErr);
             }
-            res.send('success');
+            var json = JSON.parse(JSON.stringify(user));
+            res.send(json);
         });
     })(req, res, next);
 });
