@@ -54,7 +54,7 @@ router.get('/design/:id', async(req, res, next) => {
 
         if(design) {
             await DesignLike.create({
-                userId: 12,
+                userId: req.user.id,
                 designId: parseInt(req.params.id, 10)
             });
         }

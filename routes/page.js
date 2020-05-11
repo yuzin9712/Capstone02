@@ -1,6 +1,6 @@
 const express = require('express');
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
-const { Post, User, Closet, Design, Product, PostComment, Hashtag, PImg } = require('../models');
+const { Post, User, Closet, Design, Product, PostComment, Hashtag, PImg, DesignLike } = require('../models');
 const db = require('../models');
 const { Op } = require('sequelize');
 
@@ -78,6 +78,11 @@ router.get('/join', isNotLoggedIn, (req, res) => {
 router.get('/design', async (req, res, next) => {
 
     try {
+        const likeInfo = await DesignLike.findAll({
+            attributes: ['designId'],
+            where: { userId: 12 }
+        });
+
         const designs = await Design.findAll({
             include: [{
                 model: Hashtag,
@@ -110,7 +115,7 @@ router.get('/design', async (req, res, next) => {
             order: [['createdAt', 'DESC']],
         });
 
-        res.send(designs);
+        res.send({designs, likeInfo});
     } catch (err) {
         console.error(err);
         next(err);

@@ -42,15 +42,17 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
         }
         if(!user) {
             req.flash('loginError', info.message);
-            return res.redirect('/');
+            res.send('실패11');
         }
         return req.login(user, (loginErr) => {
             if(loginErr) {
                 console.error(loginErr);
-                return next(loginErr);
+                res.send('실패22');
             }
-            var json = JSON.parse(JSON.stringify(user));
-            res.send(json);
+            var json = {
+                name: user.name
+            };
+            res.send(json); //이름
         });
     })(req, res, next);
 });

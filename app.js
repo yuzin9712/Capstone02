@@ -25,6 +25,7 @@ const productRouter = require('./routes/product');
 const cartRouter = require('./routes/cart');
 const messageRouter = require('./routes/message');
 const orderRouter = require('./routes/order');
+const reviewRouter = require('./routes/review');
 
 const {sequelize} = require('./models');
 const passportConfig = require('./passport');
@@ -100,10 +101,7 @@ app.use('/product', productRouter);
 app.use('/cart', cartRouter);
 app.use('/message', messageRouter);
 app.use('/order', orderRouter);
-
-// app.use(function(req, res, next) {
-
-//     });
+app.use('/review', reviewRouter);
 
 app.use((req, res, next) => {
     const err = new Error('Not Found');

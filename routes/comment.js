@@ -48,6 +48,7 @@ router.post('/post/:id', upload.array('img'), async (req, res, next) => {
         } else {
             const localImgs = req.files; //로컬에서 올린 이미지들 ..
         
+        //req.body.closet로 접근
         const closetImgs = []; //s3에서 선택한 옷장 이미지의 아이디 값들이 배열로 들어올 예정!
 
         const postComment = await PostComment.create({

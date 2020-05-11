@@ -14,6 +14,7 @@ router.post('/', async (req, res, next) => {
     //1. order 테이블에 넣고 2. orderdetail에 넣음
     //어떤 정보를 줄 것인지 .. 제품아이디값-number, 사이즈, 색깔, 수량-number, 가격??이 담긴 객체 배열!!!
     //사이즈, 색깔 이렇게 줄것인지 아니면 productinfo 아이디 값으로 줄 것인지??
+    //재고도 삭제....!!!!
     try {
         console.log(typeof req.body.products[0].id);
 
@@ -70,7 +71,7 @@ router.get('/', async (req, res, next) => {
                 model: OrderDetail,
                 include: [{
                     model: Product,
-                    attributes: ['img', 'pname']
+                    attributes: ['img', 'pname', 'price']
                 }]
             }],
             where: { userId: 2 }

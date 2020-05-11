@@ -14,7 +14,7 @@ router.get('/', async (req, res, next) => {
                 model: ChatLine,
                 separate: true,
                 limit: 1,
-                attributes: ['lines'], //메인에서는 글내용만 있어도 되나..
+                attributes: ['lines', 'createdAt'], //메인에서는 글내용만 있어도 되나..
                 order: [['createdAt', 'DESC']],
             }],
             where: { 
@@ -24,7 +24,8 @@ router.get('/', async (req, res, next) => {
                 ]
              },
              //여기안됨..
-            // order: [[ Room.associations.ChatLine, 'createdAt', 'DESC']] //쪽지가 최근에 온걸로
+            //  order: [[ChatLine, 'createdAt', 'DESC']]
+            // order: [[ {model: ChatLine}, 'createdAt', 'DESC']] //쪽지가 최근에 온걸로
         })
         .then((rooms) => {
             res.send(rooms);
