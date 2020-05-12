@@ -42,12 +42,12 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
         }
         if(!user) {
             req.flash('loginError', info.message);
-            res.send('실패11');
+            console.log('유저가 없음');
         }
         return req.login(user, (loginErr) => {
             if(loginErr) {
                 console.error(loginErr);
-                res.send('실패22');
+                console.log('로그인 에러?');
             }
             var json = {
                 name: user.name
