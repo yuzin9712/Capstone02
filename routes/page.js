@@ -75,7 +75,7 @@ router.get('/join', isNotLoggedIn, (req, res) => {
 //     // console.log(JSON.stringify(req.user));
 // });
 
-router.get('/design', async (req, res, next) => {
+router.get('/design', isLoggedIn, async (req, res, next) => {
 
     try {
         const likeInfo = await DesignLike.findAll({
@@ -122,7 +122,7 @@ router.get('/design', async (req, res, next) => {
     }
 });
 
-router.get('/bestdesign', async (req, res, next) => {
+router.get('/bestdesign',isLoggedIn, async (req, res, next) => {
     try {
         const bestDesigns = await Design.findAll({
             include: [{
@@ -165,7 +165,7 @@ router.get('/bestdesign', async (req, res, next) => {
 });
 
 /**패션 케어 커뮤니티 페이지 메인 화면*/
-router.get('/post', async (req, res, next) => {
+router.get('/post', isLoggedIn, async (req, res, next) => {
     
     await Post.findAll({ 
         include: [
@@ -216,7 +216,7 @@ router.get('/post', async (req, res, next) => {
 });
 
 /*나의 옷장 페이지*/
-router.get('/closet', async (req, res, next) => {
+router.get('/closet', isLoggedIn, async (req, res, next) => {
     console.log('요청한사람이누구냐????????',req.user);
 
     await Closet.findAll({

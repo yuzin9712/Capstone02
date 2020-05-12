@@ -45,10 +45,11 @@ const upload = multer({
 const upload2 = multer();
 
 /**패션 케어 커뮤니티에 게시물 올리기 */
-router.post('/', upload.array('img', 3), async (req, res, next) => {
+router.post('/', isLoggedIn, upload.array('img', 3), async (req, res, next) => {
     try {
         const localImgs = req.files; //로컬에서 올린 이미지들 ..
         
+        //req.body.closet으로
         const closetImgs = [8, 14]; //s3에서 선택한 옷장 이미지의 아이디 값들이 배열로 들어올 예정!
 
         const post = await Post.create({
@@ -188,7 +189,7 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
 });
 
 /**사용자가 올린 커뮤니티 게시글 조회 */
-router.get('/user', async (req, res, next) => {
+router.get('/user', isLoggedIn, async (req, res, next) => {
 
     await Post.findAll({ 
         include: [
@@ -233,7 +234,7 @@ router.get('/user', async (req, res, next) => {
 })
 
 /**게시물 내용 상세 조회 - 게시물 아이디가 파라미터로 */
-router.get('/:id', async(req, res, next) => { //게시물 아이디
+router.get('/:id', isLoggedIn, async(req, res, next) => { //게시물 아이디
 
     Post.findOne({ 
         include: [{
@@ -313,7 +314,7 @@ router.get('/:id', async(req, res, next) => { //게시물 아이디
  * put 은 자원의 전체 교체, 자원내 모든 필드 필요
  * patch 는 자원의 부분교체, 자원 내 일부 필드 필요 -- 사진은 수정안되니까 patch로 하겠음
  */
-router.put('/:id', async(req, res, next) => {
+router.put('/:id', isLoggedIn, async(req, res, next) => {
 
     const post = await Post.findOne({ where: { id: parseInt(req.params.id, 10), userId: req.user.id  }});
 
@@ -334,7 +335,7 @@ router.put('/:id', async(req, res, next) => {
 });
 
 /**커뮤니티에 등록된 게시물 삭제*/
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', isLoggedIn, async (req, res, next) => {
 
     try {
         const post = await Post.findOne({ 

@@ -38,7 +38,7 @@ const upload = multer({
 const upload2 = multer();
 
 /**나의 옷장에 사진과 함께 사용된 제품 아이디 저장 - 게시물 아이디가 파라미터로*/
-router.post('/post/:id', upload.array('img'), async (req, res, next) => {
+router.post('/post/:id', isLoggedIn, upload.array('img'), async (req, res, next) => {
 
     try {
         const post = await Post.findOne({ where: { id: parseInt(req.params.id, 10) } }); //게시물의 아이디값
@@ -95,7 +95,7 @@ router.post('/post/:id', upload.array('img'), async (req, res, next) => {
 });
 
 /**게시물 댓글 삭제 - 댓글 아이디가 파라미터로 온다.*/
-router.delete('/post/:id', async (req, res, next) => {
+router.delete('/post/:id', isLoggedIn, async (req, res, next) => {
     
     try {
         const postComment = await PostComment.findOne({ 
@@ -126,7 +126,7 @@ router.delete('/post/:id', async (req, res, next) => {
 });
 
 /**댓글 내용 수정하기 - 댓글의 아이디값이 파라미터로 와야함!!*/
-router.put('/post/:id', async (req, res, next) => {
+router.put('/post/:id', isLoggedIn, async (req, res, next) => {
     const postComment = await PostComment.findOne({ where: { id: parseInt(req.params.id, 10), userId: 2 }});
 
     try {

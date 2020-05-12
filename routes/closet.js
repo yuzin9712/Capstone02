@@ -37,7 +37,7 @@ const upload = multer({
 const upload2 = multer();
 
 /**나의 옷장에 사진과 함께 사용된 제품 아이디 저장*/
-router.post('/', upload.single('image'), async (req, res, next) => {
+router.post('/', isLoggedIn, upload.single('image'), async (req, res, next) => {
     try {
         console.log('---------------시작------------'); 
         //사용된 물품의 아이디를 배열로 받아온다 ? 그리고 받아온 사진도 저장한다.
@@ -67,7 +67,7 @@ router.post('/', upload.single('image'), async (req, res, next) => {
 });
 
 /**나의 옷장에 저장된 게시물들의 사진을 조회 - 나의옷장에서 선택하기 실행시 */
-router.get('/all', isLoggedIn, async (req, res, next) => {
+router.get('/all', isLoggedIn, isLoggedIn, async (req, res, next) => {
     Closet.findAll({
         where: { userId: req.user.id },
         attributes: ['id', 'img'],

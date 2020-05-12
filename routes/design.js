@@ -7,7 +7,7 @@ const { User, Closet, Design, DesignLike, Hashtag, Product } = require('../model
 const router = express.Router();
 
 /**태그로 추천 디자인 게시물 검색*/ //
-router.post('/hashtag', async (req, res, next) => {
+router.post('/hashtag', isLoggedIn, async (req, res, next) => {
     const tags = req.body.hashtag;
 
     if (!tags)
@@ -72,7 +72,7 @@ router.post('/hashtag', async (req, res, next) => {
 });
 
 /**좋아요 많이 받은 순 게시물 조회 */
-router.get('/best', async(req, res, next) => {
+router.get('/best', isLoggedIn, async(req, res, next) => {
     Design.findAll({
         include: [{
             model: Hashtag,
@@ -114,7 +114,7 @@ router.get('/best', async(req, res, next) => {
 });
 
 /**팔로우 맺은 게시물 조회 */
-router.get('/followpost', async(req, res, next) => {
+router.get('/followpost', isLoggedIn, async(req, res, next) => {
     
     const follows = req.user.Followings; //팔로우하는 애들의 아이디값 배열이여야함[{"id":10,"name":"유저1","Follow":{"createdAt":"2020-04-07T11:00:10.000Z","updatedAt":"2020-04-07T11:00:10.000Z","followingId":10,"followerId":2}},{"id":11,"name":"user2","Follow":{"createdAt":"2020-04-07T11:18:18.000Z","updatedAt":"2020-04-07T11:18:18.000Z","followingId":11,"followerId":2}}]
     console.log('이게무ㅓ냐??????????', follows.map(r=>Number(r.id))); //팔로우하는 애들의 아이디 값을 배열로 만듬!!!!!
@@ -162,7 +162,7 @@ router.get('/followpost', async(req, res, next) => {
 });
 
 /**좋아요한 게시물 조회 */
-router.get('/like', async (req, res, next) => {
+router.get('/like', isLoggedIn, async (req, res, next) => {
 
     const likes = await DesignLike.findAll({ where: { userId: req.user.id }});
     console.log('이게무ㅓ냐??????????', likes.map(r=>Number(r.designId)));
@@ -209,7 +209,7 @@ router.get('/like', async (req, res, next) => {
 });
 
 /**사용자가 올린 게시물 조회!!!! */
-router.get('/user', async (req, res, next) => {
+router.get('/user', isLoggedIn, async (req, res, next) => {
     Design.findAll({
         include: [{
             model: Hashtag,
@@ -252,7 +252,7 @@ router.get('/user', async (req, res, next) => {
 });
 
 /**추천코디 수정 전에 특정 게시물 내용 보내주는 부분 */
-router.get('/:id',  async (req, res, next) => {
+router.get('/:id', isLoggedIn,  async (req, res, next) => {
     
     Design.findOne({
             include: [{
@@ -287,7 +287,7 @@ router.get('/:id',  async (req, res, next) => {
 });
 
 /**추천코디 태그 수정하는 부분!!!! */
-router.put('/:id',  async (req, res, next) => {
+router.put('/:id', isLoggedIn,  async (req, res, next) => {
     try{
         const design = await Design.findOne({ 
             include: [{
@@ -321,7 +321,7 @@ router.put('/:id',  async (req, res, next) => {
 });
 
 /**추천코디에 등록된 게시물 삭제 - 관련 태그도 삭제하겠음~!~*/
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', isLoggedIn, async (req, res, next) => {
     try {
         const design = await Design.findOne({ 
             include: [{
@@ -347,7 +347,7 @@ router.delete('/:id', async (req, res, next) => {
 });
 
 /**추천 코디 업로드 */
-router.post('/:id', async (req, res, next) => { //이렇게 보낼 수가 있는지 물어보기
+router.post('/:id', isLoggedIn, async (req, res, next) => { //이렇게 보낼 수가 있는지 물어보기
     //선택한 옷장의 아이디 값, 작성한 해시태그 내용
     //해시태그내용은 어떻게 보낼거임? 배열로 ['1번태그,'2번'] 인지 아니면 #으로 보낼건지 현재 후자로 진행중..
     try {
@@ -362,12 +362,14 @@ router.post('/:id', async (req, res, next) => { //이렇게 보낼 수가 있는
                 closetId: parseInt(req.params.id, 10)
             });
 
-            const hashtags = req.body.content.match(/#[^\s#]*/g);
+            // const hashtags = req.body.content.match(/#[^\s#]*/g);
+            const hashtags = req.body.content;
             console.log('이게해시태그임!!!!!!!!!!!!!!!!!!! ', hashtags); //[ '#토끼', '#귀여웡' ] 이렇게출력되네
 
             if(hashtags) {
             const result = await Promise.all(hashtags.map(tag => Hashtag.findOrCreate({
-                where: { title: tag.slice(1).toLowerCase() },
+                // where: { title: tag.slice(1).toLowerCase() },
+                where: { title: tag.toLowerCase() },
             })));
             // console.log("1번: ", result);
             await design.addHashtags(result.map(r => r[0])); //2차원 배열에서 1차원 배열로 만들어줌?
