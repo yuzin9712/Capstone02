@@ -95,54 +95,68 @@ router.post('/', isLoggedIn, upload.array('img', 3), async (req, res, next) => {
 
 /**팔로우 맺은 게시물 조회*/
 router.get('/followpost', isLoggedIn, async(req, res, next) => {
-    
-    const follows = req.user.Followings; //팔로우하는 애들의 아이디값 배열이여야함[{"id":10,"name":"유저1","Follow":{"createdAt":"2020-04-07T11:00:10.000Z","updatedAt":"2020-04-07T11:00:10.000Z","followingId":10,"followerId":2}},{"id":11,"name":"user2","Follow":{"createdAt":"2020-04-07T11:18:18.000Z","updatedAt":"2020-04-07T11:18:18.000Z","followingId":11,"followerId":2}}]
-    console.log('이게무ㅓ냐??????????', follows.map(r=>Number(r.id))); //팔로우하는 애들의 아이디 값을 배열로 만듬!!!!!
-    // console.log('follow는????',follows);
 
-    Post.findAll({
-        include: [
-            {
-                model: User,
-                attributes: ['id', 'name'],
-            },
-            { //대표이미지하나가 안 뽑히고 다나옴,,,,
-                model: PImg,
-                attributes: ['id','img'],
-                through: {
-                    attributes: []
-                },
-                // limit: 1 //안먹히넴
-            },
-        ],
-        attributes: {
+    try {
+        const likeInfo = await PostLike.findAll({
+            attributes: ['postId'],
+            where: { userId: req.user.id }
+        });
+
+        const follows = req.user.Followings; //팔로우하는 애들의 아이디값 배열이여야함[{"id":10,"name":"유저1","Follow":{"createdAt":"2020-04-07T11:00:10.000Z","updatedAt":"2020-04-07T11:00:10.000Z","followingId":10,"followerId":2}},{"id":11,"name":"user2","Follow":{"createdAt":"2020-04-07T11:18:18.000Z","updatedAt":"2020-04-07T11:18:18.000Z","followingId":11,"followerId":2}}]
+        console.log('이게무ㅓ냐??????????', follows.map(r=>Number(r.id))); //팔로우하는 애들의 아이디 값을 배열로 만듬!!!!!
+        // console.log('follow는????',follows);
+    
+        Post.findAll({
             include: [
-                [
-                    db.sequelize.literal(`(
-                        SELECT COUNT(*) FROM postLikes AS reaction WHERE reaction.postId = post.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
-                    'likecount'
-                ],
-                [
-                    db.sequelize.literal(`(
-                        SELECT COUNT(*) FROM postComments AS comment WHERE comment.postId = post.id AND comment.deletedAt IS NULL)`), //댓글 수 구하기!!!!
-                    'commentcount'
+                {
+                    model: User,
+                    attributes: ['id', 'name'],
+                },
+                { //대표이미지하나가 안 뽑히고 다나옴,,,,
+                    model: PImg,
+                    attributes: ['id','img'],
+                    through: {
+                        attributes: []
+                    },
+                    // limit: 1 //안먹히넴
+                },
+            ],
+            attributes: {
+                include: [
+                    [
+                        db.sequelize.literal(`(
+                            SELECT COUNT(*) FROM postLikes AS reaction WHERE reaction.postId = post.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                        'likecount'
+                    ],
+                    [
+                        db.sequelize.literal(`(
+                            SELECT COUNT(*) FROM postComments AS comment WHERE comment.postId = post.id AND comment.deletedAt IS NULL)`), //댓글 수 구하기!!!!
+                        'commentcount'
+                    ]
                 ]
-            ]
-        },
-        order: [['createdAt', 'DESC']],
-        where: { userId: follows.map(r=>Number(r.id)) },
-    })
-    .then((posts) => {
-        res.send(posts);
-    })
-    .catch((err) => {
+            },
+            order: [['createdAt', 'DESC']],
+            where: { userId: follows.map(r=>Number(r.id)) },
+        })
+        .then((posts) => {
+            res.send({posts, likeInfo});
+        })
+        .catch((err) => {
+            console.error(err);
+            next(err);
+        })
+
+    } catch (err) {
         console.error(err);
         next(err);
-    })
+    }
 });
 
 /**좋아요한 게시물 조회 */
 router.get('/like', isLoggedIn, async (req, res, next) => {
+
+    const follows = req.user.Followings;
+    const followingInfo = follows.map(r=>Number(r.id));
 
     const likes = await PostLike.findAll({ where: { userId: req.user.id }});
     console.log('이게무ㅓ냐??????????', likes.map(r=>Number(r.postId)));
@@ -180,7 +194,7 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
         where: { id: likes.map(r => Number(r.postId)) },
     })
     .then((posts) => {
-        res.send(posts);
+        res.send({posts, followingInfo});
     })
     .catch((err) => {
         console.error(err);
@@ -235,6 +249,15 @@ router.get('/user', isLoggedIn, async (req, res, next) => {
 
 /**게시물 내용 상세 조회 - 게시물 아이디가 파라미터로 */
 router.get('/:id', isLoggedIn, async(req, res, next) => { //게시물 아이디
+
+    const likes = await PostLike.findAll({
+        attributes: ['postId'],
+        where: { userId: req.user.id }
+    });
+    const likeInfo = likes.map(r=>Number(r.postId));
+
+    const follows = req.user.Followings;
+    const followingInfo = follows.map(r=>Number(r.id));
 
     Post.findOne({ 
         include: [{
@@ -301,7 +324,7 @@ router.get('/:id', isLoggedIn, async(req, res, next) => { //게시물 아이디
         where: { id: parseInt(req.params.id, 10)}
     })
     .then((post) => {
-        res.send(post);
+        res.send({post, likeInfo, followingInfo});
     })
     .catch((err) => {
         console.error(err);
@@ -319,7 +342,6 @@ router.put('/:id', isLoggedIn, async(req, res, next) => {
     const post = await Post.findOne({ where: { id: parseInt(req.params.id, 10), userId: req.user.id  }});
 
     try {
-
         if(post == undefined) {
             res.send('없는 게시물!');
         }
@@ -327,7 +349,6 @@ router.put('/:id', isLoggedIn, async(req, res, next) => {
             post.update({ title: req.body.title, content: req.body.content });
             res.send('수정완료');
         }
-
 } catch (err) {
     console.error(err);
     next(err);

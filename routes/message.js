@@ -12,7 +12,6 @@ router.get('/', async (req, res, next) => {
         await Room.findAll({
             include: [{
                 model: ChatLine,
-                separate: true,
                 limit: 1,
                 attributes: ['lines', 'createdAt'], //메인에서는 글내용만 있어도 되나..
                 order: [['createdAt', 'DESC']],
@@ -24,6 +23,7 @@ router.get('/', async (req, res, next) => {
                 ]
              },
              //여기안됨..
+            // order: [[Room.associations.ChatLine,'createdAt', 'DESC']]
             //  order: [[ChatLine, 'createdAt', 'DESC']]
             // order: [[ {model: ChatLine}, 'createdAt', 'DESC']] //쪽지가 최근에 온걸로
         })

@@ -49,10 +49,11 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
                 console.error(loginErr);
                 console.log('로그인 에러?');
             }
-            var json = {
-                name: user.name
-            };
-            res.send(json); //이름
+            res.send({
+                loginStatus: true,
+                name: req.user.name,
+                id: req.user.id
+            });
         });
     })(req, res, next);
 });
@@ -61,7 +62,20 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
 router.get('/logout', isLoggedIn, (req, res) => {
     req.logout();
     req.session.destroy();
-    res.redirect('/');
+    res.send({
+        loginStatus: false,
+        name: '',
+        id: ''
+    });
+});
+
+/**로그인 확인 */
+router.get('/status', isLoggedIn, (req, res) => {
+    res.send({
+        loginStatus: true,
+        name: req.user.name,
+        id: req.user.id
+    });
 });
 
 /**로그인 - 카카오 */

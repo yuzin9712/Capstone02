@@ -16,6 +16,15 @@ router.post('/hashtag', isLoggedIn, async (req, res, next) => {
     }
 
     try {
+        const likes = await DesignLike.findAll({
+            attributes: ['designId'],
+            where: { userId: req.user.id }
+        });
+        const likeInfo = likes.map(r=>Number(r.designId));
+
+        const follows = req.user.Followings;
+        const followingInfo = follows.map(r=>Number(r.id));
+
         const hashtag = await Hashtag.findOne({ where: { title: tags } });
 
         console.log('해시태그 찾을때는!?!?!!!', hashtag);
@@ -58,7 +67,7 @@ router.post('/hashtag', isLoggedIn, async (req, res, next) => {
                 order: [[db.sequelize.literal('likecount'), 'DESC']],
             })
             .then((designs) => {
-                res.send(designs);
+                res.send({designs, likeInfo, followingInfo});
             })
             .catch((err) => {
                 console.error(err);
@@ -73,101 +82,130 @@ router.post('/hashtag', isLoggedIn, async (req, res, next) => {
 
 /**좋아요 많이 받은 순 게시물 조회 */
 router.get('/best', isLoggedIn, async(req, res, next) => {
-    Design.findAll({
-        include: [{
-            model: Hashtag,
-            attributes: ['title'],
-            through: {
-                attributes: []
-            }
-        },{
-            model: Closet,
-            attributes: ['id'],
+
+    try {
+        const likes = await DesignLike.findAll({
+            attributes: ['designId'],
+            where: { userId: req.user.id }
+        });
+        const likeInfo = likes.map(r=>Number(r.designId));
+
+        const follows = req.user.Followings;
+        const followingInfo = follows.map(r=>Number(r.id));
+
+        await Design.findAll({
             include: [{
-                model: Product,
+                model: Hashtag,
+                attributes: ['title'],
                 through: {
                     attributes: []
                 }
-            }]
-        },{
-            model: User,
-            attributes: ['id', 'name']
-        }],
-        attributes: {
-            include: [
-                [
-                    db.sequelize.literal(`(
-                        SELECT COUNT(*) FROM designLikes AS reaction WHERE reaction.designId = design.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
-                    'likecount'
+            },{
+                model: Closet,
+                attributes: ['id'],
+                include: [{
+                    model: Product,
+                    through: {
+                        attributes: []
+                    }
+                }]
+            },{
+                model: User,
+                attributes: ['id', 'name']
+            }],
+            attributes: {
+                include: [
+                    [
+                        db.sequelize.literal(`(
+                            SELECT COUNT(*) FROM designLikes AS reaction WHERE reaction.designId = design.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                        'likecount'
+                    ]
                 ]
-            ]
-        },
-        order: [[db.sequelize.literal('likecount'), 'DESC']],
-    })
-    .then((designs) => {
-        res.send(designs);
-    })
-    .catch((err) => {
+            },
+            order: [[db.sequelize.literal('likecount'), 'DESC']],
+        })
+        .then((designs) => {
+            res.send({designs, likeInfo, followingInfo});
+        })
+        .catch((err) => {
+            console.error(err);
+            next(err);
+        })
+    } catch(err) {
         console.error(err);
         next(err);
-    })
+    }
 });
 
 /**팔로우 맺은 게시물 조회 */
 router.get('/followpost', isLoggedIn, async(req, res, next) => {
-    
-    const follows = req.user.Followings; //팔로우하는 애들의 아이디값 배열이여야함[{"id":10,"name":"유저1","Follow":{"createdAt":"2020-04-07T11:00:10.000Z","updatedAt":"2020-04-07T11:00:10.000Z","followingId":10,"followerId":2}},{"id":11,"name":"user2","Follow":{"createdAt":"2020-04-07T11:18:18.000Z","updatedAt":"2020-04-07T11:18:18.000Z","followingId":11,"followerId":2}}]
-    console.log('이게무ㅓ냐??????????', follows.map(r=>Number(r.id))); //팔로우하는 애들의 아이디 값을 배열로 만듬!!!!!
-    // console.log('follow는????',follows);
 
-    Design.findAll({
-        include: [{
-            model: Hashtag,
-            attributes: ['title'],
-            through: {
-                attributes: []
-            }
-        },{
-            model: Closet,
-            attributes: ['id'],
+    try {
+        const likes = await DesignLike.findAll({
+            attributes: ['designId'],
+            where: { userId: req.user.id }
+        });
+        const likeInfo = likes.map(r=>Number(r.designId));
+
+        const follows = req.user.Followings; //팔로우하는 애들의 아이디값 배열이여야함[{"id":10,"name":"유저1","Follow":{"createdAt":"2020-04-07T11:00:10.000Z","updatedAt":"2020-04-07T11:00:10.000Z","followingId":10,"followerId":2}},{"id":11,"name":"user2","Follow":{"createdAt":"2020-04-07T11:18:18.000Z","updatedAt":"2020-04-07T11:18:18.000Z","followingId":11,"followerId":2}}]
+        console.log('이게무ㅓ냐??????????', follows.map(r=>Number(r.id))); //팔로우하는 애들의 아이디 값을 배열로 만듬!!!!!
+        // console.log('follow는????',follows);
+    
+        await Design.findAll({
             include: [{
-                model: Product,
+                model: Hashtag,
+                attributes: ['title'],
                 through: {
                     attributes: []
                 }
-            }]
-        },{
-            model: User,
-            attributes: ['id', 'name']
-        }],
-        attributes: {
-            include: [
-                [
-                    db.sequelize.literal(`(
-                        SELECT COUNT(*) FROM designLikes AS reaction WHERE reaction.designId = design.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
-                    'likecount'
+            },{
+                model: Closet,
+                attributes: ['id'],
+                include: [{
+                    model: Product,
+                    through: {
+                        attributes: []
+                    }
+                }]
+            },{
+                model: User,
+                attributes: ['id', 'name']
+            }],
+            attributes: {
+                include: [
+                    [
+                        db.sequelize.literal(`(
+                            SELECT COUNT(*) FROM designLikes AS reaction WHERE reaction.designId = design.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                        'likecount'
+                    ]
                 ]
-            ]
-        },
-    order: [['createdAt', 'DESC']],
-    where: { userId: follows.map(r=>Number(r.id)) },
-    })
-    .then((designs) => {
-        res.send(designs);
-    })
-    .catch((err) => {
+            },
+        order: [['createdAt', 'DESC']],
+        where: { userId: follows.map(r=>Number(r.id)) },
+        })
+        .then((designs) => {
+            res.send({designs, likeInfo});
+        })
+        .catch((err) => {
+            console.error(err);
+            next(err);
+        })
+    } catch (err) {
         console.error(err);
         next(err);
-    })
+    }
 });
 
 /**좋아요한 게시물 조회 */
 router.get('/like', isLoggedIn, async (req, res, next) => {
 
+    const follows = req.user.Followings;
+    const followingInfo = follows.map(r=>Number(r.id));
+
     const likes = await DesignLike.findAll({ where: { userId: req.user.id }});
     console.log('이게무ㅓ냐??????????', likes.map(r=>Number(r.designId)));
 
-    Design.findAll({
+    await Design.findAll({
         include: [{
             model: Hashtag,
             attributes: ['title'],
@@ -200,7 +238,7 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
     where: { id: likes.map(r => Number(r.designId)) },
     })
     .then((designs) => {
-        res.send(designs);
+        res.send({designs, followingInfo});
     })
     .catch((err) => {
         console.error(err);

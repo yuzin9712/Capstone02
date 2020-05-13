@@ -1,6 +1,6 @@
 const express = require('express');
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
-const { Post, User, Closet, Design, Product, PostComment, Hashtag, PImg, DesignLike } = require('../models');
+const { Post, User, Closet, Design, Product, PostComment, Hashtag, PImg, DesignLike, PostLike } = require('../models');
 const db = require('../models');
 const { Op } = require('sequelize');
 
@@ -75,13 +75,17 @@ router.get('/join', isNotLoggedIn, (req, res) => {
 //     // console.log(JSON.stringify(req.user));
 // });
 
-router.get('/design', isLoggedIn, async (req, res, next) => {
+router.get('/design',isLoggedIn, async (req, res, next) => {
 
     try {
-        const likeInfo = await DesignLike.findAll({
+        const likes = await DesignLike.findAll({
             attributes: ['designId'],
-            where: { userId: 12 }
+            where: { userId: req.user.id }
         });
+        const likeInfo = likes.map(r=>Number(r.designId));
+
+        const follows = req.user.Followings;
+        const followingInfo = follows.map(r=>Number(r.id));
 
         const designs = await Design.findAll({
             include: [{
@@ -115,7 +119,7 @@ router.get('/design', isLoggedIn, async (req, res, next) => {
             order: [['createdAt', 'DESC']],
         });
 
-        res.send({designs, likeInfo});
+        res.send({designs, likeInfo, followingInfo});
     } catch (err) {
         console.error(err);
         next(err);
@@ -167,52 +171,67 @@ router.get('/bestdesign',isLoggedIn, async (req, res, next) => {
 /**패션 케어 커뮤니티 페이지 메인 화면*/
 router.get('/post', isLoggedIn, async (req, res, next) => {
     
-    await Post.findAll({ 
-        include: [
-            {
-                model: User,
-                attributes: ['id', 'name'],
-            },
-            { //대표이미지하나가 안 뽑히고 다나옴,,,,
-                model: PImg,
-                attributes: ['id','img'],
-                through: {
-                    attributes: []
-                },
-                // limit: 1
-            },
-        ],
-        attributes: {
+    try {
+        const likes = await PostLike.findAll({
+            attributes: ['postId'],
+            where: { userId: req.user.id }
+        });
+        const likeInfo = likes.map(r=>Number(r.postId));
+
+        const follows = req.user.Followings;
+        const followingInfo = follows.map(r=>Number(r.id));
+
+        await Post.findAll({ 
             include: [
-                [
-                    db.sequelize.literal(`(
-                        SELECT COUNT(*) FROM postLikes AS reaction WHERE reaction.postId = post.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
-                    'likecount'
-                ],
-                [ //댓글수?
-                    db.sequelize.literal(`(
-                        SELECT COUNT(*) FROM postComments AS comment WHERE comment.postId = post.id AND comment.deletedAt IS NULL)`), //댓글 수 구하기!!!!
-                    'commentcount'
+                {
+                    model: User,
+                    attributes: ['id', 'name'],
+                },
+                { //대표이미지하나가 안 뽑히고 다나옴,,,,
+                    model: PImg,
+                    attributes: ['id','img'],
+                    through: {
+                        attributes: []
+                    },
+                    // limit: 1
+                },
+            ],
+            attributes: {
+                include: [
+                    [
+                        db.sequelize.literal(`(
+                            SELECT COUNT(*) FROM postLikes AS reaction WHERE reaction.postId = post.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
+                        'likecount'
+                    ],
+                    [ //댓글수?
+                        db.sequelize.literal(`(
+                            SELECT COUNT(*) FROM postComments AS comment WHERE comment.postId = post.id AND comment.deletedAt IS NULL)`), //댓글 수 구하기!!!!
+                        'commentcount'
+                    ]
                 ]
-            ]
-        },
-        order: [['createdAt', 'DESC']],
-    })
-    .then((posts) => {
-        // res.render('post', {
-        //     title: 'example',
-        //     twits: posts,
-        //     user: req.user,
-        //     loginError: req.flash('loginError'),
-        // });
-        res.send(posts);
-        // console.log(`posts= ${JSON.stringify(posts)}`);
-    })
-    .catch((err) => {
+            },
+            order: [['createdAt', 'DESC']],
+        })
+        .then((posts) => {
+            // res.render('post', {
+            //     title: 'example',
+            //     twits: posts,
+            //     user: req.user,
+            //     loginError: req.flash('loginError'),
+            // });
+            res.send({posts, likeInfo, followingInfo});
+            // console.log(`posts= ${JSON.stringify(posts)}`);
+        })
+        .catch((err) => {
+            console.error(err);
+            next(err);
+        });
+        // console.log(JSON.stringify(req.user));
+    } catch(err) {
         console.error(err);
         next(err);
-    });
-    // console.log(JSON.stringify(req.user));
+    }
+
 });
 
 /*나의 옷장 페이지*/
