@@ -14,7 +14,7 @@ router.get('/post/:id', isLoggedIn,  async(req, res, next) => {
 
         if(post) {
             await PostLike.create({
-                userId: 2,
+                userId: req.user.id,
                 postId: parseInt(req.params.id, 10)
             });
         }
@@ -33,7 +33,7 @@ router.delete('/post/:id', isLoggedIn, async(req, res, next) => {
 
         await PostLike.destroy({
             where: {
-                userId: 2,
+                userId: req.user.id,
                 postId: parseInt(req.params.id, 10),
             }
         });
@@ -73,7 +73,7 @@ router.delete('/design/:id', isLoggedIn, async(req, res, next) => {
 
         await DesignLike.destroy({
             where: {
-                userId: 12,
+                userId: req.user.id,
                 designId: parseInt(req.params.id, 10),
             }
         });
