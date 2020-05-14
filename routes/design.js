@@ -396,7 +396,7 @@ router.post('/:id', isLoggedIn, async (req, res, next) => { //이렇게 보낼 �
         } else {
             const design = await Design.create({
                 img: closet.img,
-                userId: 2,
+                userId: req.user.id,
                 closetId: parseInt(req.params.id, 10)
             });
 
