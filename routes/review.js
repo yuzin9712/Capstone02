@@ -26,9 +26,9 @@ const upload = multer({
 });
 
 /**리뷰 답글 작성하기 - 리뷰 아이디 값이 파라미터로 온다 */
-router.post('/comment/:id', async (req, res, next) => {
+router.post('/comment/:id', isLoggedIn, async (req, res, next) => {
     var reviewId = parseInt(req.params.id, 10);
-    var writer = 2;
+    var writer = req.user.id;
     var content = req.body.content;
     var query = "insert into comments(content, writer, reviewId) values (?)";
     var data = [content, writer, reviewId];
@@ -46,7 +46,7 @@ router.post('/comment/:id', async (req, res, next) => {
 });
 
 /**리뷰 펼쳐보기..? - 리뷰아이디값이 파라미터*/
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', isLoggedIn, async (req, res, next) => {
     var reviewId = parseInt(req.params.id, 10);
     var query = "select * from reviews where id =?";
     var query2 = "select * from comments where reviewId=?";
@@ -59,7 +59,7 @@ router.get('/:id', async (req, res, next) => {
         replacements: [reviewId]
     })
     .spread(function (comments) {
-        res.send({ rows: reviews, comments: comments })
+        res.send({ reviews: reviews, comments: comments })
     }, function (err) {
         console.error(err);
         next(err);
@@ -68,7 +68,7 @@ router.get('/:id', async (req, res, next) => {
 });
 
 /**리뷰 작성하기 - 상품 아이디값이 파라미터로 옴 */
-router.post('/:id', upload.array('photo', 3), async (req, res, next) => {
+router.post('/:id', isLoggedIn, upload.array('photo', 3), async (req, res, next) => {
     var reviewId = parseInt(req.params.id, 10);
     var content = req.body.content;
 
@@ -90,6 +90,6 @@ router.post('/:id', upload.array('photo', 3), async (req, res, next) => {
         console.error(err);
         next(err);
     })
-})
+});
 
 module.exports = router;

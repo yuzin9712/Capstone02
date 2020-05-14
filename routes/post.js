@@ -41,34 +41,46 @@ const upload = multer({
 //     console.log('success');
 //     // res.json({ url: req.file.location }); //S3버킷에 이미지주소
 // });
+
+router.post('/img',isLoggedIn, upload.array('img', 3), async (req, res, next) => {
+    console.log('/img로 들어왔음!!!!');
+    console.log(req.file);
+
+    const s3Imgs = req.files;
+    const imgs = s3Imgs.map(img => img.location);
+
+    console.log('보내는 데이터는???', imgs);
+
+    res.json(imgs);
+});
  
 const upload2 = multer();
 
 /**패션 케어 커뮤니티에 게시물 올리기 */
-router.post('/', isLoggedIn, upload.array('img', 3), async (req, res, next) => {
+router.post('/', isLoggedIn, async (req, res, next) => {
     try {
-        const localImgs = req.files; //로컬에서 올린 이미지들 ..
-        
-        //req.body.closet으로
-        const closetImgs = [8, 14]; //s3에서 선택한 옷장 이미지의 아이디 값들이 배열로 들어올 예정!
+        const localImgs = req.body.imgs; //로컬에서 올린 이미지들 ..
+        const closetImgs = req.body.closet; //s3에서 선택한 옷장 이미지의 아이디 값들이 배열로 들어올 예정!
+
+        console.log('이거!!!!!!!',req.body.closet);
 
         const post = await Post.create({
             title: req.body.title,
             content: req.body.content, //이미지가 업로드 됐으면 그 이미지 주소도 req.body.url로 옴
-            userId: 2
+            userId: req.user.id
         });
 
-        //로컬 사진 url 저장하는 부분 -> 확인 필요!!!
+        //로컬 사진 url 저장하는 부분
         if(localImgs !== undefined) {
 
-            console.log(localImgs); //확인할때사용
+            console.log(localImgs);
 
             const locals = await Promise.all(localImgs.map(img => PImg.create({
-                img: img.location,
+                img: img
                 //closetId에는 null값이겠쥬
             })));
     
-            await post.addPImgs(locals.map(r=>Number(r.id))); //relation 테이블에 방금 저장한 로컬 이미지 값 아이디를 넣겠음!
+            await post.addPimgs(locals.map(r=>Number(r.id))); //relation 테이블에 방금 저장한 로컬 이미지 값 아이디를 넣겠음!
         }
 
         if(closetImgs !== undefined) {
@@ -97,15 +109,10 @@ router.post('/', isLoggedIn, upload.array('img', 3), async (req, res, next) => {
 router.get('/followpost', isLoggedIn, async(req, res, next) => {
 
     try {
-        const likeInfo = await PostLike.findAll({
-            attributes: ['postId'],
-            where: { userId: req.user.id }
-        });
-
         const follows = req.user.Followings; //팔로우하는 애들의 아이디값 배열이여야함[{"id":10,"name":"유저1","Follow":{"createdAt":"2020-04-07T11:00:10.000Z","updatedAt":"2020-04-07T11:00:10.000Z","followingId":10,"followerId":2}},{"id":11,"name":"user2","Follow":{"createdAt":"2020-04-07T11:18:18.000Z","updatedAt":"2020-04-07T11:18:18.000Z","followingId":11,"followerId":2}}]
         console.log('이게무ㅓ냐??????????', follows.map(r=>Number(r.id))); //팔로우하는 애들의 아이디 값을 배열로 만듬!!!!!
         // console.log('follow는????',follows);
-    
+
         Post.findAll({
             include: [
                 {
@@ -139,7 +146,7 @@ router.get('/followpost', isLoggedIn, async(req, res, next) => {
             where: { userId: follows.map(r=>Number(r.id)) },
         })
         .then((posts) => {
-            res.send({posts, likeInfo});
+            res.send(posts);
         })
         .catch((err) => {
             console.error(err);
@@ -154,9 +161,6 @@ router.get('/followpost', isLoggedIn, async(req, res, next) => {
 
 /**좋아요한 게시물 조회 */
 router.get('/like', isLoggedIn, async (req, res, next) => {
-
-    const follows = req.user.Followings;
-    const followingInfo = follows.map(r=>Number(r.id));
 
     const likes = await PostLike.findAll({ where: { userId: req.user.id }});
     console.log('이게무ㅓ냐??????????', likes.map(r=>Number(r.postId)));
@@ -194,7 +198,7 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
         where: { id: likes.map(r => Number(r.postId)) },
     })
     .then((posts) => {
-        res.send({posts, followingInfo});
+        res.send(posts);
     })
     .catch((err) => {
         console.error(err);
@@ -250,16 +254,7 @@ router.get('/user', isLoggedIn, async (req, res, next) => {
 /**게시물 내용 상세 조회 - 게시물 아이디가 파라미터로 */
 router.get('/:id', isLoggedIn, async(req, res, next) => { //게시물 아이디
 
-    const likes = await PostLike.findAll({
-        attributes: ['postId'],
-        where: { userId: req.user.id }
-    });
-    const likeInfo = likes.map(r=>Number(r.postId));
-
-    const follows = req.user.Followings;
-    const followingInfo = follows.map(r=>Number(r.id));
-
-    Post.findOne({ 
+   await Post.findOne({ 
         include: [{
             model: User,
             attributes: ['id', 'name'],
@@ -324,7 +319,7 @@ router.get('/:id', isLoggedIn, async(req, res, next) => { //게시물 아이디
         where: { id: parseInt(req.params.id, 10)}
     })
     .then((post) => {
-        res.send({post, likeInfo, followingInfo});
+        res.send(posts);
     })
     .catch((err) => {
         console.error(err);

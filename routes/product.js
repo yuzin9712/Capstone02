@@ -6,7 +6,7 @@ const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
 const router = express.Router();
 
 /**상품 목록 조회 */
-router.get('/', async (req, res, next) => {
+router.get('/', isLoggedIn, async (req, res, next) => {
 
     var query = "select * from products";
 
@@ -16,7 +16,7 @@ router.get('/', async (req, res, next) => {
         const [products, metadata1 ] = await db.sequelize.query(query);
         const [imgs, metadata2 ] = await db.sequelize.query(query2);
 
-        res.send({ rows: products.reverse(), imgs: imgs });
+        res.send({ productRows: products.reverse(), imgArr: imgs });
     } catch (err) {
         console.error(err);
         next(err);
@@ -25,7 +25,7 @@ router.get('/', async (req, res, next) => {
 });
 
 /**카테고리별 조회 */
-router.get('/category/:id', async (req, res, next) => {
+router.get('/category/:id', isLoggedIn, async (req, res, next) => {
     var pid = [];
     var imgArr = [];
     var productRows;
@@ -55,10 +55,10 @@ router.get('/category/:id', async (req, res, next) => {
                 imgArr.push(imgs[i]);
             }
 
-            res.send({rows: productRows, imgArr: imgArr });
+            res.send({productRows: productRows, imgArr: imgArr });
         }
         else {
-            res.send({rows: productRows, imgArr: [] });
+            res.send({productRows: productRows, imgArr: [] });
         }
     }, function (err) {
         console.error(err);
@@ -67,15 +67,15 @@ router.get('/category/:id', async (req, res, next) => {
 })
 
 /**검색 */
-router.post('/search', async (req, res, next) => {
+router.post('/search', isLoggedIn, async (req, res, next) => {
     var query = "select * from products where pname like ?";
     var keyword = req.body.keyword;
 
     await db.sequelize.query(query, {
         replacements: ["%" + keyword + "%"],
     })
-    .spread(function (products) {
-        res.send(products);
+    .spread(function (searchedProducts) {
+        res.send({searched_products: searchedProducts});
     }, function (err) {
         console.error(err);
         next(err);
@@ -83,7 +83,7 @@ router.post('/search', async (req, res, next) => {
 });
 
 /**상품 상세 정보 조회*/
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', isLoggedIn, async (req, res, next) => {
     var productId = parseInt(req.params.id, 10);
     var query1 = "select * from products where id = ?";
     var query2 = "select * from productInfo where productId =?";
@@ -106,7 +106,7 @@ router.get('/:id', async (req, res, next) => {
         replacements: [productId]
     });
 
-    res.send({result: selectedProduct, detial: detail, rows: review, colors: colors});
+    res.send({selected_product: selectedProduct, detail: detail, reviews: review, colors: colors});
 });
 
 module.exports = router;

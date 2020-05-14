@@ -69,24 +69,8 @@ function getProInfoByPid(productids) {
 }
 
 /**장바구니 조회 */
-router.get('/', async (req, res, next) => {
-    // var query = "select * from carts where userId = ?";
-
-    // try {
-    //     await db.sequelize.query(query, {
-    //         replacements: [req.user.id]
-    //     })
-    //     .spread(function (carts) {
-    //         res.send(carts);
-    //     },function (err) {
-    //         console.error(err);
-    //         next(err);
-    //     });   
-    // } catch (err) {
-    //     console.error(err);
-    //     next(err);
-    // }
-    let uid = 3;
+router.get('/', isLoggedIn, async (req, res, next) => {
+    let uid = req.user.id;
     try {
         let result = await getCartByUserId(uid);
         console.log('result : ');
@@ -97,7 +81,7 @@ router.get('/', async (req, res, next) => {
         
         console.log('results2 : '); console.dir(results);
         console.log('result.rows2 : '); console.dir(result.rows);
-        res.json({ resultrows: result.rows, results: results });
+        res.json({ cartsByUid: result.rows, result2: results });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'error발생' });
@@ -105,7 +89,7 @@ router.get('/', async (req, res, next) => {
 });
 
 /**툴바에서 장바구니 담기*/
-router.post('/toolbar', async (req, res, next) => {
+router.post('/toolbar', isLoggedIn, async (req, res, next) => {
     var query1 = "select * from imgByColors where img = ?";
     var query2 = "select * from rows where id =?";
     var query3 = "insert into carts(userId, productId, pname, cnt, img, color) values (?)";
@@ -150,7 +134,7 @@ router.post('/toolbar', async (req, res, next) => {
 });
 
 /**장바구니 수정하기 - cart아이디값이 파라미터로 온다. */
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', isLoggedIn, async (req, res, next) => {
     var query =  "update carts set cnt=?, color=?, size=? where id = ?";
     var cnt = req.body.cnt;
     var color = req.body.color;
@@ -166,7 +150,7 @@ router.put('/:id', async (req, res, next) => {
 });
 
 /**장바구니 담기 - 상품 아이디 값이 파라미터로 넘어옴 - 사이즈 색깔도 넘어오도록 수정예정! */
-router.post('/:id', async (req, res, next) => {
+router.post('/:id', isLoggedIn, async (req, res, next) => {
     var query1 = "select * from rows where id = ?";
     var query2 = "insert into carts(userId, productId, pname, cnt, img, size, color) values (?)";
     var selectedProduct;
@@ -183,7 +167,7 @@ router.post('/:id', async (req, res, next) => {
         });
 
         console.log(selectedProduct);
-        var data = [ 2, selectedProduct.id, selectedProduct.pname, req.body.cnt, selectedProduct.img, req.body.size, req.body.color ];
+        var data = [ req.user.id, selectedProduct.id, selectedProduct.pname, req.body.cnt, selectedProduct.img, req.body.size, req.body.color ];
 
         await db.sequelize.query(query2, {
             replacements: [ data ]

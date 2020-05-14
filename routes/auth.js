@@ -49,10 +49,28 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
                 console.error(loginErr);
                 console.log('로그인 에러?');
             }
+            const designlikes = await DesignLike.findAll({
+                attributes: ['designId'],
+                where: { userId: req.user.id }
+            });
+            const designLike = likes.map(r=>Number(r.designId));
+        
+            const postlikes = await PostLike.findAll({
+                attributes: ['postId'],
+                where: { userId: req.user.id }
+            });
+            const postLike = likes.map(r=>Number(r.designId));
+        
+            const follows = req.user.Followings;
+            const followingInfo = follows.map(r=>Number(r.id));
+        
             res.send({
                 loginStatus: true,
                 name: req.user.name,
-                id: req.user.id
+                id: req.user.id,
+                designLike,
+                postLike,
+                followingInfo
             });
         });
     })(req, res, next);
@@ -70,11 +88,29 @@ router.get('/logout', isLoggedIn, (req, res) => {
 });
 
 /**로그인 확인 */
-router.get('/status', isLoggedIn, (req, res) => {
+router.get('/status', isLoggedIn, async (req, res) => {
+    const designlikes = await DesignLike.findAll({
+        attributes: ['designId'],
+        where: { userId: req.user.id }
+    });
+    const designLike = likes.map(r=>Number(r.designId));
+
+    const postlikes = await PostLike.findAll({
+        attributes: ['postId'],
+        where: { userId: req.user.id }
+    });
+    const postLike = likes.map(r=>Number(r.designId));
+
+    const follows = req.user.Followings;
+    const followingInfo = follows.map(r=>Number(r.id));
+
     res.send({
         loginStatus: true,
         name: req.user.name,
-        id: req.user.id
+        id: req.user.id,
+        designLike,
+        postLike,
+        followingInfo
     });
 });
 

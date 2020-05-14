@@ -2,6 +2,7 @@ const express = require('express');
 
 const { isLoggedIn } = require('./middlewares');
 const { Room, ChatLine, User } = require('../models');
+const db = require('../models');
 const { Op } = require('sequelize');
 
 const router = express.Router();
@@ -10,12 +11,13 @@ const router = express.Router();
 router.get('/', async (req, res, next) => {
     try {
         await Room.findAll({
-            include: [{
+            include: {
                 model: ChatLine,
                 limit: 1,
                 attributes: ['lines', 'createdAt'], //메인에서는 글내용만 있어도 되나..
                 order: [['createdAt', 'DESC']],
-            }],
+            },
+            // order: [[{model: ChatLine, as: 'Chat'}, 'createdAt', 'DESC']],
             where: { 
                 [Op.or]: [
                     { user1Id: 12 },

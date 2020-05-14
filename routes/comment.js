@@ -29,16 +29,22 @@ const upload = multer({
 });
 
 /**댓글 이미지 S3에 업로드 */
-// router.post('/img', isLoggedIn, upload.single('img'), (req, res, next) => {
-//     console.log('/img로 들어왔음!!!');
-//     console.log(req.file);
-//     res.json({ url: req.file.location }); //S3버킷에 이미지주소
-// });
+router.post('/img', isLoggedIn, upload.array('img', 3), async (req, res, next) => {
+    console.log('/img로 들어왔음!!!!');
+    console.log(req.file);
+
+    const s3Imgs = req.files;
+    const imgs = s3Imgs.map(img => img.location);
+
+    console.log('보내는 데이터는???', imgs);
+
+    res.json(imgs);
+});
 
 const upload2 = multer();
 
 /**나의 옷장에 사진과 함께 사용된 제품 아이디 저장 - 게시물 아이디가 파라미터로*/
-router.post('/post/:id', isLoggedIn, upload.array('img'), async (req, res, next) => {
+router.post('/post/:id', isLoggedIn, async (req, res, next) => {
 
     try {
         const post = await Post.findOne({ where: { id: parseInt(req.params.id, 10) } }); //게시물의 아이디값
@@ -46,7 +52,7 @@ router.post('/post/:id', isLoggedIn, upload.array('img'), async (req, res, next)
         if(post == undefined) {
             res.send('게시물이 없다!!');
         } else {
-            const localImgs = req.files; //로컬에서 올린 이미지들 ..
+            const localImgs = req.body.imgs; //로컬에서 올린 이미지들 ..
         
         //req.body.closet로 접근
         const closetImgs = []; //s3에서 선택한 옷장 이미지의 아이디 값들이 배열로 들어올 예정!
@@ -63,11 +69,11 @@ router.post('/post/:id', isLoggedIn, upload.array('img'), async (req, res, next)
             console.log(localImgs); //확인할때사용
 
             const locals = await Promise.all(localImgs.map(img => CImg.create({
-                img: img.location,
+                img: img,
                 //closetId에는 null값이겠쥬
             })));
     
-            await postComment.addCImgs(locals.map(r=>Number(r.id))); //relation 테이블에 방금 저장한 로컬 이미지 값 아이디를 넣겠음!
+            await postComment.addCimgs(locals.map(r=>Number(r.id))); //relation 테이블에 방금 저장한 로컬 이미지 값 아이디를 넣겠음!
         }
 
         if(closetImgs !== undefined) {

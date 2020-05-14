@@ -78,14 +78,6 @@ router.get('/join', isNotLoggedIn, (req, res) => {
 router.get('/design',isLoggedIn, async (req, res, next) => {
 
     try {
-        const likes = await DesignLike.findAll({
-            attributes: ['designId'],
-            where: { userId: req.user.id }
-        });
-        const likeInfo = likes.map(r=>Number(r.designId));
-
-        const follows = req.user.Followings;
-        const followingInfo = follows.map(r=>Number(r.id));
 
         const designs = await Design.findAll({
             include: [{
@@ -119,7 +111,7 @@ router.get('/design',isLoggedIn, async (req, res, next) => {
             order: [['createdAt', 'DESC']],
         });
 
-        res.send({designs, likeInfo, followingInfo});
+        res.send(designs);
     } catch (err) {
         console.error(err);
         next(err);
@@ -172,14 +164,6 @@ router.get('/bestdesign',isLoggedIn, async (req, res, next) => {
 router.get('/post', isLoggedIn, async (req, res, next) => {
     
     try {
-        const likes = await PostLike.findAll({
-            attributes: ['postId'],
-            where: { userId: req.user.id }
-        });
-        const likeInfo = likes.map(r=>Number(r.postId));
-
-        const follows = req.user.Followings;
-        const followingInfo = follows.map(r=>Number(r.id));
 
         await Post.findAll({ 
             include: [
@@ -219,7 +203,7 @@ router.get('/post', isLoggedIn, async (req, res, next) => {
             //     user: req.user,
             //     loginError: req.flash('loginError'),
             // });
-            res.send({posts, likeInfo, followingInfo});
+            res.send(posts);
             // console.log(`posts= ${JSON.stringify(posts)}`);
         })
         .catch((err) => {

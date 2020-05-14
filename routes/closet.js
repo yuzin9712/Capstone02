@@ -37,27 +37,35 @@ const upload = multer({
 const upload2 = multer();
 
 /**나의 옷장에 사진과 함께 사용된 제품 아이디 저장*/
-router.post('/', isLoggedIn, upload.single('image'), async (req, res, next) => {
+router.post('/', upload.single('image'), async (req, res, next) => {
     try {
         console.log('---------------시작------------'); 
         //사용된 물품의 아이디를 배열로 받아온다 ? 그리고 받아온 사진도 저장한다.
-        const closet = await Closet.create({
-            img: req.file.location,
-            userId: 2
-        });
+        // const closet = await Closet.create({
+        //     img: req.file.location,
+        //     userId: req.user.id
+        // });
         console.log(req.file);
         const url = req.body.product; //url이 여러개 담겨있음
-        const products = url.split(','); //얘가 상품 url이 담긴 배열이고  
+        const products = await url.split(','); //얘가 상품 url이 담긴 배열이고  
         
         console.log(url);
-        console.log(products);
+        console.log('전!!!!!!: ',products);
 
-        //그러면 imgbycolor테이블에서 img url이 받아온 값과 같은 걸 찾아내고.
-        const result = await Promise.all(products.map(product => ImgByColor.findOne({
-            where: { img: product },
-        }))); //id 맞는 제품들을 조회하겠다!!
+        var uniqueProducts = await products.reduce(function(a,b) {
+            if(a.indexOf(b) < 0)
+                a.push(b);
+                return a;
+        }, []);
 
-        await closet.addProducts(result.map(r=>Number(r.productId))); //relation 테이블에 제품의 아이디가 담기게 하기
+        console.log('후!!!!!!!: ',uniqueProducts);
+
+        // //그러면 imgbycolor테이블에서 img url이 받아온 값과 같은 걸 찾아내고.
+        // const result = await Promise.all(uniqueProducts.map(product => ImgByColor.findOne({
+        //     where: { img: product },
+        // }))); //id 맞는 제품들을 조회하겠다!!
+
+        // await closet.addProducts(result.map(r=>Number(r.productId))); //relation 테이블에 제품의 아이디가 담기게 하기
         
         res.send('success');
     } catch (err) {
