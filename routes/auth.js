@@ -2,7 +2,7 @@ const express = require('express');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
-const { User } = require('../models');
+const { User, DesignLike, PostLike } = require('../models');
 
 const router = express.Router();
 
@@ -44,7 +44,7 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
             req.flash('loginError', info.message);
             console.log('유저가 없음');
         }
-        return req.login(user, (loginErr) => {
+        return req.login(user, async (loginErr) => {
             if(loginErr) {
                 console.error(loginErr);
                 console.log('로그인 에러?');
@@ -53,15 +53,29 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
                 attributes: ['designId'],
                 where: { userId: req.user.id }
             });
-            const designLike = likes.map(r=>Number(r.designId));
+            const designLike = designlikes.map(r=>Number(r.designId));
         
             const postlikes = await PostLike.findAll({
                 attributes: ['postId'],
                 where: { userId: req.user.id }
             });
-            const postLike = likes.map(r=>Number(r.designId));
+            const postLike = postlikes.map(r=>Number(r.postId));
+
+            const id = req.user.id;
+
+            const userInfo = await User.findOne({ where: { id },
+                include: [{
+                    model: User,
+                    attributes: ['id','name'],
+                    as: 'Followers',
+                }, {
+                    model: User,
+                    attributes: ['id','name'],
+                    as: 'Followings',
+                }],
+             });
         
-            const follows = req.user.Followings;
+            const follows = userInfo.Followings;
             const followingInfo = follows.map(r=>Number(r.id));
         
             res.send({
@@ -93,13 +107,13 @@ router.get('/status', isLoggedIn, async (req, res) => {
         attributes: ['designId'],
         where: { userId: req.user.id }
     });
-    const designLike = likes.map(r=>Number(r.designId));
+    const designLike = designlikes.map(r=>Number(r.designId));
 
     const postlikes = await PostLike.findAll({
         attributes: ['postId'],
         where: { userId: req.user.id }
     });
-    const postLike = likes.map(r=>Number(r.designId));
+    const postLike = postlikes.map(r=>Number(r.postId));
 
     const follows = req.user.Followings;
     const followingInfo = follows.map(r=>Number(r.id));

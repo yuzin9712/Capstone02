@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => (
         },
         size: {
             type: DataTypes.STRING(200),
-            allowNull: false,
+            allowNull: true, //사이즈가 없을 수도 있잖아!
             //defaultValue: 1,
         },
         color: {
