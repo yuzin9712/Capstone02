@@ -33,6 +33,11 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
     }
 });
 
+/**쇼핑몰이 제휴 신청 가입 */
+router.post('/join/shop', isNotLoggedIn, async (req, res, next) => {
+    
+});
+
 /**로그인  - 로컬*/
 router.post('/login', isNotLoggedIn, (req, res, next) => {
     passport.authenticate('local', (authErr, user, info) => {
