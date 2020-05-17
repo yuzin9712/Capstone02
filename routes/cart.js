@@ -7,23 +7,23 @@ const router = express.Router();
 
 function getCartByUserId(uid) {
     return new Promise((resolve, reject) => {
-        let products = new Array();
-        let newProducts = new Array();
+        let pidArr = new Array();
+        let uniquePidArr = new Array();
 
         var query = "select * from carts where userId = ?";
 
         db.sequelize.query(query, {
             replacements: [uid]
         })
-        .spread(function (rows) {
-            if(rows.length > 0) {
-                for(let i = 0; i < rows.length; i++) {
-                    products[i] = rows[i].productId;
+        .spread(function (cartsByUid) {
+            if(cartsByUid.length > 0) {
+                for(let i = 0; i < cartsByUid.length; i++) {
+                    pidArr[i] = cartsByUid[i].productId;
                 }
 
-                newProducts = Array.from(new Set(products));
+                uniquePidArr = Array.from(new Set(pidArr));
 
-                resolve({ newProducts: newProducts, rows: rows});
+                resolve({ uniquePidArr: uniquePidArr, cartsByUid: cartsByUid });
             }
         })
     });
@@ -36,8 +36,8 @@ function getProInfoByPidQuery(productid) {
         db.sequelize.query(query, {
             replacements: [productid]
         })
-        .spread(function (data) {
-            resolve(data);
+        .spread(function (selected_productInfoes) {
+            resolve(selected_productInfoes);
         }, function (err) {
             console.error(err);
             next(err);
@@ -49,21 +49,19 @@ function getProInfoByPid(productids) {
     return new Promise(async (resolve, reject) => {
 
         console.log('이거는뭐야..', productids);
-        let results = [];
+        let result2 = [];
 
         for(let j = 0; j < productids.length; j++) {
-            let dataArr = await getProInfoByPidQuery(productids[j]);
+            let selected_productInfoes = await getProInfoByPidQuery(productids[j]);
 
-            if(dataArr.length > 0) {
-                for(let k = 0; k < dataArr.length; k++) {
-                    results.push(dataArr[k]);
+            if(selected_productInfoes.length > 0) {
+                for(let k = 0; k < selected_productInfoes.length; k++) {
+                    result2.push(selected_productInfoes[k]);
                 }
             }
         }
 
-        console.log('이게results@@@@@@@@@@@@@', results);
-
-        resolve({results: results});
+        resolve({ result2: result2 });
 
     });
 }
@@ -72,16 +70,19 @@ function getProInfoByPid(productids) {
 router.get('/', isLoggedIn, async (req, res, next) => {
     let uid = req.user.id;
     try {
-        let result = await getCartByUserId(uid);
-        console.log('result : ');
-        console.dir(result);
-        console.log(result.newProducts);
+        let result1 = await getCartByUserId(uid);
+        console.log('result1 : ');
+        console.dir(result1);
+        console.log('result1.uniquePidArr : ');
+        console.log(result1.uniquePidArr);
+        console.log('result1.cartsByUid : '); 
+        console.dir(result1.cartsByUid);
 
-        let results = await getProInfoByPid(result.newProducts);
+        let result2 = await getProInfoByPid(result1.uniquePidArr);
+        console.log('results2 : '); 
+        console.dir(result2);
         
-        console.log('results2 : '); console.dir(results);
-        console.log('result.rows2 : '); console.dir(result.rows);
-        res.json({ cartsByUid: result.rows, result2: results });
+        res.json({ cartsByUid : result1.cartsByUid, result2 : result2 });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'error발생' });
@@ -91,7 +92,7 @@ router.get('/', isLoggedIn, async (req, res, next) => {
 /**툴바에서 장바구니 담기*/
 router.post('/toolbar', isLoggedIn, async (req, res, next) => {
     var query1 = "select * from imgByColors where img = ?";
-    var query2 = "select * from rows where id =?";
+    var query2 = "select * from products where id =?";
     var query3 = "insert into carts(userId, productId, pname, cnt, img, color) values (?)";
     var imgurl = req.body.img;
     var selectedProduct;
@@ -151,7 +152,7 @@ router.put('/:id', isLoggedIn, async (req, res, next) => {
 
 /**장바구니 담기 - 상품 아이디 값이 파라미터로 넘어옴 - 사이즈 색깔도 넘어오도록 수정예정! */
 router.post('/:id', isLoggedIn, async (req, res, next) => {
-    var query1 = "select * from rows where id = ?";
+    var query1 = "select * from products where id = ?";
     var query2 = "insert into carts(userId, productId, pname, cnt, img, size, color) values (?)";
     var selectedProduct;
 

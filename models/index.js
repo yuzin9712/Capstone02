@@ -32,6 +32,7 @@ db.CImg = require('./Cimg')(sequelize, Sequelize);
 db.Room = require('./room')(sequelize, Sequelize);
 db.ChatLine = require('./chatLine')(sequelize, Sequelize);
 db.ProductInfo = require('./productInfo')(sequelize, Sequelize);
+db.ShopAdmin = require('./shopAdmin')(sequelize, Sequelize);
 
 /** 1:1 관계 */
 db.User.hasOne(db.Profile, { foreignKey: 'user_id', sourceKey: 'id' });
@@ -74,6 +75,12 @@ db.User.belongsToMany(db.User, {
 });
 
 /**1:N 관계 */
+db.ShopAdmin.hasMany(db.Product);
+db.Product.belongsTo(db.ShopAdmin);
+
+db.User.hasMany(db.ShopAdmin);
+db.ShopAdmin.belongsTo(db.User);
+
 db.Product.hasMany(db.ProductInfo);
 db.ProductInfo.belongsTo(db.Product);
 

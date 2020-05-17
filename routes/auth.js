@@ -2,13 +2,13 @@ const express = require('express');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
-const { User, DesignLike, PostLike } = require('../models');
+const { User, DesignLike, PostLike, ShopAdmin } = require('../models');
 
 const router = express.Router();
 
 /**회원가입 */
 router.post('/join', isNotLoggedIn, async (req, res, next) => {
-    const { email, name, password, phone} = req.body;
+    const { email, name, password } = req.body;
 
     try {
         const exUser = await User.findOne({ where: { email } });
@@ -34,8 +34,38 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
 });
 
 /**쇼핑몰이 제휴 신청 가입 */
-router.post('/join/shop', isNotLoggedIn, async (req, res, next) => {
-    
+router.post('/shop', isNotLoggedIn, async (req, res, next) => {
+    const { shopname, shopurl, email, password, phone } = req.body;
+
+    try {
+        const exUser = await User.findOne({ where: { email } });
+
+        /**이미 가입된 이메일인 경우 리다이렉트 */
+        if(exUser) {
+            req.flash('joinError', '이미 가입된 이메일입니다.');
+            return res.redirect('/join');
+        }
+
+        const hash = await bcrypt.hash(password, 12);
+
+        const user = await User.create({
+            email,
+            name: shopname,
+            password: hash,
+            phone: phone
+        });
+
+        await ShopAdmin.create({
+            shopurl,
+            shopname,
+            userId: user.id
+        });
+
+        res.send('success');
+    } catch(err) {
+        console.error(err);
+        return next(err);
+    }
 });
 
 /**로그인  - 로컬*/

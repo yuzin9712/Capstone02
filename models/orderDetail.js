@@ -25,6 +25,11 @@ module.exports = (sequelize, DataTypes) => (
             allowNull: true,
             //defaultValue: 1,
         },
+        status: {
+            type: DataTypes.INTEGER.UNSIGNED,
+            allowNull: false,
+            defaultValue: 1,
+        },
     }, {
         timestamps: true,
         paranoid: true,

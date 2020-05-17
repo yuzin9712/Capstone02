@@ -1,9 +1,5 @@
 module.exports = (sequelize, DataTypes) => (
-    sequelize.define('product', {
-        seller: {
-            type: DataTypes.STRING(255),
-            allowNull: false,
-        },
+    sequelize.define('product2', {
         pname: {
             type: DataTypes.STRING(200),
             allowNull: false,
@@ -20,6 +16,10 @@ module.exports = (sequelize, DataTypes) => (
         img: {
             type: DataTypes.STRING(200),
             allowNull: true,
+        },
+        gender: {
+            type: DataTypes.STRING(10),
+            allowNull: false,
         }
     }, {
         timestamps: true,

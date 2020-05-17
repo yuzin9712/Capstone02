@@ -26,6 +26,8 @@ const cartRouter = require('./routes/cart');
 const messageRouter = require('./routes/message');
 const orderRouter = require('./routes/order');
 const reviewRouter = require('./routes/review');
+const shopRouter = require('./routes/shop');
+const adminRouter = require('./routes/admin');
 
 const {sequelize} = require('./models');
 const passportConfig = require('./passport');
@@ -59,37 +61,7 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-// app.all('/*', function(req, res, next) {
-//     // res.header("Access-Control-Allow-Origin", "*");
-//     res.header("Access-Control-Allow-Headers", "X-Requested-With");
-//     next();
-// });
-
-// app.all('/*', function (req, res, next) {
-//     res.header('Access-Control-Allow-Credentials', true);
-//     res.header('Access-Control-Allow-Origin', req.headers.origin);
-//     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-//     res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
-//     if ('OPTIONS' == req.method) {
-//          res.send(200);
-//      } else {
-//          next();
-//      }
-// })
-
-// app.use(function (req, res, next) {
-//     res.setHeader('Access-Control-Allow-Credentials', true);
-//     res.setHeader('Access-Control-Allow-Origin', 'http://172.16.101.72:8080');
-//     res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-//     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
-//     if ('OPTIONS' == req.method) {
-//        res.send(200);
-//      } else {
-//        next();
-//      }
-// });
-
-app.use('/page', pageRouter); //바꿔라~
+app.use('/page', pageRouter);
 app.use('/auth', authRouter);
 app.use('/post', postsRouter);
 app.use('/user', usersRouter);
@@ -102,6 +74,8 @@ app.use('/cart', cartRouter);
 app.use('/message', messageRouter);
 app.use('/order', orderRouter);
 app.use('/review', reviewRouter);
+app.use('/shop', shopRouter);
+app.use('/admin', adminRouter);
 
 app.use((req, res, next) => {
     const err = new Error('Not Found');
