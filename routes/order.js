@@ -93,7 +93,7 @@ router.get('/', isLoggedIn, async (req, res, next) => {
             where: { userId: req.user.id }
         })
         .then((orders) => {
-            res.send(orders);
+            res.send(orders.reverse());
         })
         .catch((err) => {
             console.error(err);
