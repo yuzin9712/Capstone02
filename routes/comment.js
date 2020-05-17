@@ -55,11 +55,11 @@ router.post('/post/:id', isLoggedIn, async (req, res, next) => {
             const localImgs = req.body.imgs; //로컬에서 올린 이미지들 ..
         
         //req.body.closet로 접근
-        const closetImgs = []; //s3에서 선택한 옷장 이미지의 아이디 값들이 배열로 들어올 예정!
+        const closetImgs = req.body.closet; //s3에서 선택한 옷장 이미지의 아이디 값들이 배열로 들어올 예정!
 
         const postComment = await PostComment.create({
             content: req.body.content, //이미지가 업로드 됐으면 그 이미지 주소도 req.body.url로 옴
-            userId: 12,
+            userId: req.user.id,
             postId: parseInt(req.params.id, 10)
         });
 
