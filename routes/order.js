@@ -93,7 +93,7 @@ router.get('/', async (req, res, next) => {
             where: { userId: 12 }
         })
         .then((orders) => {
-            res.send(orders);
+            res.send(orders.reverse());
         })
         .catch((err) => {
             console.error(err);
