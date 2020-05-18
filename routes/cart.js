@@ -61,9 +61,7 @@ function getProInfoByPid(productids) {
                 }
             }
         }
-
         resolve({ result2: result2 });
-
     });
 }
 
