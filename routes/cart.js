@@ -5,6 +5,7 @@ const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
 
 const router = express.Router();
 
+// 테스트
 function getCartByUserId(uid) {
     return new Promise((resolve, reject) => {
         let pidArr = new Array();
