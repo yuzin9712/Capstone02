@@ -65,7 +65,7 @@ router.post('/img', isLoggedIn, upload.array('photo', 8), async (req, res, next)
     res.json(imgs);
 });
 
-//상품업로드
+//상품업로드2
 router.post('/addproduct', isLoggedIn, async (req, res, next) => {
 
     const productname = req.body.productname;
