@@ -27,7 +27,7 @@ const upload = multer({
 });
 
 /**이미지 올리기 */
-router.post('/img', isLoggedIn, async (req, res, next) => {
+router.post('/img', isLoggedIn, upload.array('img', 3), async (req, res, next) => {
     console.log('/img로 들어왔음!!!!');
     console.log(req.file);
 
@@ -82,7 +82,7 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
 });
 
 /**리뷰 작성하기 - 상품 아이디값이 파라미터로 옴 */
-router.post('/:id', isLoggedIn, upload.array('photo', 3), async (req, res, next) => {
+router.post('/:id', isLoggedIn, async (req, res, next) => {
     console.log('------------들어옴-------------');
     var reviewId = parseInt(req.params.id, 10);
     var content = req.body.content;
