@@ -1,6 +1,6 @@
 const local = require('./localStrategy');
 const kakao = require('./kakaoStrategy');
-const { User } = require('../models');
+const { User, ShopAdmin } = require('../models');
 
 module.exports = (passport) => {
     passport.serializeUser((user, done) => {
@@ -13,17 +13,33 @@ module.exports = (passport) => {
      */
     passport.deserializeUser((id, done) => {
         /**팔로우 팔로잉 사람들 배열 함께 저장 */
-        User.findOne({ where: { id },
-                       include: [{
-                           model: User,
-                           attributes: ['id','name'],
-                           as: 'Followers',
-                       }, {
-                           model: User,
-                           attributes: ['id','name'],
-                           as: 'Followings',
-                       }],
-                    })
+        // User.findOne({ where: { id },
+        //                include: [{
+        //                    model: User,
+        //                    attributes: ['id','name'],
+        //                    as: 'Followers',
+        //                }, {
+        //                    model: User,
+        //                    attributes: ['id','name'],
+        //                    as: 'Followings',
+        //                }],
+        //             })
+            User.findOne({ where: { id },
+                include: [
+                {
+                    model: ShopAdmin,
+                    attributes: ['id', 'shopname', 'shopurl'],
+                    // where: { alianced: 1 }
+                },{
+                    model: User,
+                    attributes: ['id','name'],
+                    as: 'Followers',
+                }, {
+                    model: User,
+                    attributes: ['id','name'],
+                    as: 'Followings',
+                }],
+            })
             .then((user) => {
                 console.log('전체!!',user.Followings);
                 console.log('여기여기칭구들!!!!!!!!!!!!!!!!!!', JSON.stringify(user.Followings));

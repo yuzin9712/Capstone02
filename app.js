@@ -36,8 +36,8 @@ const app = express();
 sequelize.sync();
 passportConfig(passport);
 
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
+// app.set('views', path.join(__dirname, 'views'));
+// app.set('view engine', 'pug');
 app.set('port', process.env.PORT || 8001);
 
 app.use(cors(corsOptions));

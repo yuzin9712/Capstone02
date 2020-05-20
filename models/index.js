@@ -75,8 +75,8 @@ db.User.belongsToMany(db.User, {
 });
 
 /**1:N 관계 */
-db.ShopAdmin.hasMany(db.Product);
-db.Product.belongsTo(db.ShopAdmin);
+// db.ShopAdmin.hasMany(db.Product);
+// db.Product.belongsTo(db.ShopAdmin);
 
 db.User.hasMany(db.ShopAdmin);
 db.ShopAdmin.belongsTo(db.User);
