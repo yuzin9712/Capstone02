@@ -319,7 +319,7 @@ router.get('/:id', isLoggedIn, async(req, res, next) => { //게시물 아이디
         where: { id: parseInt(req.params.id, 10)}
     })
     .then((post) => {
-        res.send(posts);
+        res.send(post);
     })
     .catch((err) => {
         console.error(err);

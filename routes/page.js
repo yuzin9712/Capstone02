@@ -9,16 +9,10 @@ const router = express.Router();
 
 /**마이 페이지 이동 - 어떤 내용이 나와야하나? */
 router.get('/profile', isLoggedIn, (req, res) => {
-    res.render('profile', { title: '내 정보', user: req.user });
 });
 
 /**회원가입 페이지 이동*/
 router.get('/join', isNotLoggedIn, (req, res) => {
-    res.render('join', {
-        title: '회원가입',
-        user: req.user,
-        joinError: req.flash('joinError'),
-    });
 });
 
 /**전체 사람들 글 조회하기 */

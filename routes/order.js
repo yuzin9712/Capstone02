@@ -10,7 +10,7 @@ const router = express.Router();
 //배송정보, 주문자정보 등록(????) / 주문 등록/ 주문내역조회
 
 /**주문자 정보, 주문 상품 정보 정보, 배송지 정보 등록하기 */
-router.post('/', async (req, res, next) => {
+router.post('/', isLoggedIn, async (req, res, next) => {
     try {
         const ordererInfo = req.body.ordererInfo; //주문자 정보(이름, 전화번호1, 전화번호2, 이메일) 전화번호1이 핸드폰 번호로 필수입력란입니다.
         const orderProductInfo = req.body.orderProductInfo; //주문한 상품들의 배열 목록
@@ -42,7 +42,7 @@ router.post('/', async (req, res, next) => {
             phone: ordererInfo.phone,
             phone2: ordererInfo.phone2,
             total: price.reduce((a,b) => a + b),
-            userId: 12
+            userId: req.user.id
         });
 
         console.log(newOrder.id);
@@ -79,8 +79,8 @@ router.post('/', async (req, res, next) => {
 
 });
 
-/**사용자별 주문정보 전체 조회 */
-router.get('/', async (req, res, next) => {
+/**사용자별 주문정보 전체 조회 zz*/
+router.get('/', isLoggedIn, async (req, res, next) => {
     try {
         await Order.findAll({
             include: [{
@@ -90,7 +90,8 @@ router.get('/', async (req, res, next) => {
                     attributes: ['img', 'pname', 'price', 'seller']
                 }]
             }],
-            where: { userId: 12 }
+            where: { userId: req.user.id },
+            order: [['createdAt', 'DESC']],
         })
         .then((orders) => {
             res.send(orders);

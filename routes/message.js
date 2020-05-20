@@ -13,8 +13,12 @@ router.get('/', async (req, res, next) => {
         await Room.findAll({
             include: {
                 model: ChatLine,
-                limit: 1,
-                attributes: ['lines', 'createdAt'], //메인에서는 글내용만 있어도 되나..
+                // limit: 1, 하나만 보내지 말라고 ..?
+                attributes: ['id','lines','createdAt'],
+                include: {
+                    model: User,
+                    attributes: ['id', 'name']
+                },
                 order: [['createdAt', 'DESC']],
             },
             // order: [[{model: ChatLine, as: 'Chat'}, 'createdAt', 'DESC']],
@@ -52,12 +56,12 @@ router.post('/:id', async (req, res, next) => {
         const [ room, created ] = await Room.findOrCreate({
             where: { 
                 [Op.or]: [
-                    { user1Id: 10, user2Id: parseInt(req.params.id, 10) },
-                    { user1Id: parseInt(req.params.id, 10), user2Id: 10 }
+                    { user1Id: 12, user2Id: parseInt(req.params.id, 10) },
+                    { user1Id: parseInt(req.params.id, 10), user2Id: 12 }
                 ]
              },
              defaults: {
-                 user1Id: 10, 
+                 user1Id: 12,
                  user2Id: parseInt(req.params.id, 10)
              }
         });
@@ -66,7 +70,7 @@ router.post('/:id', async (req, res, next) => {
 
         await ChatLine.create({
             lines: newLine,
-            userId: 10,
+            userId: 12,
             roomId: room.id
         });
 
@@ -78,35 +82,35 @@ router.post('/:id', async (req, res, next) => {
 });
 
 /**특정 대화방에 들어감 - 방 아이디값이 파라미터로 온다. */
-router.get('/:id', async (req, res, next) => {
-    try {
-        const room = await Room.findOne({
-            where: { id: parseInt(req.params.id, 10)}
-        });
+// router.get('/:id', async (req, res, next) => {
+//     try {
+//         const room = await Room.findOne({
+//             where: { id: parseInt(req.params.id, 10)}
+//         });
 
-        if(room == undefined) {
-            res.send('없는 대화방입니다!!');
-        } else {
-            await ChatLine.findAll({
-                include: [{
-                    model: User,
-                    attributes: ['id', 'name']
-                }],
-                where: { roomId: room.id },
-                order: [['createdAt', 'DESC']],
-            })
-            .then((chatlines) => {
-                res.send(chatlines);
-            })
-            .catch((err) => {
-                console.error(err);
-                next(err);
-            })
-        }
-    } catch (err) {
-        console.error(err);
-        next(err);
-    }
-})
+//         if(room == undefined) {
+//             res.send('없는 대화방입니다!!');
+//         } else {
+//             await ChatLine.findAll({
+//                 include: [{
+//                     model: User,
+//                     attributes: ['id', 'name']
+//                 }],
+//                 where: { roomId: room.id },
+//                 order: [['createdAt', 'DESC']],
+//             })
+//             .then((chatlines) => {
+//                 res.send(chatlines);
+//             })
+//             .catch((err) => {
+//                 console.error(err);
+//                 next(err);
+//             })
+//         }
+//     } catch (err) {
+//         console.error(err);
+//         next(err);
+//     }
+// })
 
 module.exports = router;

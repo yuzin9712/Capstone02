@@ -55,10 +55,10 @@ router.get('/category/:id', isLoggedIn, async (req, res, next) => {
                 imgArr.push(imgs[i]);
             }
 
-            res.send({productRows: productRows, imgArr: imgArr });
+            res.send({productRows: productRows.reverse(), imgArr: imgArr });
         }
         else {
-            res.send({productRows: productRows, imgArr: [] });
+            res.send({productRows: productRows.reverse(), imgArr: [] });
         }
     }, function (err) {
         console.error(err);
@@ -75,7 +75,7 @@ router.post('/search', isLoggedIn, async (req, res, next) => {
         replacements: ["%" + keyword + "%"],
     })
     .spread(function (searchedProducts) {
-        res.send({searched_products: searchedProducts});
+        res.send({productRows: searchedProducts.reverse()});
     }, function (err) {
         console.error(err);
         next(err);

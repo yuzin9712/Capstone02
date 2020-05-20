@@ -45,7 +45,7 @@ router.get('/:id', async (req, res, next) => {
 });
 
 /**제휴 끊기 - shopadmin id가 파라미터로 온다 */
-router.delete('/:id', async (req, res, next) => {
+router.post('/:id', async (req, res, next) => {
     try {
         var query = "UPDATE shopAdmins SET deletedAt = NOW(), alianced = 0 WHERE id = ?";
 
@@ -63,6 +63,6 @@ router.delete('/:id', async (req, res, next) => {
         console.error(err);
         next(err);
     }
-})
+});
 
 module.exports = router;
