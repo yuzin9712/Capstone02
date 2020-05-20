@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../models');
+const path = require('path');
 const AWS = require('aws-sdk');
 const multerS3 = require('multer-s3');
 const multer = require('multer');
@@ -25,12 +26,25 @@ const upload = multer({
     limits: { fileSize: 125 * 1024 * 1024 }, //25MB
 });
 
+/**이미지 올리기 */
+router.post('/img', isLoggedIn, async (req, res, next) => {
+    console.log('/img로 들어왔음!!!!');
+    console.log(req.file);
+
+    const s3Imgs = req.files;
+    const imgs = s3Imgs.map(img => img.location);
+
+    console.log('보내는 데이터는???', imgs);
+
+    res.json(imgs);
+});
+
 /**리뷰 답글 작성하기 - 리뷰 아이디 값이 파라미터로 온다 */
 router.post('/comment/:id', isLoggedIn, async (req, res, next) => {
     var reviewId = parseInt(req.params.id, 10);
     var writer = req.user.id;
     var content = req.body.content;
-    var query = "insert into comments(content, writer, reviewId) values (?)";
+    var query = "insert into comments(content, writer, reviewId) values (?)"; //timestamp가 없네...
     var data = [content, writer, reviewId];
 
     await db.sequelize.query(query, {
@@ -69,27 +83,28 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
 
 /**리뷰 작성하기 - 상품 아이디값이 파라미터로 옴 */
 router.post('/:id', isLoggedIn, upload.array('photo', 3), async (req, res, next) => {
+    console.log('------------들어옴-------------');
     var reviewId = parseInt(req.params.id, 10);
     var content = req.body.content;
+    var imgs = req.body.imgs;
 
-    var query = "select * from users where id=?";
-    var query2 = "insert into reviews(content, user_email, img, img2, img3, reviewId, userId) values (?)";
+    var query = "insert into reviews(content, user_email, img, img2, img3, userId, productId, createdAt) values (?)";
     
-    const [userInfo, metadata] = await db.sequelize.query(query, {
-        replacements: req.user.id
-    });
+    var data = [ content, req.user.email, req.imgs[0], req.imgs[1], req.imgs[2], req.user.id, parseInt(req.params.id, 10), new Date() ];
 
-    var data = [ content, userInfo.email, req.files[0], req.files[1], req.files[2] ];
-
-    await db.sequelize.query(query2, {
-        replacements: [data]
-    })
-    .spread(function () {
-        res.sendStatus(200);
-    }, function (err) {
+    try {
+        await db.sequelize.query(query, {
+            replacements: [data]
+        })
+        .spread(function () {
+            res.sendStatus(200);
+        }, function (err) {
+            console.error(err);
+            next(err);
+        })
+    } catch (err) {
         console.error(err);
-        next(err);
-    })
+    }
 });
 
 module.exports = router;

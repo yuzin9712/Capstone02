@@ -13,17 +13,6 @@ module.exports = (passport) => {
      */
     passport.deserializeUser((id, done) => {
         /**팔로우 팔로잉 사람들 배열 함께 저장 */
-        // User.findOne({ where: { id },
-        //                include: [{
-        //                    model: User,
-        //                    attributes: ['id','name'],
-        //                    as: 'Followers',
-        //                }, {
-        //                    model: User,
-        //                    attributes: ['id','name'],
-        //                    as: 'Followings',
-        //                }],
-        //             })
             User.findOne({ where: { id },
                 include: [
                 {
@@ -41,8 +30,6 @@ module.exports = (passport) => {
                 }],
             })
             .then((user) => {
-                console.log('전체!!',user.Followings);
-                console.log('여기여기칭구들!!!!!!!!!!!!!!!!!!', JSON.stringify(user.Followings));
                 done(null, user)
             })
             .catch((err) => {

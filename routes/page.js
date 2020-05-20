@@ -71,7 +71,7 @@ router.get('/join', isNotLoggedIn, (req, res) => {
 
 router.get('/design',isLoggedIn, async (req, res, next) => {
 
-    try {
+    // try {
 
         const designs = await Design.findAll({
             include: [{
@@ -103,13 +103,20 @@ router.get('/design',isLoggedIn, async (req, res, next) => {
                 ]
             },
             order: [['createdAt', 'DESC']],
-        });
+        })
+        .then((designs) => {
+            res.send(designs);
+        })
+        .catch((err) => {
+            console.error(err);
+            next(err);
+        })
 
-        res.send(designs);
-    } catch (err) {
-        console.error(err);
-        next(err);
-    }
+    //     res.send(designs);
+    // } catch (err) {
+    //     console.error(err);
+    //     next(err);
+    // }
 });
 
 router.get('/bestdesign',isLoggedIn, async (req, res, next) => {
@@ -214,8 +221,6 @@ router.get('/post', isLoggedIn, async (req, res, next) => {
 
 /*나의 옷장 페이지*/
 router.get('/closet', isLoggedIn, async (req, res, next) => {
-    console.log('요청한사람이누구냐????????',req.user);
-
     await Closet.findAll({
         include: {
             model: Product, //사용된 제품 정보도 같이 나온다.
