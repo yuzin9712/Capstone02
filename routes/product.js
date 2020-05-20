@@ -36,7 +36,7 @@ router.get('/category/:id', isLoggedIn, async (req, res, next) => {
         replacements: [parseInt(req.params.id, 10)]
     })
     .spread(function (rows) {
-        productRows = rows;
+        productRows = rows.reverse();
 
         for(var i = 0; i < productRows.length; i++) {
             pid[i] = productRows[i].id;
