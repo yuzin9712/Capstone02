@@ -42,7 +42,7 @@ router.post('/img', isLoggedIn, upload.array('img', 3), async (req, res, next) =
 /**리뷰 답글 작성하기 - 리뷰 아이디 값이 파라미터로 온다 */
 router.post('/comment/:id', isLoggedIn, async (req, res, next) => {
     var reviewId = parseInt(req.params.id, 10);
-    var writer = req.user.id;
+    var writer = req.user.name;
     var content = req.body.content;
     var query = "insert into comments(content, writer, reviewId) values (?)"; //timestamp가 없네...
     var data = [content, writer, reviewId];
@@ -90,7 +90,7 @@ router.post('/:id', isLoggedIn, async (req, res, next) => {
 
     var query = "insert into reviews(content, user_email, img, img2, img3, userId, productId, createdAt) values (?)";
     
-    var data = [ content, req.user.email, req.imgs[0], req.imgs[1], req.imgs[2], req.user.id, parseInt(req.params.id, 10), new Date() ];
+    var data = [ content, req.user.email, req.body.imgs[0], req.body.imgs[1], req.body.imgs[2], req.user.id, parseInt(req.params.id, 10), new Date() ];
 
     try {
         await db.sequelize.query(query, {

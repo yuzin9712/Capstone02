@@ -64,7 +64,7 @@ router.post('/shop', isNotLoggedIn, async (req, res, next) => {
         res.send('success');
     } catch(err) {
         console.error(err);
-        return next(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -112,15 +112,30 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
         
             const follows = userInfo.Followings;
             const followingInfo = follows.map(r=>Number(r.id));
-        
-            res.send({
-                loginStatus: true,
-                name: req.user.name,
-                id: req.user.id,
-                designLike,
-                postLike,
-                followingInfo
-            });
+
+            if(await ShopAdmin.findOne({
+                where: { userId: req.user.id, alianced: 1 }
+            })) {
+                res.send({
+                    loginStatus: true,
+                    shopStatus: true,
+                    name: req.user.name,
+                    id: req.user.id,
+                    designLike,
+                    postLike,
+                    followingInfo
+                });
+            } else {
+                res.send({
+                    loginStatus: true,
+                    shopStatus: false,
+                    name: req.user.name,
+                    id: req.user.id,
+                    designLike,
+                    postLike,
+                    followingInfo
+                });
+            }
         });
     })(req, res, next);
 });
@@ -153,14 +168,29 @@ router.get('/status', isLoggedIn, async (req, res) => {
     const follows = req.user.Followings;
     const followingInfo = follows.map(r=>Number(r.id));
 
-    res.send({
-        loginStatus: true,
-        name: req.user.name,
-        id: req.user.id,
-        designLike,
-        postLike,
-        followingInfo
-    });
+    if(await ShopAdmin.findOne({
+        where: { userId: req.user.id, alianced: 1 }
+    })) {
+        res.send({
+            loginStatus: true,
+            shopStatus: true,
+            name: req.user.name,
+            id: req.user.id,
+            designLike,
+            postLike,
+            followingInfo
+        });
+    } else {
+        res.send({
+            loginStatus: true,
+            shopStatus: false,
+            name: req.user.name,
+            id: req.user.id,
+            designLike,
+            postLike,
+            followingInfo
+        })
+    }
 });
 
 /**로그인 - 카카오 */
