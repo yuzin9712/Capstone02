@@ -66,14 +66,14 @@ router.post('/img', isLoggedIn, upload.array('photo', 8), async (req, res, next)
 });
 
 //상품업로드2
-router.post('/addproduct', isLoggedIn, async (req, res, next) => {
+router.post('/addproduct', async (req, res, next) => {
 
     const productname = req.body.productname;
     const price = req.body.price;
     const categoryId = req.body.categoryId;
     const createdAt = req.body.createdAt;
     const gender = req.body.gender;
-    const seller = '테스트샾';
+    const seller = req.body.seller;
 
     const color = req.body.color;
     const S = req.body.S;
@@ -111,97 +111,88 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
 
     var query1 = "insert into products(pname, price, categoryId, gender, img, description) VALUES(?)";
     var query2 = "select id from products";
-    var query3 = "insert into productInfo set ?";
-    var query4 = "insert into imgByColors set ?";
+    // var query3 = "insert into productInfo set ?";
+    // var query4 = "insert into imgByColors set ?";
+    var query3 = "insert into productInfo (productId, color, size, cnt) VALUES (?)";
+    var query4 = "insert into imgByColors (productId, img, color) VALUES (?)";
     var data; //products테이블에 들어갈 row
     var data2 = []; //productInfo테이블에 들어갈 배열
     var data3 = []; //imgByColors테이블에 들어갈 배열 
     var pid;
+
     data = [productname, price, categoryId, gender, req.body.photo[0], req.body.photo[1]];
 
     try{
+        
         await db.sequelize.query(query1, {replacements: [data]})
         .spread(function(inserted){
             if(inserted){
                 console.log('inserted : ');
                 console.dir(inserted);
+                pid = inserted;
             }   
         }, function(err){
             console.error(err);
             next(err);
         });
 
-        await db.sequelize.query(query2)
-        .spread(async (pids) => {
-            console.log('pids : ');
-            console.dir(pids);
-            if(pids.length > 0){
-                pid = pids.length;
-                console.log('pid :'+pid);
-            }else{
-                pid = 1;
-                console.log('pid :'+pid);
-            }
-            var k = 0;
-            for(var i=0; i<colorCnt; i++){
-                for(var j=0; j<4; j++){
-                    if(j==0){
-                        data2[k] = {productId:pid, color:color[i], size:'S', cnt:S[i]};
-                    }
-                    if(j==1){
-                        data2[k] = {productId:pid, color:color[i], size:'M', cnt:M[i]};
-                    }
-                    if(j==2){
-                        data2[k] = {productId:pid, color:color[i], size:'L', cnt:L[i]};
-                    }
-                    if(j==3){
-                        data2[k] = {productId:pid, color:color[i], size:'XL', cnt:XL[i]};
-                    }
-                    k++;
+        var k = 0;
+        for (var i = 0; i < colorCnt; i++) {
+            for (var j = 0; j < 4; j++) {
+                if (j == 0) {
+                    data2[k] = [pid, color[i], 'S', S[i]];
                 }
+                if (j == 1) {
+                    data2[k] = [pid, color[i], 'M', M[i]];
+                }
+                if (j == 2) {
+                    data2[k] = [pid, color[i], 'L', L[i]];
+                }
+                if (j == 3) {
+                    data2[k] = [pid, color[i], 'XL', XL[i]];
+                }
+                k++;
             }
-            console.log('data2 : ');
-            console.log(data2);
+        }
+        console.log('data2 : ');
+        console.log(data2);
 
-            for(var i=0; i<k; i++){
-                await db.sequelize.query(query3, {replacements:[data2[i]]})
-                .spread(function(inserted){
-                    if(inserted){
-                        console.log('productInfo_inserted : ');
-                        console.dir(inserted);
-                    }
-                }, function(err){
-                    console.error(err);
-                    next(err);
-                });
-            }
-            
-            var d = 0;
-            for(var i=0; i<colorCnt; i++){
-                data3[d] = {productId:pid, img:req.body.photo[i+2], color:color[i]};
-                d++;
-            }
-            console.log('data3 : ');
-            console.log(data3);
+        for(var i=0; i<data2.length; i++){
+            await db.sequelize.query(query3, {replacements:[data2[i]]})
+            .spread(function(inserted){
+                if(inserted){
+                    console.log('productInfo_inserted : ');
+                    console.dir(inserted);
+                }
+            }, function(err){
+                console.error(err);
+                next(err);
+            });
+        }
+        
+        var d = 0;
+        for(var i=0; i<colorCnt; i++){
+            data3[d] = [pid, req.body.photo[i+2], color[i]];
+            d++;
+        }
+        console.log('data3 : ');
+        console.log(data3);
 
-            for(var i=0; i<d; i++){
-                await db.sequelize.query(query4, {replacements:[data3[i]]})
-                .spread(function(inserted){
-                    if(inserted){
-                        console.log('imgByColors_inserted : ');
-                        console.dir(inserted);
-                        res.send('<h2>ADD PRODUCT SUCCESS</h2>');
-                    }
-                }, function(err){
-                    console.error(err);
-                    next(err);
-                });
-            }
-            
-        }, function(err){
-            console.log(err);
-            next(err);
-        });
+        for(var i=0; i<d; i++){
+            await db.sequelize.query(query4, {replacements:[data3[i]]})
+            .spread(function(inserted){
+                if(inserted){
+                    console.log('imgByColors_inserted : ');
+                    console.dir(inserted);
+                    //res.send('<h2>ADD PRODUCT SUCCESS</h2>');
+                }
+            }, function(err){
+                console.error(err);
+                next(err);
+            });
+        }
+
+        res.send('add product success');
 
     }catch (err) {
         console.error(err);
