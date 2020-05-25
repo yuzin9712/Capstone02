@@ -7,7 +7,7 @@ const multerS3 = require('multer-s3');
 const db = require('../models');
 const Op = db.sequelize.Op;
 
-const { Post, PImg, User, PostLike, PostComment, Closet, Product, CImg } = require('../models');
+const { Post, PImg, User, PostLike, PostComment, Closet, Product, CImg, ImgByColor } = require('../models');
 const { isLoggedIn } = require('./middlewares');
 
 const router = express.Router();
@@ -97,7 +97,7 @@ router.post('/', isLoggedIn, async (req, res, next) => {
         await post.addPimgs(nonlocals.map(r=>Number(r.id)));
         }
 
-        res.send('success');
+        res.send(post.id);
 
     } catch (err) {
         console.error(err);
@@ -252,7 +252,7 @@ router.get('/user', isLoggedIn, async (req, res, next) => {
 })
 
 /**게시물 내용 상세 조회 - 게시물 아이디가 파라미터로 */
-router.get('/:id', isLoggedIn, async(req, res, next) => { //게시물 아이디
+router.get('/:id', async(req, res, next) => { //게시물 아이디
 
    await Post.findOne({ 
         include: [{
@@ -269,9 +269,12 @@ router.get('/:id', isLoggedIn, async(req, res, next) => { //게시물 아이디
                 attributes: ['id'],
                 include: [{
                     model: Product,
+                    include: [{
+                        model: ImgByColor,
+                    }],
                     through: {
                         attributes: []
-                    }
+                    },
                 }]
             }
         },
@@ -292,6 +295,9 @@ router.get('/:id', isLoggedIn, async(req, res, next) => { //게시물 아이디
                     attributes: ['id'],
                     include: [{
                         model: Product,
+                        include: [{
+                            model: ImgByColor,
+                        }],
                         through: {
                             attributes: []
                         }

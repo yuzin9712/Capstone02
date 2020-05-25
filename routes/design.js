@@ -39,6 +39,9 @@ router.post('/hashtag', isLoggedIn, async (req, res, next) => {
                     attributes: ['id'],
                     include: [{
                         model: Product,
+                        include: [{
+                            model: ImgByColor,
+                        }],
                         through: {
                             attributes: []
                         }
@@ -88,6 +91,9 @@ router.get('/best', isLoggedIn, async(req, res, next) => {
                 attributes: ['id'],
                 include: [{
                     model: Product,
+                    include: [{
+                        model: ImgByColor,
+                    }],
                     through: {
                         attributes: []
                     }
@@ -141,6 +147,9 @@ router.get('/followpost', isLoggedIn, async(req, res, next) => {
                 attributes: ['id'],
                 include: [{
                     model: Product,
+                    include: [{
+                        model: ImgByColor,
+                    }],
                     through: {
                         attributes: []
                     }
@@ -192,6 +201,9 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
             attributes: ['id'],
             include: [{
                 model: Product,
+                include: [{
+                    model: ImgByColor,
+                }],
                 through: {
                     attributes: []
                 }
@@ -235,6 +247,9 @@ router.get('/user', isLoggedIn, async (req, res, next) => {
             attributes: ['id'],
             include: [{
                 model: Product,
+                include: [{
+                    model: ImgByColor,
+                }],
                 through: {
                     attributes: []
                 }

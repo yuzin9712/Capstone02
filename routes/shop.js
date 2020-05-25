@@ -28,7 +28,7 @@ const upload = multer({
 });
 
 
-/**댓글 이미지 S3에 업로드 */
+/**S3에 업로드 */
 router.post('/img', isLoggedIn, upload.array('photo', 8), async (req, res, next) => {
     console.log('/img로 들어왔음!!!!');
     console.log(req.file);
@@ -47,7 +47,6 @@ router.post('/addproduct', async (req, res, next) => {
     const productname = req.body.productname;
     const price = req.body.price;
     const categoryId = req.body.categoryId;
-    const createdAt = req.body.createdAt;
     const gender = req.body.gender;
     //const seller = req.body.seller;
     const shopAdminId = req.user.id;
@@ -200,7 +199,7 @@ router.post('/delivery/:id', isLoggedIn, async (req, res, next) => {
 router.get('/orders', isLoggedIn, async (req, res, next) => {
     try {
         const shopInfo = await ShopAdmin.findOne({
-            where: { userId: 1 }
+            where: { userId: req.user.id, alianced: 1 }
         });
 
         await OrderDetail.findAll({
