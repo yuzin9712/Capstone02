@@ -86,10 +86,10 @@ router.post('/addproduct', async (req, res, next) => {
     // console.log(req.files[1].location);
 
     var query1 = "insert into products(pname, price, categoryId, gender, img, description) VALUES(?)";
-    var query2 = "select id from products";
+    //var query2 = "select id from products";
     // var query3 = "insert into productInfo set ?";
     // var query4 = "insert into imgByColors set ?";
-    var query3 = "insert into productInfo (productId, color, size, cnt) VALUES (?)";
+    var query3 = "insert into productInfos (productId, color, size, cnt) VALUES (?)";
     var query4 = "insert into imgByColors (productId, img, color) VALUES (?)";
     var data; //products테이블에 들어갈 row
     var data2 = []; //productInfo테이블에 들어갈 배열
