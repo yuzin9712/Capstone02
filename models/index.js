@@ -33,10 +33,11 @@ db.Room = require('./room')(sequelize, Sequelize);
 db.ChatLine = require('./chatLine')(sequelize, Sequelize);
 db.ProductInfo = require('./productInfo')(sequelize, Sequelize);
 db.ShopAdmin = require('./shopAdmin')(sequelize, Sequelize);
+db.Comment = require('./comment')(sequelize, Sequelize);
 
 /** 1:1 관계 */
-db.User.hasOne(db.Profile, { foreignKey: 'user_id', sourceKey: 'id' });
-db.Profile.belongsTo(db.User, { foreignKey: 'user_id', targetKey: 'id' });
+db.User.hasOne(db.Profile, { foreignKey: 'userId', sourceKey: 'id' });
+db.Profile.belongsTo(db.User, { foreignKey: 'userId', targetKey: 'id' });
 
 /** N:M 관계 */
 db.Design.belongsToMany(db.Hashtag, { through: 'DesignHashtag' });
@@ -75,11 +76,17 @@ db.User.belongsToMany(db.User, {
 });
 
 /**1:N 관계 */
-// db.ShopAdmin.hasMany(db.Product);
-// db.Product.belongsTo(db.ShopAdmin);
+db.User.hasMany(db.Comment);
+db.Comment.belongsTo(db.User);
 
-db.User.hasMany(db.ShopAdmin);
-db.ShopAdmin.belongsTo(db.User);
+db.Review.hasMany(db.Comment);
+db.Comment.belongsTo(db.Review);
+
+db.User.hasMany(db.Review);
+db.Review.belongsTo(db.User);
+
+db.ShopAdmin.hasMany(db.Product);
+db.Product.belongsTo(db.ShopAdmin);
 
 db.Product.hasMany(db.ProductInfo);
 db.ProductInfo.belongsTo(db.Product);

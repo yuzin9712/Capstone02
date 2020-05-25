@@ -4,9 +4,21 @@ module.exports = (sequelize, DataTypes) => (
             type: DataTypes.STRING(200),
             allowNull: false,
         },
+        img: {
+            type: DataTypes.STRING(200),
+            allowNull: false,
+        },
+        color: {
+            type: DataTypes.STRING(200),
+            allowNull: false,
+        },
+        size: {
+            type: DataTypes.STRING(200),
+            allowNull: false,
+        },
         cnt: {
             type: DataTypes.INTEGER.UNSIGNED,
-            defaultValue: 1,
+            allowNull: false,
         },
     }, {
         timestamps: true,

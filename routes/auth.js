@@ -16,7 +16,7 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
         /**이미 가입된 이메일인 경우 리다이렉트 */
         if(exUser) {
             req.flash('joinError', '이미 가입된 이메일입니다.');
-            return res.redirect('/join');
+            return res.status(403).send('이미 가입된 이메일 입니다!');
         }
 
         const hash = await bcrypt.hash(password, 12);
@@ -26,10 +26,10 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
             name,
             password: hash,
         });
-        return res.redirect('/');
+        return res.send('success');
     } catch(err) {
         console.error(err);
-        return next(err);
+        return res.status(403).send('Error');
     }
 });
 
@@ -43,7 +43,7 @@ router.post('/shop', isNotLoggedIn, async (req, res, next) => {
         /**이미 가입된 이메일인 경우 리다이렉트 */
         if(exUser) {
             req.flash('joinError', '이미 가입된 이메일입니다.');
-            return res.redirect('/join');
+            return res.status(403).send('이미 가입된 이메일 입니다!');
         }
 
         const hash = await bcrypt.hash(password, 12);
@@ -61,10 +61,10 @@ router.post('/shop', isNotLoggedIn, async (req, res, next) => {
             userId: user.id
         });
 
-        res.send('success');
+        return res.send('success');
     } catch(err) {
         console.error(err);
-        res.status(403).send('Error');
+        return res.status(403).send('Error');
     }
 });
 
@@ -77,12 +77,12 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
         }
         if(!user) {
             req.flash('loginError', info.message);
-            console.log('유저가 없음');
+            return res.status(403).send('존재하지 않은 유저');
         }
         return req.login(user, async (loginErr) => {
             if(loginErr) {
                 console.error(loginErr);
-                console.log('로그인 에러?');
+                return res.status(403).send('로그인 에러');
             }
             const designlikes = await DesignLike.findAll({
                 attributes: ['designId'],
@@ -113,10 +113,10 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
             const follows = userInfo.Followings;
             const followingInfo = follows.map(r=>Number(r.id));
 
-            if(await ShopAdmin.findOne({
+            if(await ShopAdmin.findOne({ //제휴 승인된 애들만 관리자로 보내줄거임.
                 where: { userId: req.user.id, alianced: 1 }
             })) {
-                res.send({
+                return res.send({
                     loginStatus: true,
                     shopStatus: true,
                     name: req.user.name,
@@ -126,7 +126,7 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
                     followingInfo
                 });
             } else {
-                res.send({
+                return res.send({
                     loginStatus: true,
                     shopStatus: false,
                     name: req.user.name,
@@ -146,8 +146,12 @@ router.get('/logout', isLoggedIn, (req, res) => {
     req.session.destroy();
     res.send({
         loginStatus: false,
+        shopStatus: false,
         name: '',
-        id: ''
+        id: '',
+        designLike: '',
+        postLike: '',
+        followingInfo: ''
     });
 });
 

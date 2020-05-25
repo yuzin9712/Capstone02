@@ -1,16 +1,24 @@
 module.exports = (sequelize, DataTypes) => (
     sequelize.define('review', {
-        title: {
-            type: DataTypes.STRING(200),
-            allowNull: false,
-        },
         content: {
-            type: DataTypes.STRING(255),
+            type: DataTypes.TEXT,
             allowNull: false,
         },
         img: {
             type: DataTypes.STRING(200),
             allowNull: true,
+        },
+        img2: {
+            type: DataTypes.STRING(200),
+            allowNull: true,
+        },
+        img3: {
+            type: DataTypes.STRING(200),
+            allowNull: true,
+        },
+        user_email: {
+            type: DataTypes.STRING(100),
+            allowNull: false,
         },
     }, {
         timestamps: true,

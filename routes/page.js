@@ -224,7 +224,7 @@ router.get('/closet', isLoggedIn, async (req, res, next) => {
     await Closet.findAll({
         include: {
             model: Product, //사용된 제품 정보도 같이 나온다.
-            attributes: ['id', 'seller', 'pname', 'img', 'price', 'description'],
+            attributes: ['id', 'pname', 'img', 'price', 'description'],
             through: {
                  attributes: []//relation table의 attribute는 안뽑히게함!
             }

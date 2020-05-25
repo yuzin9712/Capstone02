@@ -31,13 +31,13 @@ function getCartByUserId(uid) {
 
 function getProInfoByPidQuery(productid) {
     return new Promise((resolve, reject) => {
-        var query = "select * from productInfo where productId=?";
+        var query = "select * from productInfos where productId=?";
 
         db.sequelize.query(query, {
             replacements: [productid]
         })
-        .spread(function (selected_productInfoes) {
-            resolve(selected_productInfoes);
+        .spread(function (selected_productInfos) {
+            resolve(selected_productInfos);
         }, function (err) {
             console.error(err);
             next(err);
@@ -52,11 +52,11 @@ function getProInfoByPid(productids) {
         let result2 = [];
 
         for(let j = 0; j < productids.length; j++) {
-            let selected_productInfoes = await getProInfoByPidQuery(productids[j]);
+            let selected_productInfos = await getProInfoByPidQuery(productids[j]);
 
-            if(selected_productInfoes.length > 0) {
-                for(let k = 0; k < selected_productInfoes.length; k++) {
-                    result2.push(selected_productInfoes[k]);
+            if(selected_productInfos.length > 0) {
+                for(let k = 0; k < selected_productInfos.length; k++) {
+                    result2.push(selected_productInfos[k]);
                 }
             }
         }
@@ -92,7 +92,7 @@ router.get('/', isLoggedIn, async (req, res, next) => {
 /**툴바에서 장바구니 담기*/
 router.post('/toolbar', isLoggedIn, async (req, res, next) => {
     var query1 = "select * from imgByColors where img = ?";
-    var query2 = "select * from products where id =?";
+    var query2 = "select * from products, shopAdmins where products.shopAdminId = shopAdmins.id";
     var query3 = "insert into carts(userId, productId, pname, cnt, img, color) values (?)";
     var imgurl = req.body.img;
     var selectedProduct;
@@ -152,7 +152,7 @@ router.put('/:id', isLoggedIn, async (req, res, next) => {
 
 /**장바구니 담기 - 상품 아이디 값이 파라미터로 넘어옴 - 사이즈 색깔도 넘어오도록 수정예정! */
 router.post('/:id', isLoggedIn, async (req, res, next) => {
-    var query1 = "select * from products where id = ?";
+    var query1 = "select * from products, shopAdmins where products.shopAdminId = shopAdmins.id";
     var query2 = "insert into carts(userId, productId, pname, cnt, img, size, color) values (?)";
     var selectedProduct;
 

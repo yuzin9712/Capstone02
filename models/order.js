@@ -7,7 +7,6 @@ module.exports = (sequelize, DataTypes) => (
         email: {
             type: DataTypes.STRING(40),
             allowNull: false,
-            unique: true,
         },
         phone: { //핸드폰번호 - 필수입력란
             type: DataTypes.STRING(30),

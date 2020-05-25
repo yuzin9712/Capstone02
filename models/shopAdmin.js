@@ -12,7 +12,12 @@ module.exports = (sequelize, DataTypes) => (
             type: DataTypes.INTEGER.UNSIGNED,
             allowNull: false,
             defaultValue: 0,
-        }
+        },
+        userId: {
+            type: DataTypes.INTEGER.UNSIGNED,
+            allowNull: false,
+            defaultValue: 0,
+        },
     }, {
         timestamps: true,
         paranoid: true,

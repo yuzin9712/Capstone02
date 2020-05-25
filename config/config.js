@@ -4,7 +4,7 @@ module.exports = {
     development: {
         username: 'user',
         password: process.env.SEQUELIZE_PASSWORD,
-        database: 'capstone',
+        database: 'newcap',
         host: 'capstone-project.cojwntxe9hru.ap-northeast-2.rds.amazonaws.com',
         dialect: 'mysql',
         operatorAliases: 'false',
