@@ -5,7 +5,6 @@ const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
 
 const router = express.Router();
 
-// 테스트
 function getCartByUserId(uid) {
     return new Promise((resolve, reject) => {
         let pidArr = new Array();
@@ -46,11 +45,29 @@ function getProInfoByPidQuery(productid) {
     });
 }
 
+function getProductByPidQuery(productid){
+    return new Promise((resolve, reject) => {
+        var query = "select * from products where id = ?";
+
+        db.sequelize.query(query, {
+            replacements:[productid]
+        })
+        .spread(function(pro){
+            resolve(pro);
+        }, function(err){
+            console.error(err);
+            next(err);
+        })
+    });
+}
+
+
 function getProInfoByPid(productids) {
     return new Promise(async (resolve, reject) => {
 
         console.log('이거는뭐야..', productids);
         let result2 = [];
+        let result3 = [];
 
         for(let j = 0; j < productids.length; j++) {
             let selected_productInfos = await getProInfoByPidQuery(productids[j]);
@@ -60,8 +77,11 @@ function getProInfoByPid(productids) {
                     result2.push(selected_productInfos[k]);
                 }
             }
+
+            let product = await getProInfoByPidQuery(productids[j]);
+            result3.push(product);
         }
-        resolve({ result2: result2 });
+        resolve({ result2: result2, result3: result3 });
     });
 }
 
@@ -77,11 +97,11 @@ router.get('/', isLoggedIn, async (req, res, next) => {
         console.log('result1.cartsByUid : '); 
         console.dir(result1.cartsByUid);
 
-        let result2 = await getProInfoByPid(result1.uniquePidArr);
-        console.log('results2 : '); 
-        console.dir(result2);
+        let result2n3 = await getProInfoByPid(result1.uniquePidArr);
+        console.log('results2n3 : '); 
+        console.dir(result2n3);
         
-        res.json({ cartsByUid : result1.cartsByUid, result2 : result2 });
+        res.json({ cartsByUid : result1.cartsByUid, result2n3 : result2n3 });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'error발생' });
