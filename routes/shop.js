@@ -49,7 +49,8 @@ router.post('/addproduct', async (req, res, next) => {
     const categoryId = req.body.categoryId;
     const createdAt = req.body.createdAt;
     const gender = req.body.gender;
-    const seller = req.body.seller;
+    //const seller = req.body.seller;
+    const shopAdminId = req.user.id;
 
     const color = req.body.color;
     const S = req.body.S;
@@ -85,7 +86,7 @@ router.post('/addproduct', async (req, res, next) => {
     // console.log('상품설명이미지 : ');
     // console.log(req.files[1].location);
 
-    var query1 = "insert into products(pname, price, categoryId, gender, img, description) VALUES(?)";
+    var query1 = "insert into products(pname, price, categoryId, gender, img, description, shopAdminId, createdAt) VALUES(?)";
     //var query2 = "select id from products";
     // var query3 = "insert into productInfo set ?";
     // var query4 = "insert into imgByColors set ?";
@@ -96,7 +97,7 @@ router.post('/addproduct', async (req, res, next) => {
     var data3 = []; //imgByColors테이블에 들어갈 배열 
     var pid;
 
-    data = [productname, price, categoryId, gender, req.body.photo[0], req.body.photo[1]];
+    data = [productname, price, categoryId, gender, req.body.photo[0], req.body.photo[1], shopAdminId, new Date()];
 
     try{
         
