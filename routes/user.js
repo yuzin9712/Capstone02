@@ -5,8 +5,7 @@ const { User } = require('../models');
 
 const router = express.Router();
 
-/**팔로우 맺기
- * 팔로우 맺고자 하는 대상의 아이디값을 파라미터로 얻기
+/**팔로우 맺기 테스트용 팔로우 맺고자 하는 대상의 아이디값을 파라미터로 얻기
  */
 router.post('/:id/follow', isLoggedIn, async(req, res, next) => {
     try {
