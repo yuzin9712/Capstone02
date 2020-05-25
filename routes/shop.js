@@ -28,7 +28,7 @@ const upload = multer({
 });
 
 
-/**댓글 이미지 S3에 업로드 */
+/**S3에 업로드 */
 router.post('/img', isLoggedIn, upload.array('photo', 8), async (req, res, next) => {
     console.log('/img로 들어왔음!!!!');
     console.log(req.file);
@@ -47,9 +47,9 @@ router.post('/addproduct', async (req, res, next) => {
     const productname = req.body.productname;
     const price = req.body.price;
     const categoryId = req.body.categoryId;
-    const createdAt = req.body.createdAt;
     const gender = req.body.gender;
-    const seller = req.body.seller;
+    //const seller = req.body.seller;
+    const shopAdminId = req.user.id;
 
     const color = req.body.color;
     const S = req.body.S;
@@ -85,7 +85,7 @@ router.post('/addproduct', async (req, res, next) => {
     // console.log('상품설명이미지 : ');
     // console.log(req.files[1].location);
 
-    var query1 = "insert into products(pname, price, categoryId, gender, img, description) VALUES(?)";
+    var query1 = "insert into products(pname, price, categoryId, gender, img, description, shopAdminId, createdAt) VALUES(?)";
     //var query2 = "select id from products";
     // var query3 = "insert into productInfo set ?";
     // var query4 = "insert into imgByColors set ?";
@@ -96,7 +96,7 @@ router.post('/addproduct', async (req, res, next) => {
     var data3 = []; //imgByColors테이블에 들어갈 배열 
     var pid;
 
-    data = [productname, price, categoryId, gender, req.body.photo[0], req.body.photo[1]];
+    data = [productname, price, categoryId, gender, req.body.photo[0], req.body.photo[1], shopAdminId, new Date()];
 
     try{
         
@@ -199,7 +199,7 @@ router.post('/delivery/:id', isLoggedIn, async (req, res, next) => {
 router.get('/orders', isLoggedIn, async (req, res, next) => {
     try {
         const shopInfo = await ShopAdmin.findOne({
-            where: { userId: 1 }
+            where: { userId: req.user.id, alianced: 1 }
         });
 
         await OrderDetail.findAll({

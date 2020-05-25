@@ -69,7 +69,7 @@ router.post('/', isLoggedIn, upload.single('image'), async (req, res, next) => {
 /**나의 옷장에 저장된 게시물들의 사진을 조회 - 나의옷장에서 선택하기 실행시 */
 router.get('/all', async (req, res, next) => {
     await Closet.findAll({
-        where: { userId: 12 },
+        where: { userId: req.user.id },
         attributes: ['id', 'img'],
         order: [['createdAt', 'DESC']],
     })
