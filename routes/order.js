@@ -1,7 +1,7 @@
 const express = require('express');
 
 const { isLoggedIn } = require('./middlewares');
-const { Order, OrderDetail, Delivery, Product, ProductInfo } = require('../models');
+const { Order, OrderDetail, Delivery, Product, ProductInfo, ShopAdmin } = require('../models');
 const { Op } = require('sequelize');
 const { db } = require('../models');
 
@@ -79,7 +79,7 @@ router.post('/', isLoggedIn, async (req, res, next) => {
 
 });
 
-/**사용자별 주문정보 전체 조회 zz*/
+/**사용자별 주문정보 전체 조회 */
 router.get('/', isLoggedIn, async (req, res, next) => {
     try {
         await Order.findAll({
@@ -87,7 +87,10 @@ router.get('/', isLoggedIn, async (req, res, next) => {
                 model: OrderDetail,
                 include: [{
                     model: Product,
-                    attributes: ['img', 'pname', 'price', 'seller']
+                    attributes: ['img', 'pname', 'price', 'shopAdminId'],
+                    include: {
+                        model: ShopAdmin,
+                    }
                 }]
             }],
             where: { userId: req.user.id },

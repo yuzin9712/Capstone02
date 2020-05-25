@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => (
     sequelize.define('chatLine', {
         lines: {
-            type: DataTypes.STRING(200),
+            type: DataTypes.TEXT,
             allowNull: true,
         },
     }, {

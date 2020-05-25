@@ -14,12 +14,7 @@ module.exports = (passport) => {
     passport.deserializeUser((id, done) => {
         /**팔로우 팔로잉 사람들 배열 함께 저장 */
             User.findOne({ where: { id },
-                include: [
-                {
-                    model: ShopAdmin,
-                    attributes: ['id', 'shopname', 'shopurl'],
-                    // where: { alianced: 1 }
-                },{
+                include: [{
                     model: User,
                     attributes: ['id','name'],
                     as: 'Followers',

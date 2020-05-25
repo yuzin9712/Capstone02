@@ -1,8 +1,12 @@
 module.exports = (sequelize, DataTypes) => (
-    sequelize.define('postComment', {
+    sequelize.define('comment', {
         content: {
             type: DataTypes.TEXT,
             allowNull: true,
+        },
+        writer: {
+            type: DataTypes.STRING(100),
+            allowNull: false
         }
     }, {
         timestamps: true,

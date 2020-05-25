@@ -44,8 +44,8 @@ router.post('/comment/:id', isLoggedIn, async (req, res, next) => {
     var reviewId = parseInt(req.params.id, 10);
     var writer = req.user.name;
     var content = req.body.content;
-    var query = "insert into comments(content, writer, reviewId) values (?)"; //timestamp가 없네...
-    var data = [content, writer, reviewId];
+    var query = "insert into comments(content, writer, reviewId, userId, createdAt) values (?)"; //timestamp가 없네...
+    var data = [content, writer, reviewId, req.user.id, new Date()];
 
     await db.sequelize.query(query, {
         replacements: [data]
