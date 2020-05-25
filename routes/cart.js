@@ -111,8 +111,8 @@ router.get('/', isLoggedIn, async (req, res, next) => {
 /**툴바에서 장바구니 담기*/
 router.post('/toolbar', isLoggedIn, async (req, res, next) => {
     var query1 = "select * from imgByColors where img = ?";
-    var query2 = "select * from products, shopAdmins where products.shopAdminId = shopAdmins.id";
-    var query3 = "insert into carts(userId, productId, pname, cnt, img, color) values (?)";
+    var query2 = "select * from shopAdmins, products where products.shopAdminId = shopAdmins.id and products.id = ?";
+    var query3 = "insert into carts(userId, productId, pname, cnt, img, color, createdAt) values (?)";
     var imgurl = req.body.img;
     var selectedProduct;
     var selectedProductInfo;
@@ -136,7 +136,7 @@ router.post('/toolbar', isLoggedIn, async (req, res, next) => {
             next(err);
         });
     
-        var data = [ req.user.id, selectedProductInfo.id, selectedProductInfo.pname, 1, selectedProductInfo.img, selectedProduct.color ];
+        var data = [ req.user.id, selectedProductInfo.id, selectedProductInfo.pname, 1, selectedProductInfo.img, selectedProduct.color, new Date() ];
     
         await db.sequelize.query(query3, {
         replacements: [data]
@@ -171,8 +171,8 @@ router.put('/:id', isLoggedIn, async (req, res, next) => {
 
 /**장바구니 담기 - 상품 아이디 값이 파라미터로 넘어옴 - 사이즈 색깔도 넘어오도록 수정예정! */
 router.post('/:id', isLoggedIn, async (req, res, next) => {
-    var query1 = "select * from products, shopAdmins where products.shopAdminId = shopAdmins.id";
-    var query2 = "insert into carts(userId, productId, pname, cnt, img, size, color) values (?)";
+    var query1 = "select * from shopAdmins, products where products.shopAdminId = shopAdmins.id and products.id = ?";
+    var query2 = "insert into carts(userId, productId, pname, cnt, img, size, color, createdAt) values (?)";
     var selectedProduct;
 
     try {
@@ -187,7 +187,7 @@ router.post('/:id', isLoggedIn, async (req, res, next) => {
         });
 
         console.log(selectedProduct);
-        var data = [ req.user.id, selectedProduct.id, selectedProduct.pname, req.body.cnt, selectedProduct.img, req.body.size, req.body.color ];
+        var data = [ req.user.id, selectedProduct.id, selectedProduct.pname, req.body.cnt, selectedProduct.img, req.body.size, req.body.color, new Date() ];
 
         await db.sequelize.query(query2, {
             replacements: [ data ]
