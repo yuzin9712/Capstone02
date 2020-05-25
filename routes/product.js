@@ -8,7 +8,7 @@ const router = express.Router();
 /**상품 목록 조회 */
 router.get('/', isLoggedIn, async (req, res, next) => {
 
-    var query = "select * from products, shopAdmins where products.shopAdminId = shopAdmins.id";
+    var query = "select * from shopAdmins, products where products.shopAdminId = shopAdmins.id";
 
     var query2 = "select * from imgByColors";
 
@@ -29,7 +29,7 @@ router.get('/category/:id', isLoggedIn, async (req, res, next) => {
     var pid = [];
     var imgArr = [];
     var productRows;
-    var query = "select * from products, shopAdmins where products.shopAdminId = shopAdmins.id and products.categoryId= ?";
+    var query = "select * from shopAdmins, products where products.shopAdminId = shopAdmins.id and products.categoryId= ?";
     var query2 = "select * from `imgByColors` where `productId` IN(:productId)";
 
     await db.sequelize.query(query, {
@@ -68,7 +68,7 @@ router.get('/category/:id', isLoggedIn, async (req, res, next) => {
 
 /**검색 */
 router.post('/search', isLoggedIn, async (req, res, next) => {
-    var query = "select * from products, shopAdmins where products.shopAdminId = shopAdmins.id and products.pname like ?";
+    var query = "select * from shopAdmins, products where products.shopAdminId = shopAdmins.id and products.pname like ?";
     var keyword = req.body.keyword;
 
     await db.sequelize.query(query, {
@@ -85,7 +85,7 @@ router.post('/search', isLoggedIn, async (req, res, next) => {
 /**상품 상세 정보 조회*/
 router.get('/:id', isLoggedIn, async (req, res, next) => {
     var productId = parseInt(req.params.id, 10);
-    var query1 = "select * from products, shopAdmins where products.id = ? and products.shopAdminId = shopAdmins.id";
+    var query1 = "select * from shopAdmins, products where products.id = ? and products.shopAdminId = shopAdmins.id";
     var query2 = "select * from productInfos where productId =?";
     var query3 = "select * from imgByColors where productId =?";
     var query4 = "select * from reviews where productId =?";
