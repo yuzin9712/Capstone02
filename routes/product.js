@@ -68,7 +68,7 @@ router.get('/category/:id', isLoggedIn, async (req, res, next) => {
 
 /**검색 */
 router.post('/search', isLoggedIn, async (req, res, next) => {
-    var query = "select * from products, shopAdmins where products.shopAdminId = shopAdmins.id and pname like ?";
+    var query = "select * from products, shopAdmins where products.shopAdminId = shopAdmins.id and products.pname like ?";
     var keyword = req.body.keyword;
 
     await db.sequelize.query(query, {
