@@ -52,8 +52,6 @@ router.post('/addproduct', async (req, res, next) => {
     const price = req.body.price;
     const categoryId = req.body.categoryId;
     const gender = req.body.gender;
-    //const seller = req.body.seller;
-    const shopAdminId = req.user.id;
 
     const color = req.body.color;
     const S = req.body.S;
