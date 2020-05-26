@@ -21,7 +21,7 @@ router.get('/', async (req, res, next) => {
                 },
                 order: [['createdAt', 'DESC']],
             },
-            // order: [[{model: ChatLine, as: 'Chat'}, 'createdAt', 'DESC']],
+            // order: [[ChatLine, 'createdAt', 'DESC']], -->확인해보기
             where: { 
                 [Op.or]: [
                     { user1Id: 12 },

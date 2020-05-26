@@ -44,6 +44,10 @@ router.post('/img', isLoggedIn, upload.array('photo', 8), async (req, res, next)
 //상품업로드2
 router.post('/addproduct', async (req, res, next) => {
 
+    const shopInfo = await ShopAdmin.findOne({
+        where: { userId: req.user.id, alianced: 1 }
+    });
+
     const productname = req.body.productname;
     const price = req.body.price;
     const categoryId = req.body.categoryId;
@@ -77,18 +81,7 @@ router.post('/addproduct', async (req, res, next) => {
     console.log('XL : ');
     console.log(XL);
 
-    // console.log("files : ");
-    // console.log(req.files);
-    // console.log("file 갯수 : "+req.files.length);
-    // console.log('대표이미지 : ');
-    // console.log(req.files[0].location);
-    // console.log('상품설명이미지 : ');
-    // console.log(req.files[1].location);
-
     var query1 = "insert into products(pname, price, categoryId, gender, img, description, shopAdminId, createdAt) VALUES(?)";
-    //var query2 = "select id from products";
-    // var query3 = "insert into productInfo set ?";
-    // var query4 = "insert into imgByColors set ?";
     var query3 = "insert into productInfos (productId, color, size, cnt) VALUES (?)";
     var query4 = "insert into imgByColors (productId, img, color) VALUES (?)";
     var data; //products테이블에 들어갈 row
@@ -96,7 +89,7 @@ router.post('/addproduct', async (req, res, next) => {
     var data3 = []; //imgByColors테이블에 들어갈 배열 
     var pid;
 
-    data = [productname, price, categoryId, gender, req.body.photo[0], req.body.photo[1], shopAdminId, new Date()];
+    data = [productname, price, categoryId, gender, req.body.photo[0], req.body.photo[1], shopInfo.id, new Date()];
 
     try{
         
@@ -228,6 +221,24 @@ router.get('/orders', isLoggedIn, async (req, res, next) => {
         res.status(403).send('Error');
     }
 })
+
+/**각 쇼핑몰이 올린 제품 조회 - 아직 진행중!*/
+router.get('/products', async (req, res, next) => {
+    try {
+        const shopInfo = await ShopAdmin.findOne({ where: { userId: 1, alianced: 1 }});
+
+        await Product.findAll({
+            where: { shopAdminId: shopInfo.id }
+        })
+        .then((products) => {
+            res.send(products);
+        })
+
+    } catch (err) {
+        console.error(err);
+        res.status(403).send('Error');
+    }
+});
 
 
 module.exports = router;
