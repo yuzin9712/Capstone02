@@ -84,13 +84,13 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
 /**리뷰 작성하기 - 상품 아이디값이 파라미터로 옴 */
 router.post('/:id', isLoggedIn, async (req, res, next) => {
     console.log('------------들어옴-------------');
-    var reviewId = parseInt(req.params.id, 10);
+    
     var content = req.body.content;
     var imgs = req.body.imgs;
 
     var query = "insert into reviews(content, user_email, img, img2, img3, userId, productId, createdAt) values (?)";
     
-    var data = [ content, req.user.email, req.body.imgs[0], req.body.imgs[1], req.body.imgs[2], req.user.id, parseInt(req.params.id, 10), new Date() ];
+    var data = [ content, req.user.name, req.body.imgs[0], req.body.imgs[1], req.body.imgs[2], req.user.id, parseInt(req.params.id, 10), new Date() ];
 
     try {
         await db.sequelize.query(query, {
