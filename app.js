@@ -28,6 +28,7 @@ const orderRouter = require('./routes/order');
 const reviewRouter = require('./routes/review');
 const shopRouter = require('./routes/shop');
 const adminRouter = require('./routes/admin');
+const analyticsRouter = require('./routes/analytics')
 
 const {sequelize} = require('./models');
 const passportConfig = require('./passport');
@@ -76,6 +77,7 @@ app.use('/order', orderRouter);
 app.use('/review', reviewRouter);
 app.use('/shop', shopRouter);
 app.use('/admin', adminRouter);
+app.use('/', analyticsRouter);
 
 app.use((req, res, next) => {
     const err = new Error('Not Found');
