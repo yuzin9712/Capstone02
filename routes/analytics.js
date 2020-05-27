@@ -6,7 +6,7 @@ const { Op } = require('sequelize');
 
 const router = express.Router();
 
-/**통계 1번 */
+/**통계 1번  -> 상품 판매 수*/
 router.get('/category', async (req, res, next) => {
     try {
         const shopInfo = await ShopAdmin.findOne({
@@ -27,11 +27,11 @@ router.get('/category', async (req, res, next) => {
         })
     } catch (err) {
         console.error(err);
-        res.status(403).send('Error');
+        res.status(500).send('Server Error');
     }
 });
 
-/**통계 2번 */
+/**통계 2번  -> 상품 판매 수*/
 router.get('/category/detail', async (req, res, next) => {
     try {
         const shopInfo = await ShopAdmin.findOne({
@@ -62,7 +62,7 @@ router.get('/category/detail', async (req, res, next) => {
 
     } catch (err) {
         console.error(err);
-        res.status(403).send('Error');
+        res.status(500).send('Server Error');
     }
 });
 
@@ -98,8 +98,8 @@ router.get('/category/detail', async (req, res, next) => {
 //     }
 // });
 
-/**통계 4번째 */
-router.get('/', async (req, res, next) => {
+/**통계 4번째  -> 상품 판매 수*/
+router.get('/month', async (req, res, next) => {
     try {
         const shopInfo = await ShopAdmin.findOne({
             where: { userId: 1, alianced: 1 }
@@ -123,8 +123,68 @@ router.get('/', async (req, res, next) => {
 
     } catch (err) {
         console.error(err);
-        res.status(403).send('Error');
+        res.status(500).send('Server Error');
     }
 });
+
+/**플랫폼 관리자 통계 1 -> 상품 판매 수*/
+router.get('/shop', async (req, res, next) => {
+    try {
+        await OrderDetail.findAll({
+            attributes: [[db.sequelize.fn('sum', db.sequelize.col('orderDetail.cnt')), 'sales']],
+            include: [{
+                model: Product,
+                attributes: ['shopAdminId'],
+                include: [{
+                    model: ShopAdmin,
+                    attributes: ['shopname']
+                }]
+            }],
+            group: ['product.shopAdminId']
+        })
+        .then((data) => {
+            res.send(data);
+        })
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+/**플랫폼 관리자 통계 2 -> Order detail에 결제 수? Order에 결제 수? .. */
+router.get('/growth/sales', async (req, res, next) => {
+    try {
+        await Order.findAll({
+            attributes: [
+                [db.sequelize.fn('concat', db.sequelize.fn('year',db.sequelize.col('order.createdAt')),'-', db.sequelize.fn('month',db.sequelize.col('order.createdAt'))), 'ym'],
+                [db.sequelize.fn('count', db.sequelize.col('order.id')), 'sales']],
+            group: ['ym']
+        })
+        .then((data) => {
+            res.send(data);
+        })
+    } catch (err){
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+/**플랫폼 관리자 통계 3 -> 가입 수 구하는거 맞음?  */
+router.get('/growth/users', async (req, res, next) => {
+    try {
+        await User.findAll({
+            attributes: [
+                [db.sequelize.fn('concat', db.sequelize.fn('year',db.sequelize.col('user.createdAt')),'-', db.sequelize.fn('month',db.sequelize.col('user.createdAt'))), 'ym'],
+                [db.sequelize.fn('count', db.sequelize.col('user.id')), 'users']],
+            group: ['ym']
+        })
+        .then((data) => {
+            res.send(data);
+        })
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+})
 
 module.exports = router;
