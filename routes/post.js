@@ -97,7 +97,8 @@ router.post('/', isLoggedIn, async (req, res, next) => {
         await post.addPimgs(nonlocals.map(r=>Number(r.id)));
         }
 
-        res.send(post.id);
+        console.log('?????', post.id);
+        res.send({postId: post.id});
 
     } catch (err) {
         console.error(err);

@@ -186,6 +186,7 @@ router.post('/delivery/:id', isLoggedIn, async (req, res, next) => {
 });
 
 /**주문 내역  */
+//미결제 -> 결제완료 -> ..
 //status 상관 안하고 일단 다뽑았음 .. 무슨데이터가 필요한지 모르겠음
 router.get('/orders', isLoggedIn, async (req, res, next) => {
     try {
@@ -218,15 +219,21 @@ router.get('/orders', isLoggedIn, async (req, res, next) => {
         console.error(err);
         res.status(403).send('Error');
     }
+});
+
+/** 상태별 주문 조회 */
+router.get('/orders/status', async (req, res, next) => {
+
 })
 
-/**각 쇼핑몰이 올린 제품 조회 - 아직 진행중!*/
+/**각 쇼핑몰이 올린 제품 조회/ 카테고리별 x */
 router.get('/products', async (req, res, next) => {
     try {
         const shopInfo = await ShopAdmin.findOne({ where: { userId: 1, alianced: 1 }});
 
         await Product.findAll({
-            where: { shopAdminId: shopInfo.id }
+            where: { shopAdminId: shopInfo.id },
+            order: [['createdAt', 'DESC']]
         })
         .then((products) => {
             res.send(products);
