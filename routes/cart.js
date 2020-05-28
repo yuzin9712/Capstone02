@@ -78,7 +78,7 @@ function getProInfoByPid(productids) {
                 }
             }
 
-            let product = await getProInfoByPidQuery(productids[j]);
+            let product = await getProductByPidQuery(productids[j]);
             result3.push(product);
         }
         resolve({ result2: result2, result3: result3 });
