@@ -42,7 +42,7 @@ router.post('/img', isLoggedIn, upload.array('photo', 8), async (req, res, next)
 });
 
 //상품업로드2
-router.post('/addproduct', async (req, res, next) => {
+router.post('/addproduct', isLoggedIn, async (req, res, next) => {
 
     const shopInfo = await ShopAdmin.findOne({
         where: { userId: req.user.id, alianced: 1 }
