@@ -175,7 +175,93 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
     }
 
     if (req.body.categoryId == 4) {//신발일 경우 
-        
+        var size = req.body.size;
+        var cnt = req.body.cnt;
+        var newCnt = []; //cnt에서 ''를 제거한 배열
+
+        var sizeCnt = 0;
+        console.log('size : ');
+        console.log(size);
+        console.log(size.length);
+        for (var i = 0; i < size.length; i++) {
+            if (size[i] != '') {
+                sizeCnt++;
+            }
+        }
+        console.log(sizeCnt);
+
+        for (var i = 0; i < cnt.length; i++) {
+            if (cnt[i] != '') {
+                newCnt.push(cnt[i]);
+            }
+        }
+        console.log(newCnt);
+
+        data = [productname, price, categoryId, gender, req.body.photo[0], req.body.photo[1], shopInfo.id, new Date()];
+
+        try {
+            await db.sequelize.query(query1, { replacements: [data] })
+                .spread(function (inserted) {
+                    if (inserted) {
+                        console.log('inserted : ');
+                        console.dir(inserted);
+                        pid = inserted;
+                    }
+                }, function (err) {
+                    console.error(err);
+                    next(err);
+                });
+
+            var k = 0;
+            for (var i = 0; i < colorCnt; i++) {
+                for (var j = 0; j < sizeCnt; j++) {
+                    data2[k] = { productId: pid, color: color[i], size: size[j], cnt: newCnt[k] };
+                    k++;
+                }
+            }
+            console.log('data2 : ');
+            console.log(data2);
+
+            for (var i = 0; i < data2.length; i++) {
+                await db.sequelize.query(query3, { replacements: [data2[i]] })
+                    .spread(function (inserted) {
+                        if (inserted) {
+                            console.log('productInfo_inserted : ');
+                            console.dir(inserted);
+                        }
+                    }, function (err) {
+                        console.error(err);
+                        next(err);
+                    });
+            }
+
+            var d = 0;
+            for (var i = 0; i < colorCnt; i++) {
+                data3[d] = [pid, req.body.photo[i + 2], color[i]];
+                d++;
+            }
+            console.log('data3 : ');
+            console.log(data3);
+
+            for (var i = 0; i < data3.length; i++) {
+                await db.sequelize.query(query4, { replacements: [data3[i]] })
+                    .spread(function (inserted) {
+                        if (inserted) {
+                            console.log('imgByColors_inserted : ');
+                            console.dir(inserted);
+                            //res.send('<h2>ADD PRODUCT SUCCESS</h2>');
+                        }
+                    }, function (err) {
+                        console.error(err);
+                        next(err);
+                    });
+            }
+
+            res.send('add product success');
+
+        } catch (err) {
+            console.error(err);
+        }
     }
 });
 
