@@ -52,32 +52,18 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
     const price = req.body.price;
     const categoryId = req.body.categoryId;
     const gender = req.body.gender;
-
     const color = req.body.color;
-    const S = req.body.S;
-    const M = req.body.M;
-    const L = req.body.L;
-    const XL = req.body.XL;
     var colorCnt = 0;
 
     console.log('color : ');
     console.log(color);
     console.log('실제 컬러 수 :');
-    for(var i=0;i<color.length;i++){
-        if(color[i]!=''){
+    for (var i = 0; i < color.length; i++) {
+        if (color[i] != '') {
             colorCnt++;
         }
     }
     console.log(colorCnt);
-
-    console.log('S : ');
-    console.log(S);
-    console.log('M : ');
-    console.log(M);
-    console.log('L : ');
-    console.log(L);
-    console.log('XL : ');
-    console.log(XL);
 
     var query1 = "insert into products(pname, price, categoryId, gender, img, description, shopAdminId, createdAt) VALUES(?)";
     var query3 = "insert into productInfos (productId, color, size, cnt) VALUES (?)";
@@ -87,83 +73,109 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
     var data3 = []; //imgByColors테이블에 들어갈 배열 
     var pid;
 
-    data = [productname, price, categoryId, gender, req.body.photo[0], req.body.photo[1], shopInfo.id, new Date()];
+    if ((req.body.categoryId == 1) || (req.body.categoryId == 2)) {
 
-    try{
-        
-        await db.sequelize.query(query1, {replacements: [data]})
-        .spread(function(inserted){
-            if(inserted){
-                console.log('inserted : ');
-                console.dir(inserted);
-                pid = inserted;
-            }   
-        }, function(err){
+        const S = req.body.S;
+        const M = req.body.M;
+        const L = req.body.L;
+        const XL = req.body.XL;
+
+        console.log('S : ');
+        console.log(S);
+        console.log('M : ');
+        console.log(M);
+        console.log('L : ');
+        console.log(L);
+        console.log('XL : ');
+        console.log(XL);
+
+        data = [productname, price, categoryId, gender, req.body.photo[0], req.body.photo[1], shopInfo.id, new Date()];
+
+        try {
+
+            await db.sequelize.query(query1, { replacements: [data] })
+                .spread(function (inserted) {
+                    if (inserted) {
+                        console.log('inserted : ');
+                        console.dir(inserted);
+                        pid = inserted;
+                    }
+                }, function (err) {
+                    console.error(err);
+                    next(err);
+                });
+
+
+            var k = 0;
+            for (var i = 0; i < colorCnt; i++) {
+                for (var j = 0; j < 4; j++) {
+                    if (j == 0) {
+                        data2[k] = [pid, color[i], 'S', S[i]];
+                    }
+                    if (j == 1) {
+                        data2[k] = [pid, color[i], 'M', M[i]];
+                    }
+                    if (j == 2) {
+                        data2[k] = [pid, color[i], 'L', L[i]];
+                    }
+                    if (j == 3) {
+                        data2[k] = [pid, color[i], 'XL', XL[i]];
+                    }
+                    k++;
+                }
+            }
+            console.log('data2 : ');
+            console.log(data2);
+
+            for (var i = 0; i < data2.length; i++) {
+                await db.sequelize.query(query3, { replacements: [data2[i]] })
+                    .spread(function (inserted) {
+                        if (inserted) {
+                            console.log('productInfo_inserted : ');
+                            console.dir(inserted);
+                        }
+                    }, function (err) {
+                        console.error(err);
+                        next(err);
+                    });
+            }
+
+            var d = 0;
+            for (var i = 0; i < colorCnt; i++) {
+                data3[d] = [pid, req.body.photo[i + 2], color[i]];
+                d++;
+            }
+            console.log('data3 : ');
+            console.log(data3);
+
+            for (var i = 0; i < d; i++) {
+                await db.sequelize.query(query4, { replacements: [data3[i]] })
+                    .spread(function (inserted) {
+                        if (inserted) {
+                            console.log('imgByColors_inserted : ');
+                            console.dir(inserted);
+                            //res.send('<h2>ADD PRODUCT SUCCESS</h2>');
+                        }
+                    }, function (err) {
+                        console.error(err);
+                        next(err);
+                    });
+            }
+
+            res.send('add product success');
+
+        } catch (err) {
             console.error(err);
             next(err);
-        });
-
-        var k = 0;
-        for (var i = 0; i < colorCnt; i++) {
-            for (var j = 0; j < 4; j++) {
-                if (j == 0) {
-                    data2[k] = [pid, color[i], 'S', S[i]];
-                }
-                if (j == 1) {
-                    data2[k] = [pid, color[i], 'M', M[i]];
-                }
-                if (j == 2) {
-                    data2[k] = [pid, color[i], 'L', L[i]];
-                }
-                if (j == 3) {
-                    data2[k] = [pid, color[i], 'XL', XL[i]];
-                }
-                k++;
-            }
         }
-        console.log('data2 : ');
-        console.log(data2);
+    }
 
-        for(var i=0; i<data2.length; i++){
-            await db.sequelize.query(query3, {replacements:[data2[i]]})
-            .spread(function(inserted){
-                if(inserted){
-                    console.log('productInfo_inserted : ');
-                    console.dir(inserted);
-                }
-            }, function(err){
-                console.error(err);
-                next(err);
-            });
-        }
+    if (req.body.categoryId == 3) {//패션잡화인경우
+
+    }
+
+    if (req.body.categoryId == 4) {//신발일 경우 
         
-        var d = 0;
-        for(var i=0; i<colorCnt; i++){
-            data3[d] = [pid, req.body.photo[i+2], color[i]];
-            d++;
-        }
-        console.log('data3 : ');
-        console.log(data3);
-
-        for(var i=0; i<d; i++){
-            await db.sequelize.query(query4, {replacements:[data3[i]]})
-            .spread(function(inserted){
-                if(inserted){
-                    console.log('imgByColors_inserted : ');
-                    console.dir(inserted);
-                    //res.send('<h2>ADD PRODUCT SUCCESS</h2>');
-                }
-            }, function(err){
-                console.error(err);
-                next(err);
-            });
-        }
-
-        res.send('add product success');
-
-    }catch (err) {
-        console.error(err);
-        next(err);
     }
 });
 
@@ -202,18 +214,18 @@ router.get('/orders', isLoggedIn, async (req, res, next) => {
                     model: User,
                     attributes: ['id', 'name']
                 }
-            },{
+            }, {
                 model: Product,
                 where: { shopAdminId: shopInfo.id }
             }],
             order: [['createdAt', 'DESC']]
         })
-        .then((orders) => {
-            res.send(orders);
-        })
-        .catch((err) => {
-            console.error(err);
-        })
+            .then((orders) => {
+                res.send(orders);
+            })
+            .catch((err) => {
+                console.error(err);
+            })
 
     } catch (err) {
         console.error(err);
@@ -229,15 +241,15 @@ router.get('/orders/status', async (req, res, next) => {
 /**각 쇼핑몰이 올린 제품 조회/ 카테고리별 x */
 router.get('/products', async (req, res, next) => {
     try {
-        const shopInfo = await ShopAdmin.findOne({ where: { userId: 1, alianced: 1 }});
+        const shopInfo = await ShopAdmin.findOne({ where: { userId: 1, alianced: 1 } });
 
         await Product.findAll({
             where: { shopAdminId: shopInfo.id },
             order: [['createdAt', 'DESC']]
         })
-        .then((products) => {
-            res.send(products);
-        })
+            .then((products) => {
+                res.send(products);
+            })
 
     } catch (err) {
         console.error(err);
