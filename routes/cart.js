@@ -112,7 +112,7 @@ router.get('/', isLoggedIn, async (req, res, next) => {
 router.post('/toolbar', isLoggedIn, async (req, res, next) => {
     var query1 = "select * from imgByColors where img = ?";
     var query2 = "select * from shopAdmins, products where products.shopAdminId = shopAdmins.id and products.id = ?";
-    var query3 = "insert into carts(userId, productId, pname, cnt, img, color, createdAt) values (?)";
+    var query3 = "insert into carts(userId, productId, pname, cnt, img, color, createdAt, size) values (?)";
     var imgurl = req.body.img;
     var selectedProduct;
     var selectedProductInfo;
@@ -136,7 +136,7 @@ router.post('/toolbar', isLoggedIn, async (req, res, next) => {
             next(err);
         });
     
-        var data = [ req.user.id, selectedProductInfo.id, selectedProductInfo.pname, 1, selectedProductInfo.img, selectedProduct.color, new Date() ];
+        var data = [ req.user.id, selectedProductInfo.id, selectedProductInfo.pname, 1, selectedProductInfo.img, selectedProduct.color, new Date(), 'S'];
     
         await db.sequelize.query(query3, {
         replacements: [data]
