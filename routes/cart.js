@@ -138,7 +138,7 @@ router.post('/toolbar', isLoggedIn, async (req, res, next) => {
             next(err);
         });
 
-        await db.sequelize.query(query3, {replacements: [selectedProduct.productId]})
+        await db.sequelize.query(query4, {replacements: [selectedProduct.productId]})
         .spread(function(productInfos){
             size = productInfos[0].size;
         }, function(err){
@@ -157,6 +157,7 @@ router.post('/toolbar', isLoggedIn, async (req, res, next) => {
             console.error(err);
             next(err);
         });
+        
     } catch (err) {
         console.error(err);
         next(err);
