@@ -113,9 +113,12 @@ router.post('/toolbar', isLoggedIn, async (req, res, next) => {
     var query1 = "select * from imgByColors where img = ?";
     var query2 = "select * from shopAdmins, products where products.shopAdminId = shopAdmins.id and products.id = ?";
     var query3 = "insert into carts(userId, productId, pname, cnt, img, color, createdAt, size) values (?)";
+    var query4 = "select * from productInfos where productId = ?";
     var imgurl = req.body.img;
     var selectedProduct;
     var selectedProductInfo;
+   
+    var size;  
 
     try {
         await db.sequelize.query(query1, { replacements: [imgurl] })
@@ -125,9 +128,8 @@ router.post('/toolbar', isLoggedIn, async (req, res, next) => {
             console.error(err);
             next(err);
         });
-        
         console.log(selectedProduct);
-    
+        
         await db.sequelize.query(query2, { replacements: [selectedProduct.productId] })
         .spread(function(productInfo) {
             selectedProductInfo = productInfo[0];
@@ -135,8 +137,16 @@ router.post('/toolbar', isLoggedIn, async (req, res, next) => {
             console.error(err);
             next(err);
         });
-    
-        var data = [ req.user.id, selectedProductInfo.id, selectedProductInfo.pname, 1, selectedProductInfo.img, selectedProduct.color, new Date(), 'S'];
+
+        await db.sequelize.query(query3, {replacements: [selectedProduct.productId]})
+        .spread(function(productInfos){
+            size = productInfos[0].size;
+        }, function(err){
+            console.error(err);
+            next(err);
+        });
+        
+        var data = [ req.user.id, selectedProductInfo.id, selectedProductInfo.pname, 1, selectedProductInfo.img, selectedProduct.color, new Date(), size];
     
         await db.sequelize.query(query3, {
         replacements: [data]
