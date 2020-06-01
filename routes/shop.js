@@ -390,6 +390,34 @@ router.get('/productListBySeller', isLoggedIn, async(req, res, next) => {
     }
 });
 
+//각 쇼핑몰의 올린 상품들 재고 수정
+router.post('/updateCntBySeller', isLoggedIn, async(req, res) => {
+    var productInfo = req.body.productInfo;
+    console.log('받은 상품 정보 : ');
+    console.dir(productInfo);
+
+    var pid = productInfo.productId;
+    var cnt = productInfo.cnt;
+    var query = "update productInfos set cnt=? where id = ?";
+
+    try{
+        await db.sequelize.query(query, {replacements:[parseInt(cnt, 10), pid]})
+        .spread(function(updated){
+            console.log(updated);
+        }, function(err){
+            console.error(err);
+        });
+
+        res.send('update success');
+
+    }catch(err){
+        console.error(err);
+    }
+
+
+});
+
+
 
 /**운송장 번호 등록 - orderdetail 아이디 값이 파라미터로 옴 */
 //??한번에 여러 개를 업데이트 할건지 물어봐야됨...
