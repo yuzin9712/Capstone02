@@ -110,18 +110,29 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
             for (var i = 0; i < colorCnt; i++) {
                 for (var j = 0; j < 4; j++) {
                     if (j == 0) {
-                        data2[k] = [pid, color[i], 'S', S[i]];
+                        if(S[i]!=0 || S[i]!=''){
+                            data2[k] = [pid, color[i], 'S', S[i]];
+                            k++;
+                        }
                     }
                     if (j == 1) {
-                        data2[k] = [pid, color[i], 'M', M[i]];
+                        if(M[i]!=0 || M[i]!=''){
+                            data2[k] = [pid, color[i], 'M', M[i]];
+                            k++;
+                        }
                     }
                     if (j == 2) {
-                        data2[k] = [pid, color[i], 'L', L[i]];
+                        if(L[i]!=0 || L[i]!=''){
+                            data2[k] = [pid, color[i], 'L', L[i]];
+                            k++;
+                        }
                     }
                     if (j == 3) {
-                        data2[k] = [pid, color[i], 'XL', XL[i]];
+                        if(XL[i]!=0 || XL[i]!=''){
+                            data2[k] = [pid, color[i], 'XL', XL[i]];
+                            k++;
+                        }
                     }
-                    k++;
                 }
             }
             console.log('data2 : ');
@@ -331,6 +342,54 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
     }
 });
 
+//각 쇼핑몰의 올린 모든 상품들 조회 
+router.get('/productListBySeller', isLoggedIn, async(req, res, next) => {
+    
+    const shopInfo = await ShopAdmin.findOne({
+        where: { userId: req.user.id, alianced: 1 }
+    });
+
+    var query1 = "select * from products where shopAdminId = ?";
+    var query2 = "select * from `imgByColors` where `productId` IN(:productId)";
+    var query3 = "select * from `productInfos` where `productId` IN(:productId)";
+
+    var data1;//products테이블에서 꺼낸 데이터
+    var pidArr = [];
+    var data2;//imgByColors테이블에서 꺼낸 데이터;
+    var data3;//productInfos테이블에서 꺼낸 데이터;
+    
+    try{
+        await db.sequelize.query(query1, { replacements:[shopInfo.id] })
+        .spread(function(products){
+            data1 = products;
+            for(var i =0; i<products.length; i++){
+                pidArr.push(products[i].id);
+            }
+        }, function(err){
+            console.error(err);
+        });
+
+        await db.sequelize.query(query2, { replacements:{productId:pidArr} })
+        .spread(function(imgs){
+            data2 = imgs;
+        }, function(err){
+            console.error(err);
+        });
+
+        await db.sequelize.query(query3, {replacements:{productId:pidArr}})
+        .spread(function(infos){
+            data3 = infos;
+        }, function(err){
+            console.error(err);
+        })
+
+        res.send({products:data1, imgs:data2, productInfos:data3});
+
+    }catch(err){
+        console.error(err);
+    }
+});
+
 
 /**운송장 번호 등록 - orderdetail 아이디 값이 파라미터로 옴 */
 //??한번에 여러 개를 업데이트 할건지 물어봐야됨...
@@ -390,24 +449,23 @@ router.get('/orders/status', async (req, res, next) => {
 
 })
 
-/**각 쇼핑몰이 올린 제품 조회/ 카테고리별 x */
-router.get('/products', async (req, res, next) => {
-    try {
-        const shopInfo = await ShopAdmin.findOne({ where: { userId: 1, alianced: 1 } });
+// /**각 쇼핑몰이 올린 제품 조회/ 카테고리별 x */
+// router.get('/products', async (req, res, next) => {
+//     try {
+//         const shopInfo = await ShopAdmin.findOne({ where: { userId: 1, alianced: 1 } });
 
-        await Product.findAll({
-            where: { shopAdminId: shopInfo.id },
-            order: [['createdAt', 'DESC']]
-        })
-            .then((products) => {
-                res.send(products);
-            })
+//         await Product.findAll({
+//             where: { shopAdminId: shopInfo.id },
+//             order: [['createdAt', 'DESC']]
+//         })
+//             .then((products) => {
+//                 res.send(products);
+//             })
 
-    } catch (err) {
-        console.error(err);
-        res.status(403).send('Error');
-    }
-});
-
+//     } catch (err) {
+//         console.error(err);
+//         res.status(403).send('Error');
+//     }
+// });
 
 module.exports = router;
