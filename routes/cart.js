@@ -204,15 +204,16 @@ router.post('/:id', isLoggedIn, async (req, res, next) => {
     }
 });
 //장바구니 삭제
-router.post('/deleteCart', isLoggedIn, async(req, res, next) => {
+router.delete('/:id', isLoggedIn, async(req, res, next) => {
     
-    const cartId = req.body.cid;
+    // const cartId = req.body.cid;
+    console.log("이걸지울거임: "+req.params.id)
 
     var query = "delete from carts where id = ?";
 
     try{
         
-        await db.sequelize.query(query, { replacements: [cartId] })
+        await db.sequelize.query(query, { replacements: [req.params.id] })
         .spread(function(deleted){
             console.log(deleted);
             res.send('delete cart success!');
