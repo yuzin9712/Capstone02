@@ -50,12 +50,12 @@ router.post('/comment/:id', isLoggedIn, async (req, res, next) => {
     await db.sequelize.query(query, {
         replacements: [data]
     })
-    .spread(function (newComment) {
-        res.sendStatus(200);
-    }, function (err) {
-        console.error(err);
-        next(err);
-    })
+        .spread(function (newComment) {
+            res.sendStatus(200);
+        }, function (err) {
+            console.error(err);
+            next(err);
+        })
 
 });
 
@@ -72,36 +72,115 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
     await db.sequelize.query(query2, {
         replacements: [reviewId]
     })
-    .spread(function (comments) {
-        res.send({ reviews: reviews, comments: comments })
-    }, function (err) {
-        console.error(err);
-        next(err);
-    })
+        .spread(function (comments) {
+            res.send({ reviews: reviews, comments: comments })
+        }, function (err) {
+            console.error(err);
+            next(err);
+        })
 
 });
 
 /**리뷰 작성하기 - 상품 아이디값이 파라미터로 옴 */
 router.post('/:id', isLoggedIn, async (req, res, next) => {
     console.log('------------들어옴-------------');
-    
+
     var content = req.body.content;
     var imgs = req.body.imgs;
 
     var query = "insert into reviews(content, user_email, img, img2, img3, userId, productId, createdAt) values (?)";
-    
-    var data = [ content, req.user.name, req.body.imgs[0], req.body.imgs[1], req.body.imgs[2], req.user.id, parseInt(req.params.id, 10), new Date() ];
+
+    var data = [content, req.user.name, req.body.imgs[0], req.body.imgs[1], req.body.imgs[2], req.user.id, parseInt(req.params.id, 10), new Date()];
 
     try {
         await db.sequelize.query(query, {
             replacements: [data]
         })
-        .spread(function () {
-            res.sendStatus(200);
-        }, function (err) {
-            console.error(err);
-            next(err);
-        })
+            .spread(function () {
+                res.sendStatus(200);
+            }, function (err) {
+                console.error(err);
+                next(err);
+            })
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+//리뷰 삭제하기 
+router.post('deleteReview', isLoggedIn, async (req, res, next) => {
+    var rid = req.body.reviewId;
+    var query1 = "delete from reviews where id = ?";
+    var query2 = "delete from comments where reviewId = ?";
+    var query0 = "select from reviews where id = ?";
+    var uid = req.user.id;
+    var id;
+
+    try {
+
+        await db.sequelize.query(query0, { replacements: [rid] })
+            .spread(function (review) {
+                console.log(review);
+                id = review.userId;
+            }, function (err) {
+                console.log(err);
+            });
+
+        if (uid == id) {
+            await db.sequelize.query(query1, { replacements: [rid] })
+                .spread(function (deleted1) {
+                    console.log(deleted1);
+                }, function (err) {
+                    console.log(err);
+                });
+
+            await db.sequelize.query(query2, { replacements: [rid] })
+                .spread(function (deleted2) {
+                    console.log(deleted2);
+                    res.send('delete review done');
+                }, function (err) {
+                    console.log(err);
+                });
+
+        } else {
+            res.send('delete review fail');
+        }
+
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+//리뷰에 달린 답글 삭제하기
+router.post('deleteComment', isLoggedIn, async (req, res, next) => {
+    var comid = req.body.commentId;
+    var query = "delete from comments where reviewId = ?";
+    var query2 = "select from comments where id = ?";
+    var uid = req.user.id;
+    var id;
+
+    try {
+
+        await db.sequelize.query(query2, { replacements: [comid] })
+            .spread(function (comment) {
+                console.log(comment);
+                id = comment.userId;
+            }, function (err) {
+                console.error(err);
+            });
+
+        if (uid == id) {
+            await db.sequelize.query(query, { replacements: [comid] })
+                .spread(function (deleted) {
+                    console.log(deleted);
+                    res.send('delete comment done');
+                }, function (err) {
+                    console.log(err);
+                });
+        }else {
+            res.send('delete comment fail');
+        }
+
     } catch (err) {
         console.error(err);
     }
