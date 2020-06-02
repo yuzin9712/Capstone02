@@ -107,4 +107,50 @@ router.post('/:id', isLoggedIn, async (req, res, next) => {
     }
 });
 
+//리뷰 삭제하기 
+router.post('deleteReview', isLoggedIn, async (req, res, next) => {
+    var rid = req.body.reviewId;
+    var query1 = "delete from reviews where id = ?";
+    var query2 = "delete from comments where reviewId = ?";
+
+    try{
+        await db.sequelize.query(query1, {replacements : [rid]})
+        .spread(function(deleted1){
+            console.log(deleted1);
+        }, function(err){
+            console.log(err);
+        });
+
+        await db.sequelize.query(query2, {replacements : [rid]})
+        .spread(function(deleted2){
+            console.log(deleted2);
+            res.send('delete review done');
+        }, function(err){
+            console.log(err);
+        });
+
+    }catch(err){
+        console.error(err);
+    }
+});
+
+//리뷰에 달린 답글 삭제하기
+router.post('deleteComment', isLoggedIn, async (req, res, next) => {
+    var comid = req.body.commentId;
+    var query = "delete from comments where reviewId = ?";
+    
+    try{
+        await db.sequelize.query(query, {replacements : [comid]})
+        .spread(function(deleted){
+            console.log(deleted);
+            res.send('delete comment done');
+        }, function(err){
+            console.log(err);
+        });
+        
+    }catch(err){
+        console.error(err);
+    }
+});
+
 module.exports = router;

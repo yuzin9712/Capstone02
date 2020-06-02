@@ -414,9 +414,42 @@ router.post('/updateCntBySeller', isLoggedIn, async(req, res) => {
         console.error(err);
     }
 
-
 });
 
+//각 쇼핑몰의 올린 상품 삭제 
+router.post('/deleteProductBySeller', isLoggedIn, async(req, res, nex) => {
+    var query1 = "delete from productInfo where productId = ?";
+    var query2 = "delete from products where id = ?";
+    var query3 = "delete from imgByColors where productId = ?";
+
+    var pid = req.body.productId;
+
+    try{
+        await db.sequelize.query(query1, {replacements : [pid]})
+        .spread(function(deleted1){
+            console.log(deleted1);
+        }, function(err){
+            console.log(err);
+        });
+
+        await db.sequelize.query(query2, {replacements : [pid]})
+        .spread(function(deleted2){
+            console.log(deleted2);
+        }, function(err){
+            console.log(err);
+        });
+
+        await db.sequelize.query(query2, {replacements : [pid]})
+        .spread(function(deleted3){
+            console.log(deleted3);
+        }, function(err){
+            console.log(err);
+        });
+
+    }catch(err){
+        console.error(err);
+    }
+});
 
 
 /**운송장 번호 등록 - orderdetail 아이디 값이 파라미터로 옴 */
