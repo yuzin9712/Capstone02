@@ -452,63 +452,64 @@ router.post('/deleteProductBySeller', isLoggedIn, async(req, res, nex) => {
 });
 
 
-/**운송장 번호 등록 - orderdetail 아이디 값이 파라미터로 옴 */
-//??한번에 여러 개를 업데이트 할건지 물어봐야됨...
-router.post('/delivery/:id', isLoggedIn, async (req, res, next) => {
-    const t_invoice = req.body.invoice; //운송장 번호 입력.. --> 배송상태를 직접 수정해야하는건가..? api로 하는게아니구?
+// /**운송장 번호 등록 - orderdetail 아이디 값이 파라미터로 옴 */
+// router.post('/delivery/:id', isLoggedIn, async (req, res, next) => {
+//     const t_invoice = req.body.invoice; //운송장 번호 입력
+//     const zipCode = req.body.zipCode;
 
-    try {
-        await OrderDetail.update({
-            t_invoice: t_invoice,
-            status: 4 //발송
-        });
+//     try {
+//         await OrderDetail.update({
+//             t_invoice: t_invoice,
+//             zipCode: zipCode,
+//             status: 4 //발송
+//         });
 
-    } catch (err) {
-        console.error(err);
-        res.status(403).send('Error');
-    }
-});
+//     } catch (err) {
+//         console.error(err);
+//         res.status(403).send('Error');
+//     }
+// });
 
-/**주문 내역  */
-//미결제 -> 결제완료 -> ..
-//status 상관 안하고 일단 다뽑았음 .. 무슨데이터가 필요한지 모르겠음
-router.get('/orders', isLoggedIn, async (req, res, next) => {
-    try {
-        const shopInfo = await ShopAdmin.findOne({
-            where: { userId: req.user.id, alianced: 1 }
-        });
+// /**주문 내역  */
+// //미결제 -> 결제완료 -> ..
+// //status 상관 안하고 일단 다뽑았음 .. 무슨데이터가 필요한지 모르겠음
+// router.get('/orders', isLoggedIn, async (req, res, next) => {
+//     try {
+//         const shopInfo = await ShopAdmin.findOne({
+//             where: { userId: req.user.id, alianced: 1 }
+//         });
 
-        await OrderDetail.findAll({
-            include: [{
-                model: Order,
-                attributes: ['userId'],
-                include: {
-                    model: User,
-                    attributes: ['id', 'name']
-                }
-            }, {
-                model: Product,
-                where: { shopAdminId: shopInfo.id }
-            }],
-            order: [['createdAt', 'DESC']]
-        })
-            .then((orders) => {
-                res.send(orders);
-            })
-            .catch((err) => {
-                console.error(err);
-            })
+//         await OrderDetail.findAll({
+//             include: [{
+//                 model: Order,
+//                 attributes: ['userId'],
+//                 include: {
+//                     model: User,
+//                     attributes: ['id', 'name']
+//                 }
+//             }, {
+//                 model: Product,
+//                 where: { shopAdminId: shopInfo.id }
+//             }],
+//             order: [['createdAt', 'DESC']]
+//         })
+//             .then((orders) => {
+//                 res.send(orders);
+//             })
+//             .catch((err) => {
+//                 console.error(err);
+//             })
 
-    } catch (err) {
-        console.error(err);
-        res.status(403).send('Error');
-    }
-});
+//     } catch (err) {
+//         console.error(err);
+//         res.status(403).send('Error');
+//     }
+// });
 
-/** 상태별 주문 조회 */
-router.get('/orders/status', async (req, res, next) => {
+// /** 상태별 주문 조회 */
+// router.get('/orders/status', async (req, res, next) => {
 
-})
+// })
 
 // /**각 쇼핑몰이 올린 제품 조회/ 카테고리별 x */
 // router.get('/products', async (req, res, next) => {
