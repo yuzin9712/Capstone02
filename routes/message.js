@@ -21,28 +21,21 @@ router.get('/', async (req, res, next) => {
                 },
                 order: [['createdAt', 'DESC']],
             },
-            // order: [[ChatLine, 'createdAt', 'DESC']], -->확인해보기
+            order: [[ChatLine, 'createdAt', 'DESC']], //메세지 온 거 최신순
             where: { 
                 [Op.or]: [
                     { user1Id: 12 },
                     { user2Id: 12 }
                 ]
              },
-             //여기안됨..
-            // order: [[Room.associations.ChatLine,'createdAt', 'DESC']]
-            //  order: [[ChatLine, 'createdAt', 'DESC']]
-            // order: [[ {model: ChatLine}, 'createdAt', 'DESC']] //쪽지가 최근에 온걸로
         })
         .then((rooms) => {
             res.send(rooms);
         })
-        .catch((err) => {
-            console.error(err);
-            next(err);
-        })
+
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -51,6 +44,8 @@ router.post('/:id', async (req, res, next) => {
 
     console.log('----시작----');
     const newLine = req.body.line; //쪽지내용
+
+    console.log('이거내용??',req.body.line)
 
     try {
         const [ room, created ] = await Room.findOrCreate({
@@ -77,9 +72,22 @@ router.post('/:id', async (req, res, next) => {
         res.send('쪽지보내기 성공!');
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
+
+// router.get('/:id', async (req, res, next) => {
+//     try {
+//         const room = Room.findOne({
+//             where: { id: parseInt(req.params.id, 10)}
+//         });
+
+//         room.destroy({});
+//     } catch (err) {
+//         console.error(err);
+//         res.status(403).send('Error');
+//     }
+// })
 
 /**특정 대화방에 들어감 - 방 아이디값이 파라미터로 온다. */
 // router.get('/:id', async (req, res, next) => {

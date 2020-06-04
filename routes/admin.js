@@ -14,11 +14,11 @@ router.get('/', async (req, res, next) => {
 
         const [alianced, metadata] = await db.sequelize.query(query1);
         const [notAlianced, metadata2] = await db.sequelize.query(query2);
-        
+
         res.send({alianced: alianced, notAlianced: notAlianced});
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(500).send('Server Error');
     }
 });
 
@@ -40,7 +40,7 @@ router.get('/:id', async (req, res, next) => {
 
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(500).send('Server Error');
     }
 });
 
@@ -61,7 +61,7 @@ router.post('/:id', async (req, res, next) => {
 
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(500).send('Server Error');
     }
 });
 

@@ -118,7 +118,7 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
             })) {
                 return res.send({
                     loginStatus: true,
-                    shopStatus: true,
+                    shopStatus: "shopadmin",
                     name: req.user.name,
                     id: req.user.id,
                     designLike,
@@ -126,15 +126,29 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
                     followingInfo
                 });
             } else {
-                return res.send({
-                    loginStatus: true,
-                    shopStatus: false,
-                    name: req.user.name,
-                    id: req.user.id,
-                    designLike,
-                    postLike,
-                    followingInfo
-                });
+
+                if(req.user.email == "admin@naver.com") {
+                    console.log('관리자');
+                    return res.send({
+                        loginStatus: true,
+                        shopStatus: "admin",
+                        name: req.user.name,
+                        id: req.user.id,
+                        designLike,
+                        postLike,
+                        followingInfo
+                    });
+                } else {
+                    return res.send({
+                        loginStatus: true,
+                        shopStatus: "user",
+                        name: req.user.name,
+                        id: req.user.id,
+                        designLike,
+                        postLike,
+                        followingInfo
+                    });
+                }
             }
         });
     })(req, res, next);
@@ -146,7 +160,7 @@ router.get('/logout', isLoggedIn, (req, res) => {
     req.session.destroy();
     res.send({
         loginStatus: false,
-        shopStatus: false,
+        shopStatus: '',
         name: '',
         id: '',
         designLike: '',
@@ -177,7 +191,7 @@ router.get('/status', isLoggedIn, async (req, res) => {
     })) {
         res.send({
             loginStatus: true,
-            shopStatus: true,
+            shopStatus: "shopadmin",
             name: req.user.name,
             id: req.user.id,
             designLike,
@@ -185,15 +199,28 @@ router.get('/status', isLoggedIn, async (req, res) => {
             followingInfo
         });
     } else {
-        res.send({
-            loginStatus: true,
-            shopStatus: false,
-            name: req.user.name,
-            id: req.user.id,
-            designLike,
-            postLike,
-            followingInfo
-        })
+        if(req.user.email == "admin@naver.com") {
+            console.log('관리자');
+            return res.send({
+                loginStatus: true,
+                shopStatus: "admin",
+                name: req.user.name,
+                id: req.user.id,
+                designLike,
+                postLike,
+                followingInfo
+            });
+        } else {
+            return res.send({
+                loginStatus: true,
+                shopStatus: "user",
+                name: req.user.name,
+                id: req.user.id,
+                designLike,
+                postLike,
+                followingInfo
+            });
+        }
     }
 });
 
