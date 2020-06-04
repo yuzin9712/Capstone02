@@ -110,24 +110,25 @@ router.get('/', isLoggedIn, async (req, res, next) => {
 
 /**툴바에서 장바구니 담기*/
 router.post('/toolbar', isLoggedIn, async (req, res, next) => {
-    var query1 = "select * from imgByColors where img = ?";
+    // var query1 = "select * from imgByColors where img = ?";
+    const selectedProduct = {productId: req.body.pid, color: req.body.color}
     var query2 = "select * from shopAdmins, products where products.shopAdminId = shopAdmins.id and products.id = ?";
     var query3 = "insert into carts(userId, productId, pname, cnt, img, color, createdAt, size) values (?)";
     var query4 = "select * from productInfos where productId = ?";
-    var imgurl = req.body.img;
-    var selectedProduct;
+    // var imgurl = req.body.img;
+    // var selectedProduct;
     var selectedProductInfo;
    
     var size;  
 
     try {
-        await db.sequelize.query(query1, { replacements: [imgurl] })
-        .spread(function(product) {
-            selectedProduct = product[0];
-        }, function (err) {
-            console.error(err);
-            next(err);
-        });
+        // await db.sequelize.query(query1, { replacements: [imgurl] })
+        // .spread(function(product) {
+        //     selectedProduct = product[0];
+        // }, function (err) {
+        //     console.error(err);
+        //     next(err);
+        // });
         console.log(selectedProduct);
         
         await db.sequelize.query(query2, { replacements: [selectedProduct.productId] })
