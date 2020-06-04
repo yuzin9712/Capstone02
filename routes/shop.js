@@ -66,8 +66,8 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
     console.log(colorCnt);
 
     var query1 = "insert into products(pname, price, categoryId, gender, img, description, shopAdminId, createdAt) VALUES(?)";
-    var query3 = "insert into productInfos (productId, color, size, cnt) VALUES (?)";
-    var query4 = "insert into imgByColors (productId, img, color) VALUES (?)";
+    var query3 = "insert into productInfos(productId, color, size, cnt) VALUES (?)";
+    var query4 = "insert into imgByColors(productId, img, color) VALUES (?)";
     var data; //products테이블에 들어갈 row
     var data2 = []; //productInfo테이블에 들어갈 배열
     var data3 = []; //imgByColors테이블에 들어갈 배열 
@@ -201,7 +201,7 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
             var k = 0;
             for (var i = 0; i < colorCnt; i++) {
 
-                data2[k] = { productId: pid, color: color[i], size:'F', cnt: cnt[k] };
+                data2[k] = [ pid, color[i], 'F', cnt[k] ];
                 k++;
 
             }
@@ -268,7 +268,7 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
         console.log(sizeCnt);
 
         for (var i = 0; i < cnt.length; i++) {
-            if (cnt[i] != '') {
+            if ((cnt[i] != '') && (cnt[i] != 0)) {
                 newCnt.push(cnt[i]);
             }
         }
@@ -292,7 +292,8 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
             var k = 0;
             for (var i = 0; i < colorCnt; i++) {
                 for (var j = 0; j < sizeCnt; j++) {
-                    data2[k] = { productId: pid, color: color[i], size: size[j], cnt: newCnt[k] };
+
+                    data2[k] = [ pid, color[i], size[j], newCnt[k] ];
                     k++;
                 }
             }
@@ -452,22 +453,17 @@ router.post('/deleteProductBySeller', isLoggedIn, async(req, res, nex) => {
 });
 
 
-/**운송장 번호 등록 - orderdetail 아이디 값이 파라미터로 옴 */
-//??한번에 여러 개를 업데이트 할건지 물어봐야됨...
-router.post('/delivery/:id', isLoggedIn, async (req, res, next) => {
-    const t_invoice = req.body.invoice; //운송장 번호 입력.. --> 배송상태를 직접 수정해야하는건가..? api로 하는게아니구?
+// /**운송장 번호 등록 - orderdetail 아이디 값이 파라미터로 옴 */
+// router.post('/delivery/:id', isLoggedIn, async (req, res, next) => {
+//     const t_invoice = req.body.invoice; //운송장 번호 입력
+//     const zipCode = req.body.zipCode;
 
-    try {
-        await OrderDetail.update({
-            t_invoice: t_invoice,
-            status: 4 //발송
-        });
-        res.send('success')
-    } catch (err) {
-        console.error(err);
-        res.status(403).send('Error');
-    }
-});
+//     try {
+//         await OrderDetail.update({
+//             t_invoice: t_invoice,
+//             zipCode: zipCode,
+//             status: 4 //발송
+//         });
 
 //     } catch (err) {
 //         console.error(err);
@@ -475,41 +471,41 @@ router.post('/delivery/:id', isLoggedIn, async (req, res, next) => {
 //     }
 // });
 
-/**주문 내역  */
-//미결제 -> 결제완료 -> ..
-//status 상관 안하고 일단 다뽑았음 .. 무슨데이터가 필요한지 모르겠음
-router.get('/orders', isLoggedIn, async (req, res, next) => {
-    try {
-        const shopInfo = await ShopAdmin.findOne({
-            where: { userId: req.user.id, alianced: 1 }
-        });
+// /**주문 내역  */
+// //미결제 -> 결제완료 -> ..
+// //status 상관 안하고 일단 다뽑았음 .. 무슨데이터가 필요한지 모르겠음
+// router.get('/orders', isLoggedIn, async (req, res, next) => {
+//     try {
+//         const shopInfo = await ShopAdmin.findOne({
+//             where: { userId: req.user.id, alianced: 1 }
+//         });
 
-        await OrderDetail.findAll({
-            include: [{
-                model: Order,
-                attributes: ['userId'],
-                include: {
-                    model: User,
-                    attributes: ['id', 'name']
-                }
-            }, {
-                model: Product,
-                where: { shopAdminId: shopInfo.id }
-            }],
-            order: [['createdAt', 'DESC']]
-        })
-            .then((orders) => {
-                res.send(orders);
-            })
-            .catch((err) => {
-                console.error(err);
-            })
+//         await OrderDetail.findAll({
+//             include: [{
+//                 model: Order,
+//                 attributes: ['userId'],
+//                 include: {
+//                     model: User,
+//                     attributes: ['id', 'name']
+//                 }
+//             }, {
+//                 model: Product,
+//                 where: { shopAdminId: shopInfo.id }
+//             }],
+//             order: [['createdAt', 'DESC']]
+//         })
+//             .then((orders) => {
+//                 res.send(orders);
+//             })
+//             .catch((err) => {
+//                 console.error(err);
+//             })
 
-    } catch (err) {
-        console.error(err);
-        res.status(403).send('Error');
-    }
-});
+//     } catch (err) {
+//         console.error(err);
+//         res.status(403).send('Error');
+//     }
+// });
 
 // /** 상태별 주문 조회 */
 // router.get('/orders/status', async (req, res, next) => {
