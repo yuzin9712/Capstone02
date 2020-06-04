@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => (
             allowNull: false,
             //defaultValue: 1,
         },
+        zipCode: {
+            type: DataTypes.STRING(200),
+            allowNull: true,
+        },
         t_invoice: { //운송장번호
             type: DataTypes.STRING(200),
             allowNull: true,

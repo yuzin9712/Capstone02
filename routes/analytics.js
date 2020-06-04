@@ -6,7 +6,7 @@ const { Op } = require('sequelize');
 
 const router = express.Router();
 
-/**통계 1번  -> 상품 판매 수*/
+/**통계 1번  -> 상품 판매 수 / 카테고리별 가격 추가*/
 router.get('/category', async (req, res, next) => {
     try {
         const shopInfo = await ShopAdmin.findOne({
@@ -15,6 +15,31 @@ router.get('/category', async (req, res, next) => {
 
         await OrderDetail.findAll({
             attributes: [[db.sequelize.fn('sum', db.sequelize.col('orderDetail.cnt')), 'sales']],
+            include: [{
+                model: Product,
+                attributes: ['categoryId'],
+                where: { shopAdminId: shopInfo.id }
+            }],
+            group: ['product.categoryId']
+        })
+        .then((data) => {
+            res.send(data);
+        })
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+/**카테고리별 판매액 */
+router.get('/category/total', async (req, res, next) => {
+    try {
+        const shopInfo = await ShopAdmin.findOne({
+            where: { userId: 1, alianced: 1 }
+        });
+
+        await OrderDetail.findAll({
+            attributes: [[db.sequelize.fn('sum', db.sequelize.col('orderDetail.price')), 'sales']],
             include: [{
                 model: Product,
                 attributes: ['categoryId'],
@@ -58,7 +83,27 @@ router.get('/category/detail', async (req, res, next) => {
             group: ['product.id']
         });
 
-        res.send({category1, category2});
+        const category3 = await OrderDetail.findAll({
+            attributes: [[db.sequelize.fn('sum', db.sequelize.col('orderDetail.cnt')), 'sales']],
+            include: [{
+                model: Product,
+                attributes: ['pname'],
+                where: { shopAdminId: shopInfo.id, categoryId: 3 }
+            }],
+            group: ['product.id']
+        });
+
+        const category4 = await OrderDetail.findAll({
+            attributes: [[db.sequelize.fn('sum', db.sequelize.col('orderDetail.cnt')), 'sales']],
+            include: [{
+                model: Product,
+                attributes: ['pname'],
+                where: { shopAdminId: shopInfo.id, categoryId: 4 }
+            }],
+            group: ['product.id']
+        });
+
+        res.send({category1, category2, category3, category4});
 
     } catch (err) {
         console.error(err);
@@ -98,7 +143,7 @@ router.get('/category/detail', async (req, res, next) => {
 //     }
 // });
 
-/**통계 4번째  -> 상품 판매 수*/
+/**통계 4번째  -> 상품 판매 총 가격으로 바꾸기*/
 router.get('/month', async (req, res, next) => {
     try {
         const shopInfo = await ShopAdmin.findOne({
@@ -108,7 +153,7 @@ router.get('/month', async (req, res, next) => {
         await OrderDetail.findAll({
             attributes: [
                 [db.sequelize.fn("concat", db.sequelize.fn('year',db.sequelize.col('orderDetail.createdAt')),'-', db.sequelize.fn('month',db.sequelize.col('orderDetail.createdAt'))), 'ym'],
-                [db.sequelize.fn('sum', db.sequelize.col('orderDetail.cnt')), 'sales']],
+                [db.sequelize.fn('sum', db.sequelize.col('orderDetail.price')), 'sales']],
             include: [{
                 model: Product,
                 attributes: [],
@@ -127,20 +172,21 @@ router.get('/month', async (req, res, next) => {
     }
 });
 
-/**플랫폼 관리자 통계 1 -> 상품 판매 수*/
+/**플랫폼 관리자 통계 1 -> 안팔린 쇼핑몰은 0으로 나오게 수정*/
 router.get('/shop', async (req, res, next) => {
     try {
-        await OrderDetail.findAll({
-            attributes: [[db.sequelize.fn('sum', db.sequelize.col('orderDetail.cnt')), 'sales']],
+
+        await ShopAdmin.findAll({
+            attributes:['shopname',[db.sequelize.fn('ifnull', db.sequelize.fn('sum', db.sequelize.col('products->orderDetails.price')),0), 'sales']],
             include: [{
                 model: Product,
-                attributes: ['shopAdminId'],
+                attributes: [],
                 include: [{
-                    model: ShopAdmin,
-                    attributes: ['shopname']
+                    model: OrderDetail,
+                    attributes: []
                 }]
             }],
-            group: ['product.shopAdminId']
+            group: ['shopAdmin.id']
         })
         .then((data) => {
             res.send(data);
@@ -151,13 +197,13 @@ router.get('/shop', async (req, res, next) => {
     }
 });
 
-/**플랫폼 관리자 통계 2 -> Order detail에 결제 수? Order에 결제 수? .. */
+/**플랫폼 관리자 통계 2*/
 router.get('/growth/sales', async (req, res, next) => {
     try {
         await Order.findAll({
             attributes: [
                 [db.sequelize.fn('concat', db.sequelize.fn('year',db.sequelize.col('order.createdAt')),'-', db.sequelize.fn('month',db.sequelize.col('order.createdAt'))), 'ym'],
-                [db.sequelize.fn('count', db.sequelize.col('order.id')), 'sales']],
+                [db.sequelize.fn('sum', db.sequelize.col('order.total')), 'sales']],
             group: ['ym']
         })
         .then((data) => {
@@ -169,7 +215,7 @@ router.get('/growth/sales', async (req, res, next) => {
     }
 });
 
-/**플랫폼 관리자 통계 3 -> 가입 수 구하는거 맞음?  */
+/**플랫폼 관리자 통계 3*/
 router.get('/growth/users', async (req, res, next) => {
     try {
         await User.findAll({
@@ -186,5 +232,18 @@ router.get('/growth/users', async (req, res, next) => {
         res.status(500).send('Server Error');
     }
 })
+
+/** 상태별 주문 조회 */
+// router.get('/orders', async (req, res, next) => {
+//     try {
+//         //status:: 미입금 -> 입금완료 // 미배송 -> 배송완료 or 미발송 -> 발송완료
+//         Order.findAll({
+
+//         })
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send('Server Error');
+//     }
+// })
 
 module.exports = router;
