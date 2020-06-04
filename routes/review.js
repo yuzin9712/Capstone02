@@ -108,7 +108,7 @@ router.post('/:id', isLoggedIn, async (req, res, next) => {
 });
 
 //리뷰 삭제하기 
-router.post('deleteReview', isLoggedIn, async (req, res, next) => {
+router.post('/deleteReview', isLoggedIn, async (req, res, next) => {
     var rid = req.body.reviewId;
     var query1 = "delete from reviews where id = ?";
     var query2 = "delete from comments where reviewId = ?";
@@ -152,7 +152,7 @@ router.post('deleteReview', isLoggedIn, async (req, res, next) => {
 });
 
 //리뷰에 달린 답글 삭제하기
-router.post('deleteComment', isLoggedIn, async (req, res, next) => {
+router.post('/deleteComment', isLoggedIn, async (req, res, next) => {
     var comid = req.body.commentId;
     var query = "delete from comments where reviewId = ?";
     var query2 = "select from comments where id = ?";
@@ -184,6 +184,77 @@ router.post('deleteComment', isLoggedIn, async (req, res, next) => {
     } catch (err) {
         console.error(err);
     }
+});
+
+//리뷰 수정하기 
+router.post('/updateReview', isLoggedIn, async(req, res, next) => {
+    var content = req.body.comment;
+    var uid = req.user.id;
+    var rid = req.body.reviewId;
+    var id;
+    var query1 = "select * from reviews where id = ?";
+    var query2 = "update reviews set content = ? where id = ?";
+
+    try{
+        await db.sequelize.query(query1, { replacements : [rid] })
+        .spread(function(review){
+            console.dir(review);
+            id = review.userId;
+        }, function(err){
+            console.error(err);
+        });
+        if (id == uid) {
+            await db.sequelize.query(query2, { replacements: [content, rid] })
+                .spread(function (updated) {
+                    console.dir(updated);
+                    res.send('update review complete');
+                }, function (err) {
+                    console.error(err);
+                });
+        }else{
+            res.send('update review fail');
+        }
+    }catch(err){
+        console.error(err);
+    }
+    
+});
+
+//답글 수정하기
+router.post('/updateComment', isLoggedIn, async(req, res, next) => {
+    var content = req.body.comment;
+    var uid = req.user[0].id;
+    var comid = req.body.commentId;
+    var id;
+
+    var query1 = "select * from comments where id = ?";
+    var query2 = "update comments set content = ? where id = ?";
+
+    try{
+        await db.sequelize.query(query1, {replacements : [comid] })
+        .spread(function(comment){
+            console.dir(comment);
+            id = comment.userId;
+        }, function(err){
+            console.error(err);
+        });
+
+        if (id == uid) {
+            await db.sequelize.query(query2, { replacements: [content, comid] })
+                .spread(function (updated) {
+                    console.dir(updated);
+                    res.send('update comment success');
+                }, function (err) {
+                    console.error(err);
+                });
+        }else{
+            res.send('update comment fail');
+        }
+
+    }catch(err){
+        console.error(err);
+    }
+
 });
 
 module.exports = router;
