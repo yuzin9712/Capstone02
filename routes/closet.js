@@ -26,38 +26,51 @@ const upload = multer({
     limits: { fileSize: 25 * 1024 * 1024 }, //25MB
 });
 
+router.post('/img',isLoggedIn, upload.single('image'), async (req, res, next) => {
+  console.log('/img로 들어왔음!!!!');
+  console.log(req.file);
+
+  // const s3Imgs = req.file;
+  // const imgs = s3Imgs.map(img => img.location);
+
+  // console.log('보내는 데이터는???', imgs);
+
+  res.json(req.file.location);
+});
+
 const upload2 = multer();
 
 /**나의 옷장에 사진과 함께 사용된 제품 아이디 저장*/
-router.post('/', isLoggedIn, upload.single('image'), async (req, res, next) => {
+router.post('/', isLoggedIn, async (req, res, next) => {
     try {
         console.log('---------------시작------------'); 
         //사용된 물품의 아이디를 배열로 받아온다 ? 그리고 받아온 사진도 저장한다.
         const closet = await Closet.create({
-            img: req.file.location,
+            img: req.body.image,
             userId: req.user.id
         });
-        console.log(req.file);
-        const url = req.body.product; //url이 여러개 담겨있음
-        const products = await url.split(','); //얘가 상품 url이 담긴 배열이고  
+        // console.log(req.file);
+        // const url = req.body.product; //url이 여러개 담겨있음
+        // const products = await url.split(','); //얘가 상품 url이 담긴 배열이고  
         
-        console.log(url);
-        console.log('전!!!!!!: ',products);
+        // console.log(url);
+        // console.log('전!!!!!!: ',products);
 
-        var uniqueProducts = await products.reduce(function(a,b) {
-            if(a.indexOf(b) < 0)
-                a.push(b);
-                return a;
-        }, []);
+        // var uniqueProducts = await products.reduce(function(a,b) {
+        //     if(a.indexOf(b) < 0)
+        //         a.push(b);
+        //         return a;
+        // }, []);
 
-        console.log('후!!!!!!!: ',uniqueProducts);
+        // console.log('후!!!!!!!: ',uniqueProducts);
 
         // //그러면 imgbycolor테이블에서 img url이 받아온 값과 같은 걸 찾아내고.
-        const result = await Promise.all(uniqueProducts.map(product => ImgByColor.findOne({
-            where: { img: product },
+        const result = await Promise.all(req.body.products.map(product => Product.findOne({
+            where: { id: product },
         }))); //id 맞는 제품들을 조회하겠다!!
+        console.log(result)
 
-        await closet.addProducts(result.map(r=>Number(r.productId))); //relation 테이블에 제품의 아이디가 담기게 하기
+        await closet.addProducts(result.map(r=>Number(r.id))); //relation 테이블에 제품의 아이디가 담기게 하기
         
         res.send('success');
     } catch (err) {
