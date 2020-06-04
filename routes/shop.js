@@ -453,82 +453,90 @@ router.post('/deleteProductBySeller', isLoggedIn, async(req, res, nex) => {
 });
 
 
-// /**운송장 번호 등록 - orderdetail 아이디 값이 파라미터로 옴 */
-// router.post('/delivery/:id', isLoggedIn, async (req, res, next) => {
-//     const t_invoice = req.body.invoice; //운송장 번호 입력
-//     const zipCode = req.body.zipCode;
+/**운송장 번호 등록 - orderdetail 아이디 값이 파라미터로 옴 */
+router.post('/delivery/:id', isLoggedIn, async (req, res, next) => {
+    const t_invoice = req.body.invoice; //운송장 번호 입력
+    const zipCode = req.body.zipCode;
 
-//     try {
-//         await OrderDetail.update({
-//             t_invoice: t_invoice,
-//             zipCode: zipCode,
-//             status: 4 //발송
-//         });
+    try {
 
-//     } catch (err) {
-//         console.error(err);
-//         res.status(403).send('Error');
-//     }
-// });
+        const orderdetail = await OrderDetail.findOne({
+            where: { id: parseInt(req.params.id, 10) }
+        });
+
+        await orderdetail.update({
+            t_invoice: t_invoice,
+            zipCode: zipCode,
+            status: 4 //발송
+        });
+
+        res.status(200).send('Success');
+
+    } catch (err) {
+        console.error(err);
+        res.status(403).send('Error');
+    }
+});
+
 
 // /**주문 내역  */
-// //미결제 -> 결제완료 -> ..
-// //status 상관 안하고 일단 다뽑았음 .. 무슨데이터가 필요한지 모르겠음
-// router.get('/orders', isLoggedIn, async (req, res, next) => {
-//     try {
-//         const shopInfo = await ShopAdmin.findOne({
-//             where: { userId: req.user.id, alianced: 1 }
-//         });
+//미결제 -> 결제완료 -> ..
+//status 상관 안하고 일단 다뽑았음 .. 무슨데이터가 필요한지 모르겠음
+router.get('/orders', isLoggedIn, async (req, res, next) => {
+    try {
+        const shopInfo = await ShopAdmin.findOne({
+            where: { userId: req.user.id, alianced: 1 }
+        });
 
-//         await OrderDetail.findAll({
-//             include: [{
-//                 model: Order,
-//                 attributes: ['userId'],
-//                 include: {
-//                     model: User,
-//                     attributes: ['id', 'name']
-//                 }
-//             }, {
-//                 model: Product,
-//                 where: { shopAdminId: shopInfo.id }
-//             }],
-//             order: [['createdAt', 'DESC']]
-//         })
-//             .then((orders) => {
-//                 res.send(orders);
-//             })
-//             .catch((err) => {
-//                 console.error(err);
-//             })
+        await OrderDetail.findAll({
+            include: [{
+                model: Order,
+                attributes: ['userId'],
+                include: {
+                    model: User,
+                    attributes: ['id', 'name']
+                }
+            }, {
+                model: Product,
+                where: { shopAdminId: shopInfo.id }
+            }],
+            order: [['createdAt', 'DESC']]
+        })
+            .then((orders) => {
+                res.send(orders);
+            })
+            .catch((err) => {
+                console.error(err);
+            })
 
-//     } catch (err) {
-//         console.error(err);
-//         res.status(403).send('Error');
-//     }
-// });
+    } catch (err) {
+        console.error(err);
+        res.status(403).send('Error');
+    }
+});
 
 // /** 상태별 주문 조회 */
 // router.get('/orders/status', async (req, res, next) => {
 
 // })
 
-// /**각 쇼핑몰이 올린 제품 조회/ 카테고리별 x */
-// router.get('/products', async (req, res, next) => {
-//     try {
-//         const shopInfo = await ShopAdmin.findOne({ where: { userId: 1, alianced: 1 } });
+/**각 쇼핑몰이 올린 제품 조회/ 카테고리별 x */
+router.get('/products', async (req, res, next) => {
+    try {
+        const shopInfo = await ShopAdmin.findOne({ where: { userId: 1, alianced: 1 } });
 
-//         await Product.findAll({
-//             where: { shopAdminId: shopInfo.id },
-//             order: [['createdAt', 'DESC']]
-//         })
-//             .then((products) => {
-//                 res.send(products);
-//             })
+        await Product.findAll({
+            where: { shopAdminId: shopInfo.id },
+            order: [['createdAt', 'DESC']]
+        })
+            .then((products) => {
+                res.send(products);
+            })
 
-//     } catch (err) {
-//         console.error(err);
-//         res.status(403).send('Error');
-//     }
-// });
+    } catch (err) {
+        console.error(err);
+        res.status(403).send('Error');
+    }
+});
 
 module.exports = router;
