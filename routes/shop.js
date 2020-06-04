@@ -462,7 +462,7 @@ router.post('/delivery/:id', isLoggedIn, async (req, res, next) => {
             t_invoice: t_invoice,
             status: 4 //발송
         });
-
+        res.send('success')
     } catch (err) {
         console.error(err);
         res.status(403).send('Error');
