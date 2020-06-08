@@ -2,7 +2,7 @@ const express = require('express');
 const db = require('../models/index');
 
 const { isLoggedIn } = require('./middlewares');
-const { User, Closet, Design, DesignLike, Hashtag, Product } = require('../models');
+const { User, Closet, Design, DesignLike, Hashtag, Product, ImgByColor } = require('../models');
 
 const router = express.Router();
 
