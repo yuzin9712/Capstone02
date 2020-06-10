@@ -419,7 +419,7 @@ router.post('/updateCntBySeller', isLoggedIn, async(req, res) => {
 
 //각 쇼핑몰의 올린 상품 삭제 
 router.post('/deleteProductBySeller', isLoggedIn, async(req, res, nex) => {
-    var query1 = "delete from productInfo where productId = ?";
+    var query1 = "delete from productInfos where productId = ?";
     var query2 = "delete from products where id = ?";
     var query3 = "delete from imgByColors where productId = ?";
 
@@ -447,6 +447,7 @@ router.post('/deleteProductBySeller', isLoggedIn, async(req, res, nex) => {
             console.log(err);
         });
 
+        res.send("success")
     }catch(err){
         console.error(err);
     }
