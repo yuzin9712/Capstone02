@@ -54,7 +54,7 @@ router.post('/comment/:id', isLoggedIn, async (req, res, next) => {
             res.sendStatus(200);
         }, function (err) {
             console.error(err);
-            next(err);
+            res.status(403).send('Error');
         })
 
 });
@@ -76,7 +76,7 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
             res.send({ reviews: reviews, comments: comments })
         }, function (err) {
             console.error(err);
-            next(err);
+            res.status(403).send('Error');
         })
 
 });
@@ -100,10 +100,10 @@ router.post('/:id', isLoggedIn, async (req, res, next) => {
                 res.sendStatus(200);
             }, function (err) {
                 console.error(err);
-                next(err);
             })
     } catch (err) {
         console.error(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -148,6 +148,7 @@ router.post('/deleteReview', isLoggedIn, async (req, res, next) => {
 
     } catch (err) {
         console.error(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -183,6 +184,7 @@ router.post('/deleteComment', isLoggedIn, async (req, res, next) => {
 
     } catch (err) {
         console.error(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -216,6 +218,7 @@ router.post('/updateReview', isLoggedIn, async(req, res, next) => {
         }
     }catch(err){
         console.error(err);
+        res.status(403).send('Error');
     }
     
 });
@@ -253,6 +256,7 @@ router.post('/updateComment', isLoggedIn, async(req, res, next) => {
 
     }catch(err){
         console.error(err);
+        res.status(403).send('Error');
     }
 
 });

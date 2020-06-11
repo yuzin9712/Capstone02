@@ -29,19 +29,6 @@ const upload = multer({
     limits: { fileSize: 125 * 1024 * 1024 }, //25MB
 });
 
-/**사용자가 올린 게시물 조회!!!! */
-
-// router.post('/img', upload.single('img'), (req, res, next) => {
-//     console.log('/img로 들어왔음!!!');
-//     console.log(req.file); // single일때: 이미지 하나는 req.file로 나머지 정보는 req.body로 옴 // 속성 하나에 이미지 여러개 올렸음 --> array == 이미지들은 req.files로 나머지는 req.body로 접근!!
-//                           // 속성 여러 개에 이미지를 하나씩 업로드했다면 fields를 사용
-//     // const originalUrl = req.file.location;
-//     // const url = originalUrl.replace(/\/original\//, '/thumb/');
-//     // res.json({ url : originalUrl })
-//     console.log('success');
-//     // res.json({ url: req.file.location }); //S3버킷에 이미지주소
-// });
-
 router.post('/img',isLoggedIn, upload.array('img', 3), async (req, res, next) => {
     console.log('/img로 들어왔음!!!!');
     console.log(req.file);
@@ -102,7 +89,7 @@ router.post('/', isLoggedIn, async (req, res, next) => {
 
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -149,14 +136,10 @@ router.get('/followpost', isLoggedIn, async(req, res, next) => {
         .then((posts) => {
             res.send(posts);
         })
-        .catch((err) => {
-            console.error(err);
-            next(err);
-        })
 
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -203,7 +186,7 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
     })
     .catch((err) => {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     })
 });
 
@@ -247,7 +230,7 @@ router.get('/user', isLoggedIn, async (req, res, next) => {
     })
     .catch((err) => {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     });
 
 })
@@ -330,7 +313,7 @@ router.get('/:id', async(req, res, next) => { //게시물 아이디
     })
     .catch((err) => {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     })
 });
 
@@ -353,7 +336,7 @@ router.put('/:id', isLoggedIn, async(req, res, next) => {
         }
 } catch (err) {
     console.error(err);
-    next(err);
+    res.status(403).send('Error');
 }
 });
 
@@ -384,7 +367,7 @@ router.delete('/:id', isLoggedIn, async (req, res, next) => {
             }
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 
