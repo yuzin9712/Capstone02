@@ -12,7 +12,7 @@ const corsOptions = {
     credentials: true
 };
 require('dotenv').config();
-
+//테스트
 const pageRouter = require('./routes/page');
 const authRouter = require('./routes/auth');
 const postsRouter = require('./routes/post');
