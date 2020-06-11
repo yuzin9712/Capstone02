@@ -95,7 +95,7 @@ router.post('/post/:id', isLoggedIn, async (req, res, next) => {
 
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
     
 });
@@ -126,7 +126,7 @@ router.delete('/post/:id', isLoggedIn, async (req, res, next) => {
             }
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
     
 });
@@ -147,7 +147,7 @@ router.put('/post/:id', isLoggedIn, async (req, res, next) => {
         }
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 

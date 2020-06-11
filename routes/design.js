@@ -2,7 +2,7 @@ const express = require('express');
 const db = require('../models/index');
 
 const { isLoggedIn } = require('./middlewares');
-const { User, Closet, Design, DesignLike, Hashtag, Product } = require('../models');
+const { User, Closet, Design, DesignLike, Hashtag, Product, ImgByColor } = require('../models');
 
 const router = express.Router();
 
@@ -64,14 +64,11 @@ router.post('/hashtag', isLoggedIn, async (req, res, next) => {
             .then((designs) => {
                 res.send(designs);
             })
-            .catch((err) => {
-                console.error(err);
-                next(err);
-            })
+
         }
     } catch (err) {
         console.error(err);
-        return next(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -116,13 +113,10 @@ router.get('/best', isLoggedIn, async(req, res, next) => {
         .then((designs) => {
             res.send(designs);
         })
-        .catch((err) => {
-            console.error(err);
-            next(err);
-        })
+
     } catch(err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -173,13 +167,10 @@ router.get('/followpost', isLoggedIn, async(req, res, next) => {
         .then((designs) => {
             res.send(designs);
         })
-        .catch((err) => {
-            console.error(err);
-            next(err);
-        })
+
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -229,7 +220,7 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
     })
     .catch((err) => {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     })
 });
 
@@ -275,7 +266,7 @@ router.get('/user', isLoggedIn, async (req, res, next) => {
     })
     .catch((err) => {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     })
 });
 
@@ -310,7 +301,7 @@ router.get('/:id', isLoggedIn,  async (req, res, next) => {
         })
         .catch((err) => {
             console.error(err);
-            next(err);
+            res.status(403).send('Error');
         })
 });
 
@@ -343,8 +334,8 @@ router.put('/:id', isLoggedIn,  async (req, res, next) => {
         // console.log("2번: ", result.map(r => r[0]));
         res.send('success');
     }} catch (err) {
-    console.error(err);
-    next(err);
+        console.error(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -369,7 +360,7 @@ router.delete('/:id', isLoggedIn, async (req, res, next) => {
 
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 
 });
@@ -406,7 +397,7 @@ router.post('/:id', isLoggedIn, async (req, res, next) => { //이렇게 보낼 �
         }}
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 
 });

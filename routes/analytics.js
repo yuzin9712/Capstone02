@@ -7,10 +7,10 @@ const { Op } = require('sequelize');
 const router = express.Router();
 
 /**통계 1번  -> 상품 판매 수 / 카테고리별 가격 추가*/
-router.get('/category', async (req, res, next) => {
+router.get('/category', isLoggedIn, async (req, res, next) => {
     try {
         const shopInfo = await ShopAdmin.findOne({
-            where: { userId: 1, alianced: 1 }
+            where: { userId: req.user.id, alianced: 1 }
         });
 
         await OrderDetail.findAll({
@@ -32,10 +32,10 @@ router.get('/category', async (req, res, next) => {
 });
 
 /**카테고리별 판매액 */
-router.get('/category/total', async (req, res, next) => {
+router.get('/category/total',isLoggedIn, async (req, res, next) => {
     try {
         const shopInfo = await ShopAdmin.findOne({
-            where: { userId: 1, alianced: 1 }
+            where: { userId: req.user.id, alianced: 1 }
         });
 
         await OrderDetail.findAll({
@@ -57,10 +57,10 @@ router.get('/category/total', async (req, res, next) => {
 });
 
 /**통계 2번  -> 상품 판매 수*/
-router.get('/category/detail', async (req, res, next) => {
+router.get('/category/detail', isLoggedIn, async (req, res, next) => {
     try {
         const shopInfo = await ShopAdmin.findOne({
-            where: { userId: 1, alianced: 1 }
+            where: { userId: req.user.id, alianced: 1 }
         });
 
         const category1 = await OrderDetail.findAll({
@@ -144,10 +144,10 @@ router.get('/category/detail', async (req, res, next) => {
 // });
 
 /**통계 4번째  -> 상품 판매 총 가격으로 바꾸기*/
-router.get('/month', async (req, res, next) => {
+router.get('/month', isLoggedIn, async (req, res, next) => {
     try {
         const shopInfo = await ShopAdmin.findOne({
-            where: { userId: 1, alianced: 1 }
+            where: { userId: req.user.id, alianced: 1 }
         });
 
         await OrderDetail.findAll({
@@ -173,7 +173,7 @@ router.get('/month', async (req, res, next) => {
 });
 
 /**플랫폼 관리자 통계 1 -> 안팔린 쇼핑몰은 0으로 나오게 수정*/
-router.get('/shop', async (req, res, next) => {
+router.get('/shop',isLoggedIn, async (req, res, next) => {
     try {
 
         await ShopAdmin.findAll({
@@ -198,7 +198,7 @@ router.get('/shop', async (req, res, next) => {
 });
 
 /**플랫폼 관리자 통계 2*/
-router.get('/growth/sales', async (req, res, next) => {
+router.get('/growth/sales',isLoggedIn, async (req, res, next) => {
     try {
         await Order.findAll({
             attributes: [
@@ -216,7 +216,7 @@ router.get('/growth/sales', async (req, res, next) => {
 });
 
 /**플랫폼 관리자 통계 3*/
-router.get('/growth/users', async (req, res, next) => {
+router.get('/growth/users',isLoggedIn, async (req, res, next) => {
     try {
         await User.findAll({
             attributes: [

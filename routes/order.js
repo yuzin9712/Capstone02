@@ -74,7 +74,7 @@ router.post('/', isLoggedIn, async (req, res, next) => {
     
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 
 });
@@ -99,13 +99,10 @@ router.get('/', isLoggedIn, async (req, res, next) => {
         .then((orders) => {
             res.send(orders);
         })
-        .catch((err) => {
-            console.error(err);
-            next(err);
-        })
+
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 

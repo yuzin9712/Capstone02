@@ -102,7 +102,7 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
                     }
                 }, function (err) {
                     console.error(err);
-                    next(err);
+                    res.status(403).send('Error');
                 });
 
 
@@ -147,7 +147,7 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
                         }
                     }, function (err) {
                         console.error(err);
-                        next(err);
+                        res.status(403).send('Error');
                     });
             }
 
@@ -169,7 +169,7 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
                         }
                     }, function (err) {
                         console.error(err);
-                        next(err);
+                        res.status(403).send('Error');
                     });
             }
 
@@ -177,7 +177,7 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
 
         } catch (err) {
             console.error(err);
-            next(err);
+            res.status(403).send('Error');
         }
     }
 
@@ -195,7 +195,7 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
                     }
                 }, function (err) {
                     console.error(err);
-                    next(err);
+                    res.status(403).send('Error');
                 });
 
             var k = 0;
@@ -217,7 +217,7 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
                         }
                     }, function (err) {
                         console.error(err);
-                        next(err);
+                        res.status(403).send('Error');
                     });
             }
 
@@ -239,7 +239,7 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
                         }
                     }, function (err) {
                         console.error(err);
-                        next(err);
+                        res.status(403).send('Error');
                     });
             }
 
@@ -247,6 +247,7 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
 
         } catch (err) {
             console.error(err);
+            res.status(403).send('Error');
         }
 
     }
@@ -286,7 +287,7 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
                     }
                 }, function (err) {
                     console.error(err);
-                    next(err);
+                    res.status(403).send('Error');
                 });
 
             var k = 0;
@@ -309,7 +310,7 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
                         }
                     }, function (err) {
                         console.error(err);
-                        next(err);
+                        res.status(403).send('Error');
                     });
             }
 
@@ -331,7 +332,7 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
                         }
                     }, function (err) {
                         console.error(err);
-                        next(err);
+                        res.status(403).send('Error');
                     });
             }
 
@@ -339,6 +340,7 @@ router.post('/addproduct', isLoggedIn, async (req, res, next) => {
 
         } catch (err) {
             console.error(err);
+            res.status(403).send('Error');
         }
     }
 });
@@ -388,6 +390,7 @@ router.get('/productListBySeller', isLoggedIn, async(req, res, next) => {
 
     }catch(err){
         console.error(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -413,6 +416,7 @@ router.post('/updateCntBySeller', isLoggedIn, async(req, res) => {
 
     }catch(err){
         console.error(err);
+        res.status(403).send('Error');
     }
 
 });
@@ -442,6 +446,7 @@ router.post('/deleteProductBySeller', isLoggedIn, async(req, res, nex) => {
 
     }catch(err){
         console.error(err);
+        res.status(403).send('Error');
     }
 });
 

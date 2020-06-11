@@ -22,7 +22,7 @@ router.get('/post/:id', isLoggedIn,  async(req, res, next) => {
         res.send('success');
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -41,7 +41,7 @@ router.delete('/post/:id', isLoggedIn, async(req, res, next) => {
         res.send('success');
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -62,7 +62,7 @@ router.get('/design/:id', isLoggedIn, async(req, res, next) => {
         res.send('추천 코디 게시물 좋아요 누르기 성공');
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -81,7 +81,7 @@ router.delete('/design/:id', isLoggedIn, async(req, res, next) => {
         res.send('추천 코디 게시물 좋아요 취소하기 성공');
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 

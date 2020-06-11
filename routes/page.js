@@ -109,14 +109,8 @@ router.get('/design',isLoggedIn, async (req, res, next) => {
         })
         .catch((err) => {
             console.error(err);
-            next(err);
+            res.status(403).send('Error');
         })
-
-    //     res.send(designs);
-    // } catch (err) {
-    //     console.error(err);
-    //     next(err);
-    // }
 });
 
 router.get('/bestdesign',isLoggedIn, async (req, res, next) => {
@@ -157,7 +151,7 @@ router.get('/bestdesign',isLoggedIn, async (req, res, next) => {
         res.send(bestDesigns);
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -198,23 +192,12 @@ router.get('/post', isLoggedIn, async (req, res, next) => {
             order: [['createdAt', 'DESC']],
         })
         .then((posts) => {
-            // res.render('post', {
-            //     title: 'example',
-            //     twits: posts,
-            //     user: req.user,
-            //     loginError: req.flash('loginError'),
-            // });
             res.send(posts);
-            // console.log(`posts= ${JSON.stringify(posts)}`);
         })
-        .catch((err) => {
-            console.error(err);
-            next(err);
-        });
-        // console.log(JSON.stringify(req.user));
+
     } catch(err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 
 });
@@ -234,14 +217,12 @@ router.get('/closet', isLoggedIn, async (req, res, next) => {
     })
     .then((closets) => {
         res.send(closets);
-
-        // console.log(`posts= ${JSON.stringify(posts)}`);
     })
     .catch((err) => {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     });
-    // console.log(JSON.stringify(req.user));
+
 });
 
 module.exports = router;

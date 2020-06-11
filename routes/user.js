@@ -14,7 +14,7 @@ router.post('/:id/follow', isLoggedIn, async(req, res, next) => {
         res.send('success');
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -29,7 +29,7 @@ router.delete('/:id/follow', isLoggedIn, async(req, res, next) => {
         res.send('success');
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 
