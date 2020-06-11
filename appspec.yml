@@ -3,7 +3,3 @@ os: linux
 files:
   - source: /
     destination: /home/ubuntu/deploy/latest/
-hooks:
-  AfterInstall:
-  - location: execute-deploy.sh
-    timeout: 180
