@@ -1,43 +1,40 @@
 language: node_js
-os: linux
 node_js:
-  - 12.14.1
-before_install:
-  - npm install -g yarn
+  - "12.14.1"
 branches:
   only:
-    - master
-before_deploy:
-  - rm -rf node_modules
-  - zip -r latest
-  - mkdir -p deploy
-  - mv latest.zip deploy/latest.zip
-deploy:
-  - provider: s3
-    access_key_id: $AWS_ACCESS_KEY
-    secret_access_key: $AWS_SECRET_KEY
-    bucket: s3forcode
+    - 
+before_deploy: # 배포하기전 하는 작업들
+  - rm -rf node_modules # travis가 설치한 node_moduels를 삭제
+  - zip -r latest * # node-koa-server 라는 이름으로 zip 파일 생성
+  - mkdir -p deploy # deploy 라는 디렉터리를 만듬
+  - mv latest.zip deploy/latest.zip # deploy 디렉터리로 node-koa-server.zip 파일을 이동
+deploy: # 배포
+  - provider: s3 # AWS S3를 의미
+    access_key_id: $AWS_ACCESS_KEY # Travis repo settings에 설정된 값
+    secret_access_key: $AWS_SECRET_KEY # Travis repo settings에 설정된 값
+    bucket: s3forcode # S3에 생성한 버킷
     region: ap-northeast-2
-    skip_cleanup: true
-    local_dir: deploy
+    skip_cleanup: true 
+    local_dir: deploy # deploy 디렉터리에 있는 파일을 s3로 업로드 하겠다는 의미
+    wait-until-deployed: true
+    on:
+      repo: yuzin9712/Capstone02 #Github 주소
+      branch: master
+  - provider: codedeploy # AWS CodeDeploy를 의미
+    access_key_id: $AWS_ACCESS_KEY # Travis repo settings에 설정된 값
+    secret_access_key: $AWS_SECRET_KEY # Travis repo settings에 설정된 값
+    bucket: s3forcode # AWS CodeDeploy가 다운로드 받은 버킷
+    key: latest.zip # 해당 버킷에 저장되어 있는 파일 이름
+    bundle_type: zip # 버킷에 저장되어 있는 파일의 확장자
+    application: capcodedeploy # AWS 배포 애플리케이션
+    deployment_group: capstone # AWS 배포 애플리케이션에 만들어져 있는 배포 그룹
+    region: ap-northeast-2
     wait-until-deployed: true
     on:
       repo: yuzin9712/Capstone02
       branch: master
-  - provider: codedeploy
-    access_key_id: $AWS_ACCESS_KEY
-    secret_access_key: $AWS_SECRET_KEY
-    bucket: s3forcode
-    key: latest.zip
-    bundle_type: zip
-    application: capcodedeploy
-    deployment_group: capstone
-    region: ap-northeast-2
-    wait-until-deployed: true
-    on:
-      repo: yuzin9712/Capstone02
-      branch: master
-notifications:
+notifications: 
   email:
     recipients:
       - dbwls97@ajou.ac.kr
