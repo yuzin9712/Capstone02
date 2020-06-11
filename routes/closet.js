@@ -75,7 +75,7 @@ router.post('/', isLoggedIn, async (req, res, next) => {
         res.send('success');
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -91,7 +91,7 @@ router.get('/all', async (req, res, next) => {
     })
     .catch((err) => {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     })
 })
 
@@ -117,7 +117,7 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
     })
     .catch((err) => {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     });
 });
 
@@ -139,7 +139,7 @@ router.delete('/:id', isLoggedIn, async (req, res, next) => { //옷장 아이디
 
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 

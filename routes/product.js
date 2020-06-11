@@ -19,7 +19,7 @@ router.get('/', isLoggedIn, async (req, res, next) => {
         res.send({ productRows: products.reverse(), imgArr: imgs });
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 
 });
@@ -43,7 +43,7 @@ router.get('/category/:id', isLoggedIn, async (req, res, next) => {
         }
     }, function (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     });
 
     await db.sequelize.query(query2, {
@@ -62,7 +62,7 @@ router.get('/category/:id', isLoggedIn, async (req, res, next) => {
         }
     }, function (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     })
 })
 
@@ -78,7 +78,7 @@ router.post('/search', isLoggedIn, async (req, res, next) => {
         res.send({productRows: searchedProducts.reverse()});
     }, function (err) {
         console.error(err);
-        // next(err);
+        res.status(403).send('Error');
     })
 });
 
@@ -90,23 +90,30 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
     var query3 = "select * from imgByColors where productId =?";
     var query4 = "select * from reviews where productId =?";
 
-    const [selectedProduct, metadata1] = await db.sequelize.query(query1, {
-        replacements: [productId]
-    });
+    try {
+        const [selectedProduct, metadata1] = await db.sequelize.query(query1, {
+            replacements: [productId]
+        });
+    
+        const [detail, metadata2] = await db.sequelize.query(query2, {
+            replacements: [productId]
+        });
+    
+        const [colors, metadata3] = await db.sequelize.query(query3, {
+            replacements: [productId]
+        });
+    
+        const [review, meatadata4] = await db.sequelize.query(query4, {
+            replacements: [productId]
+        });
+    
+        res.send({selected_product: selectedProduct, detail: detail, reviews: review, colors: colors});
+    } catch (err) {
+        console.error(err);
+        res.status(403).send('Error');
+    }
 
-    const [detail, metadata2] = await db.sequelize.query(query2, {
-        replacements: [productId]
-    });
 
-    const [colors, metadata3] = await db.sequelize.query(query3, {
-        replacements: [productId]
-    });
-
-    const [review, meatadata4] = await db.sequelize.query(query4, {
-        replacements: [productId]
-    });
-
-    res.send({selected_product: selectedProduct, detail: detail, reviews: review, colors: colors});
 });
 
 module.exports = router;

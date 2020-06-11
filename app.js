@@ -11,6 +11,7 @@ const corsOptions = {
     origin: true,
     credentials: true
 };
+const clientApp = path.join(__dirname + './build');
 require('dotenv').config();
 
 const pageRouter = require('./routes/page');
@@ -34,12 +35,12 @@ const {sequelize} = require('./models');
 const passportConfig = require('./passport');
 
 const app = express();
+//app.use(express.static(__dirname + 'index.html'));
 sequelize.sync();
 passportConfig(passport);
 
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'pug');
 app.set('port', process.env.PORT || 8001);
+
 
 app.use(cors(corsOptions));
 app.use(bodyParser.json({ type: 'application/json'}));
@@ -58,10 +59,14 @@ app.use(session({
         secure: false,
     },
 }));
+
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
+// app.set('views', path.join(__dirname, 'build'));
+// app.set('view engine', 'jade');
+// app.use(express.static(path.join(__dirname, 'build')));
 app.use('/page', pageRouter);
 app.use('/auth', authRouter);
 app.use('/post', postsRouter);
@@ -78,18 +83,40 @@ app.use('/review', reviewRouter);
 app.use('/shop', shopRouter);
 app.use('/admin', adminRouter);
 app.use('/', analyticsRouter);
+// app.use('/api/page', pageRouter);
+// app.use('/api/auth', authRouter);
+// app.use('/api/post', postsRouter);
+// app.use('/api/user', usersRouter);
+// app.use('/api/closet', closetsRouter);
+// app.use('/api/like', likesRouter);
+// app.use('/api/comment', commentRouter);
+// app.use('/api/design', designRouter);
+// app.use('/api/product', productRouter);
+// app.use('/api/cart', cartRouter);
+// app.use('/api/message', messageRouter);
+// app.use('/api/order', orderRouter);
+// app.use('/api/review', reviewRouter);
+// app.use('/api/shop', shopRouter);
+// app.use('/api/admin', adminRouter);
+// app.use('/api/', analyticsRouter);
+
+app.use('/', express.static('build'));
+
 
 app.use((req, res, next) => {
     const err = new Error('Not Found');
     err.status = 404;
-    next(err);
+    console.error(err);
+    res.status(404).send('Error');
 });
 
 app.use((err, req, res, next) => {
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development ? err : {}';
-    res.status(err.status || 500);
-    res.render('error');
+    //res.status(err.status || 500);
+    //res.render('error');
+    console.error(err);
+    res.status(500).send('Error');
 });
 
 app.listen(app.get('port'), () => {

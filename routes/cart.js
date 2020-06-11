@@ -40,7 +40,7 @@ function getProInfoByPidQuery(productid) {
             resolve(selected_productInfos);
         }, function (err) {
             console.error(err);
-            next(err);
+            res.status(403).send('Error');
         })
     });
 }
@@ -56,7 +56,7 @@ function getProductByPidQuery(productid){
             resolve(pro);
         }, function(err){
             console.error(err);
-            next(err);
+            res.status(403).send('Error');
         })
     });
 }
@@ -136,7 +136,7 @@ router.post('/toolbar', isLoggedIn, async (req, res, next) => {
             selectedProductInfo = productInfo[0];
         }, function(err) {
             console.error(err);
-            next(err);
+            res.status(403).send('Error');
         });
 
         await db.sequelize.query(query4, {replacements: [selectedProduct.productId]})
@@ -144,7 +144,7 @@ router.post('/toolbar', isLoggedIn, async (req, res, next) => {
             size = productInfos[0].size;
         }, function(err){
             console.error(err);
-            next(err);
+            res.status(403).send('Error');
         });
         
         var data = [ req.user.id, selectedProductInfo.id, selectedProductInfo.pname, 1, selectedProductInfo.img, selectedProduct.color, new Date(), size];
@@ -156,12 +156,11 @@ router.post('/toolbar', isLoggedIn, async (req, res, next) => {
             res.send('success');
         },function (err) {
             console.error(err);
-            next(err);
         });
         
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 
@@ -178,6 +177,9 @@ router.put('/:id', isLoggedIn, async (req, res, next) => {
     .spread(function (modified) {
         console.log(modified);
         res.send('success');
+    },function (err) {
+        console.error(err);
+        res.status(403).send('Error');
     })
 });
 
@@ -195,7 +197,6 @@ router.post('/:id', isLoggedIn, async (req, res, next) => {
             selectedProduct = product[0];
         }, function (err) {
             console.error(err);
-            next(err);
         });
 
         console.log(selectedProduct);
@@ -208,11 +209,10 @@ router.post('/:id', isLoggedIn, async (req, res, next) => {
             res.send('success');
         }, function (err) {
             console.error(err);
-            next(err);
         });
     } catch (err) {
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 });
 //장바구니 삭제
@@ -231,12 +231,11 @@ router.delete('/:id', isLoggedIn, async(req, res, next) => {
             res.send('delete cart success!');
         }, function(err){
             console.error(err);
-            next(err);
         });
         
     }catch(err){
         console.error(err);
-        next(err);
+        res.status(403).send('Error');
     }
 
 });

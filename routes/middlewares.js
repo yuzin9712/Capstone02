@@ -10,6 +10,7 @@ exports.isNotLoggedIn = (req, res, next) => {
     if (!req.isAuthenticated()) {
         next();
     } else {
-        res.redirect('/');
+        console.error(err);
+        res.status(403).send('Error');
     }
 };
