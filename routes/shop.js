@@ -419,9 +419,9 @@ router.post('/updateCntBySeller', isLoggedIn, async(req, res) => {
 
 //각 쇼핑몰의 올린 상품 삭제 
 router.post('/deleteProductBySeller', isLoggedIn, async(req, res, nex) => {
-    var query1 = "delete from productInfo where productId = ?";
-    var query2 = "delete from products where id = ?";
-    var query3 = "delete from imgByColors where productId = ?";
+    var query1 = "UPDATE productInfos SET deletedAt = NOW() WHERE productId = ?";
+    var query2 = "UPDATE products SET deletedAt = NOW() WHERE id = ?";
+    //var query3 = "delete from imgByColors where productId = ?";
 
     var pid = req.body.productId;
 
@@ -436,13 +436,6 @@ router.post('/deleteProductBySeller', isLoggedIn, async(req, res, nex) => {
         await db.sequelize.query(query2, {replacements : [pid]})
         .spread(function(deleted2){
             console.log(deleted2);
-        }, function(err){
-            console.log(err);
-        });
-
-        await db.sequelize.query(query2, {replacements : [pid]})
-        .spread(function(deleted3){
-            console.log(deleted3);
         }, function(err){
             console.log(err);
         });
