@@ -2,6 +2,35 @@ language: node_js
 os: linux
 node_js:
   - 12.14.1
+services:
+  - mysql
+cache:
+  directories:
+    - node_modules
+deploy:
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key: $AWS_SECRET_KEY
+    local_dir: dpl_cd_upload
+    skip_cleanup: true
+    on: &2
+      repo: yuzin9712/Capstone02
+      bucket: s3forcode
+      region: ap-northeast-2
+  - provider: codedeploy
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key: $AWS_SECRET_KEY
+    bucket: s3forcode
+    key: latest.zip
+    bundle_type: zip
+    application: capcodedeploy
+    deployment_group: capstone
+    region: ap-northeast-2
+    on: *2
+script:
+  - zip -r latest *
+  - mkdir -p dpl_cd_upload
+  - mv latest.zip dpl_cd_upload/latest.zip
 branches:
   only:
     - master
