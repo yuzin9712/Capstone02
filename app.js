@@ -8,7 +8,7 @@ const passport = require('passport')
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const hpp = require('hpp');
-require('dotenv').config({path:'usr/bin/env'});
+require('dotenv').config({path:'/usr/bin/env'});
 const cors = require('cors');
 const corsOptions = {
     origin: true,
