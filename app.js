@@ -43,10 +43,10 @@ app.use(express.static(__dirname + 'index.html'));
 sequelize.sync();
 passportConfig(passport);
 
-app.set('port', process.env.PORT || 8001);
+app.set('port', process.env["PORT"] || 8001);
 
 /**배포 환경일 경우, 보다 많은 사용자 정보를 로그로 남김 */
-if(process.env.NODE_ENV === 'production') { 
+if(process.env["NODE_ENV"] === 'production') { 
     app.use(morgan('combined'));
 } else {
     app.use(morgan('dev'));
@@ -59,11 +59,11 @@ app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
-app.use(cookieParser('process.env.COOKIE_SECRET'));
+app.use(cookieParser('process.env["COOKIE_SECRET"]'));
 app.use(session({
     resave: false,
     saveUninitialized: false,
-    secret: 'process.env.COOKIE_SECRET',
+    secret: 'process.env["COOKIE_SECRET"]',
     cookie: {
         httpOnly: true,
         secure: false,

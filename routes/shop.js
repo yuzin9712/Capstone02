@@ -11,8 +11,8 @@ const { ShopAdmin, Product, ProductInfo, Order, OrderDetail, User, ImgByColor } 
 const router = express.Router();
 
 AWS.config.update({
-    accessKeyId: process.env.S3_ACCESS_KEY_ID,
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+    accessKeyId: process.env["S3_ACCESS_KEY_ID"],
+    secretAccessKey: process.env["S3_SECRET_ACCESS_KEY"],
     region: 'ap-northeast-2',
 });
 
