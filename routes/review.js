@@ -82,7 +82,7 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
 });
 
 /**리뷰 작성하기 - 상품 아이디값이 파라미터로 옴 */
-router.post('/:id', isLoggedIn, async (req, res, next) => {
+router.post('/post/:id', isLoggedIn, async (req, res, next) => {
     console.log('------------들어옴-------------');
 
     var content = req.body.content;
@@ -112,7 +112,7 @@ router.post('/deleteReview', isLoggedIn, async (req, res, next) => {
     var rid = req.body.reviewId;
     var query1 = "delete from reviews where id = ?";
     var query2 = "delete from comments where reviewId = ?";
-    var query0 = "select from reviews where id = ?";
+    var query0 = "select * from reviews where id = ?";
     var uid = req.user.id;
     var id;
 
@@ -121,26 +121,28 @@ router.post('/deleteReview', isLoggedIn, async (req, res, next) => {
         await db.sequelize.query(query0, { replacements: [rid] })
             .spread(function (review) {
                 console.log(review);
-                id = review.userId;
+                id = review[0].userId;
             }, function (err) {
                 console.log(err);
             });
 
         if (uid == id) {
+          
+          await db.sequelize.query(query2, { replacements: [rid] })
+          .spread(function (deleted2) {
+              console.log(deleted2);
+          }, function (err) {
+              console.log(err);
+          });
+          
             await db.sequelize.query(query1, { replacements: [rid] })
                 .spread(function (deleted1) {
                     console.log(deleted1);
-                }, function (err) {
-                    console.log(err);
-                });
-
-            await db.sequelize.query(query2, { replacements: [rid] })
-                .spread(function (deleted2) {
-                    console.log(deleted2);
                     res.send('delete review done');
                 }, function (err) {
                     console.log(err);
                 });
+
 
         } else {
             res.send('delete review fail');
@@ -155,8 +157,8 @@ router.post('/deleteReview', isLoggedIn, async (req, res, next) => {
 //리뷰에 달린 답글 삭제하기
 router.post('/deleteComment', isLoggedIn, async (req, res, next) => {
     var comid = req.body.commentId;
-    var query = "delete from comments where reviewId = ?";
-    var query2 = "select from comments where id = ?";
+    var query = "delete from comments where id = ?";
+    var query2 = "select * from comments where id = ?";
     var uid = req.user.id;
     var id;
 
@@ -165,7 +167,7 @@ router.post('/deleteComment', isLoggedIn, async (req, res, next) => {
         await db.sequelize.query(query2, { replacements: [comid] })
             .spread(function (comment) {
                 console.log(comment);
-                id = comment.userId;
+                id = comment[0].userId;
             }, function (err) {
                 console.error(err);
             });
@@ -201,7 +203,7 @@ router.post('/updateReview', isLoggedIn, async(req, res, next) => {
         await db.sequelize.query(query1, { replacements : [rid] })
         .spread(function(review){
             console.dir(review);
-            id = review.userId;
+            id = review[0].userId;
         }, function(err){
             console.error(err);
         });
@@ -226,7 +228,7 @@ router.post('/updateReview', isLoggedIn, async(req, res, next) => {
 //답글 수정하기
 router.post('/updateComment', isLoggedIn, async(req, res, next) => {
     var content = req.body.comment;
-    var uid = req.user[0].id;
+    var uid = req.user.id;
     var comid = req.body.commentId;
     var id;
 
@@ -237,7 +239,7 @@ router.post('/updateComment', isLoggedIn, async(req, res, next) => {
         await db.sequelize.query(query1, {replacements : [comid] })
         .spread(function(comment){
             console.dir(comment);
-            id = comment.userId;
+            id = comment[0].userId;
         }, function(err){
             console.error(err);
         });
