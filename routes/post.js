@@ -352,7 +352,7 @@ router.delete('/:id', isLoggedIn, async (req, res, next) => {
                     attributes: []
                 }
             }],
-            where: { id: req.params.id, userId: 2 }});
+            where: { id: req.params.id, userId: req.user.id }});
 
             if(post == undefined) {
                 res.send('없는 게시물');
