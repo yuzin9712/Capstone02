@@ -82,6 +82,7 @@ router.get('/design', isLoggedIn, async (req, res, next) => {
                 }
             },{
                 model: Closet,
+                paranoid: false,
                 attributes: ['id'],
                 paranoid: false,
                 include: [{

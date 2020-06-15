@@ -8,12 +8,17 @@ const router = express.Router();
 
 /**제휴 신청 목록 조회 */
 router.get('/', async (req, res, next) => {
+
+
     try {
-        var query1 = "select * from shopAdmins where alianced = 1";
-        var query2 = "select * from shopAdmins where alianced = 0 and deletedAt is null";
+        var query1 = "select * from users, shopAdmins where shopAdmins.alianced = 1 and users.id = shopAdmins.userId";
+        var query2 = "select * from users, shopAdmins where shopAdmins.alianced = 0 and shopAdmins.deletedAt is null and users.id = shopAdmins.userId";
 
         const [alianced, metadata] = await db.sequelize.query(query1);
         const [notAlianced, metadata2] = await db.sequelize.query(query2);
+
+        console.dir(alianced);
+        console.dir(notAlianced);
 
         res.send({alianced: alianced, notAlianced: notAlianced});
     } catch (err) {
