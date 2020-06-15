@@ -3,7 +3,7 @@ require('dotenv').config();
 module.exports = {
     development: {
         username: 'user',
-        password: process.env.SEQUELIZE_PASSWORD,
+        password: process.env["SEQUELIZE_PASSWORD"],
         database: 'newcap',
         host: 'capstone-project.cojwntxe9hru.ap-northeast-2.rds.amazonaws.com',
         dialect: 'mysql',
@@ -11,7 +11,7 @@ module.exports = {
     },
     production: {
         username: "user",
-        password: process.env.SEQUELIZE_PASSWORD,
+        password: process.env["SEQUELIZE_PASSWORD"],
         database: "newcap",
         host: "capstone-project.cojwntxe9hru.ap-northeast-2.rds.amazonaws.com",
         dialect: "mysql",

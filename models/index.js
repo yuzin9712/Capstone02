@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize');
-const env = process.env.NODE_ENV || 'development';
+const env = process.env["NODE_ENV"] || 'development';
 const config = require('../config/config')[env];
 const db = {};
 
@@ -19,7 +19,7 @@ db.Post = require('./post')(sequelize, Sequelize);
 db.Review = require('./review')(sequelize, Sequelize);
 db.Cart = require('./cart')(sequelize, Sequelize);
 db.Closet = require('./closet')(sequelize, Sequelize);
-db.PImg = require('./Pimg')(sequelize, Sequelize);
+db.PImg = require('./pimg')(sequelize, Sequelize);
 db.PostLike = require('./postLike')(sequelize, Sequelize);
 db.PostComment = require('./postComment')(sequelize, Sequelize);
 db.Design = require('./design')(sequelize, Sequelize);
