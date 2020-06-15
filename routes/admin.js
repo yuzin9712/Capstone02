@@ -12,10 +12,13 @@ router.get('/', async (req, res, next) => {
 
     try {
         var query1 = "select * from shopAdmins, users where shopAdmins.alianced = 1 and users.id = shopAdmins.userId";
-        var query2 = "select * from shopAdmins, users where shopAdmins.alianced = 0 and deletedAt is null and users.id = shopAdmins.userId";
+        var query2 = "select * from shopAdmins, users where shopAdmins.alianced = 0 and shopAdmins.deletedAt is null and users.id = shopAdmins.userId";
 
         const [alianced, metadata] = await db.sequelize.query(query1);
         const [notAlianced, metadata2] = await db.sequelize.query(query2);
+
+        console.dir(alianced);
+        console.dir(notAlianced);
 
         res.send({alianced: alianced, notAlianced: notAlianced});
     } catch (err) {
