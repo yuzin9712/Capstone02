@@ -6,14 +6,18 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const passport = require('passport')
 const bodyParser = require('body-parser');
+const helmet = require('helmet');
+const hpp = require('hpp');
+require('dotenv').config();
 const cors = require('cors');
 const corsOptions = {
     origin: true,
     credentials: true
 };
+
 const clientApp = path.join(__dirname + './build');
-require('dotenv').config();
-//테스트!!
+//테스트한다!!!!!!!!!!!!
+
 const pageRouter = require('./routes/page');
 const authRouter = require('./routes/auth');
 const postsRouter = require('./routes/post');
@@ -35,12 +39,18 @@ const {sequelize} = require('./models');
 const passportConfig = require('./passport');
 
 const app = express();
-//app.use(express.static(__dirname + 'index.html'));
+app.use(express.static(__dirname + 'index.html'));
 sequelize.sync();
 passportConfig(passport);
 
 app.set('port', process.env.PORT || 8001);
 
+/**배포 환경일 경우, 보다 많은 사용자 정보를 로그로 남김 */
+if(process.env.NODE_ENV === 'production') { 
+    app.use(morgan('combined'));
+} else {
+    app.use(morgan('dev'));
+}
 
 app.use(cors(corsOptions));
 app.use(bodyParser.json({ type: 'application/json'}));
@@ -64,9 +74,9 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-// app.set('views', path.join(__dirname, 'build'));
-// app.set('view engine', 'jade');
-// app.use(express.static(path.join(__dirname, 'build')));
+app.set('views', path.join(__dirname, 'build'));
+app.set('view engine', 'jade');
+app.use(express.static(path.join(__dirname, 'build')));
 
 app.use('/api/page', pageRouter);
 app.use('/api/auth', authRouter);
