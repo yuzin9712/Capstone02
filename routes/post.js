@@ -251,6 +251,7 @@ router.get('/:id', async(req, res, next) => { //게시물 아이디
             include: {
                 model: Closet,
                 attributes: ['id'],
+                paranoid: false,
                 include: [{
                     model: Product,
                     include: [{
@@ -277,6 +278,7 @@ router.get('/:id', async(req, res, next) => { //게시물 아이디
                 include: {
                     model: Closet,
                     attributes: ['id'],
+                    paranoid: false,
                     include: [{
                         model: Product,
                         include: [{

@@ -133,7 +133,7 @@ router.delete('/:id', isLoggedIn, async (req, res, next) => { //옷장 아이디
 
         console.log('이게무슨값일까?????',closet.products.map(r=>Number(r.id))); //사용된 상품들의 아이디를 배열로 만들어버리기
         
-        await closet.removeProducts(closet.products.map(r=>Number(r.id))); //다대다 관계의 가운데 테이블은 직접 접근할 수 없음!!!!
+        //await closet.removeProducts(closet.products.map(r=>Number(r.id))); //다대다 관계의 가운데 테이블은 직접 접근할 수 없음!!!!
         await closet.destroy({});
         res.send('success');
 

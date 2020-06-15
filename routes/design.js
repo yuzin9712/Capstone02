@@ -37,6 +37,7 @@ router.post('/hashtag', isLoggedIn, async (req, res, next) => {
                 },{
                     model: Closet,
                     attributes: ['id'],
+                    paranoid: false,
                     include: [{
                         model: Product,
                         include: [{
@@ -86,6 +87,7 @@ router.get('/best', isLoggedIn, async(req, res, next) => {
             },{
                 model: Closet,
                 attributes: ['id'],
+                paranoid: false,
                 include: [{
                     model: Product,
                     include: [{
@@ -139,6 +141,7 @@ router.get('/followpost', isLoggedIn, async(req, res, next) => {
             },{
                 model: Closet,
                 attributes: ['id'],
+                paranoid: false,
                 include: [{
                     model: Product,
                     include: [{
@@ -190,6 +193,7 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
         },{
             model: Closet,
             attributes: ['id'],
+            paranoid: false,
             include: [{
                 model: Product,
                 include: [{
@@ -236,6 +240,7 @@ router.get('/user', isLoggedIn, async (req, res, next) => {
         },{
             model: Closet,
             attributes: ['id'],
+            paranoid: false,
             include: [{
                 model: Product,
                 include: [{
@@ -283,6 +288,7 @@ router.get('/:id', isLoggedIn,  async (req, res, next) => {
             },{
                 model: Closet,
                 attributes: ['id'],
+                paranoid: false,
                 include: [{
                     model: Product,
                     through: {
@@ -350,7 +356,7 @@ router.delete('/:id', isLoggedIn, async (req, res, next) => {
                     attributes: []
                 }
             }],
-            where: { id: parseInt(req.params.id,10), userId: 2 }});
+            where: { id: parseInt(req.params.id,10), userId: req.user.id }});
 
         console.log('이게무슨값일까?????',design.hashtags.map(r=>Number(r.id))); //사용된 상품들의 아이디를 배열로 만들어버리기
         

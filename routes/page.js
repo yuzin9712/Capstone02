@@ -69,7 +69,7 @@ router.get('/join', isNotLoggedIn, (req, res) => {
 //     // console.log(JSON.stringify(req.user));
 // });
 
-router.get('/design',isLoggedIn, async (req, res, next) => {
+router.get('/design', isLoggedIn, async (req, res, next) => {
 
     // try {
 
@@ -83,6 +83,7 @@ router.get('/design',isLoggedIn, async (req, res, next) => {
             },{
                 model: Closet,
                 attributes: ['id'],
+                paranoid: false,
                 include: [{
                     model: Product,
                     through: {
@@ -113,7 +114,7 @@ router.get('/design',isLoggedIn, async (req, res, next) => {
         })
 });
 
-router.get('/bestdesign',isLoggedIn, async (req, res, next) => {
+router.get('/bestdesign',  async (req, res, next) => {
     try {
         const bestDesigns = await Design.findAll({
             include: [{
@@ -125,6 +126,7 @@ router.get('/bestdesign',isLoggedIn, async (req, res, next) => {
             },{
                 model: Closet,
                 attributes: ['id'],
+                paranoid: false,
                 include: [{
                     model: Product,
                     through: {
