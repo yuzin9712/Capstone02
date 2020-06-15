@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "export PORT=8001 NODE_ENV=production node app",
+    "dev": "node app",
     "start": "nodemon app",
     "test": "exit"
   },
