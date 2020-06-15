@@ -206,7 +206,7 @@ router.get('/post', isLoggedIn, async (req, res, next) => {
 });
 
 /*나의 옷장 페이지*/
-router.get('/closet', isLoggedIn, async (req, res, next) => {
+router.get('/closet/:id', isLoggedIn, async (req, res, next) => {
     await Closet.findAll({
         include: {
             model: Product, //사용된 제품 정보도 같이 나온다.
@@ -215,7 +215,7 @@ router.get('/closet', isLoggedIn, async (req, res, next) => {
                  attributes: []//relation table의 attribute는 안뽑히게함!
             }
         },
-        where: { userId: req.user.id },
+        where: { userId: parseInt(req.params.id, 10) },
         order: [['createdAt', 'DESC']],
     })
     .then((closets) => {

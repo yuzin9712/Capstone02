@@ -2,6 +2,8 @@ const express = require('express');
 
 const { isLoggedIn } = require('./middlewares');
 const { User } = require('../models');
+const db = require('../models');
+const { Op } = require('sequelize');
 
 const router = express.Router();
 
@@ -32,5 +34,48 @@ router.delete('/:id/follow', isLoggedIn, async(req, res, next) => {
         res.status(403).send('Error');
     }
 });
+
+/**각 유저의 팔로잉 팔로우 수 구하기 */
+router.get('/:id', async (req, res, next) => {
+    try {
+
+        const userInfo =  await User.findOne({
+            attributes: [
+                        [
+                            db.sequelize.literal(`(
+                                SELECT COUNT(*) FROM Follow AS Followers WHERE Followers.followingId = user.id)`), //좋아요 수 구하기!!!!
+                            'Followernum' //파라미터로 주어진 사용자를 팔로잉하는 팔로워들
+                        ],
+                        [
+                            db.sequelize.literal(`(
+                                SELECT COUNT(*) FROM Follow AS Followings WHERE Followings.followerId = user.id)`), //좋아요 수 구하기!!!!
+                            'Followingnum' //파라미터로 주어진 사용자가 팔로우하는 사람들
+                        ],
+            ],
+            where: { id: parseInt(req.params.id, 10) },
+            include: [{
+                model: User,
+                attributes: ['id','name'],
+                as: 'Followers',
+                through: {
+                    attributes: []
+                },
+            }, {
+                model: User,
+                attributes: ['id','name'],
+                as: 'Followings',
+                through: {
+                    attributes: []
+                },
+            }],
+        });
+
+        res.send(userInfo);
+
+    } catch (err) {
+        console.error(err);
+        res.status(403).send('Error');
+    }
+})
 
 module.exports = router;

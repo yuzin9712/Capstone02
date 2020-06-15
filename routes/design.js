@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../models/index');
+const { Op } = require('sequelize');
 
 const { isLoggedIn } = require('./middlewares');
 const { User, Closet, Design, DesignLike, Hashtag, Product, ImgByColor } = require('../models');
@@ -229,7 +230,7 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
 });
 
 /**사용자가 올린 게시물 조회!!!! */
-router.get('/user', isLoggedIn, async (req, res, next) => {
+router.get('/user/:id', isLoggedIn, async (req, res, next) => {
     Design.findAll({
         include: [{
             model: Hashtag,
@@ -264,7 +265,7 @@ router.get('/user', isLoggedIn, async (req, res, next) => {
             ]
         },
     order: [['createdAt', 'DESC']],
-    where: { userId: req.user.id },
+    where: { userId: parseInt(req.params.id, 10) }
     })
     .then((designs) => {
         res.send(designs);
@@ -346,22 +347,43 @@ router.put('/:id', isLoggedIn,  async (req, res, next) => {
 });
 
 /**추천코디에 등록된 게시물 삭제 - 관련 태그도 삭제하겠음~!~*/
-router.delete('/:id', isLoggedIn, async (req, res, next) => {
+router.delete('/:id',  async (req, res, next) => {
     try {
-        const design = await Design.findOne({ 
-            include: [{
-                model: Hashtag,
-                attributes: ['id'],
-                through: {
-                    attributes: []
-                }
-            }],
-            where: { id: parseInt(req.params.id,10), userId: req.user.id }});
 
-        console.log('이게무슨값일까?????',design.hashtags.map(r=>Number(r.id))); //사용된 상품들의 아이디를 배열로 만들어버리기
-        
-        await design.removeHashtags(design.hashtags.map(r=>Number(r.id))); //다대다 관계의 가운데 테이블은 직접 접근할 수 없음!!!!
-        await design.destroy({});
+        //플랫폼 관리자면 그냥 삭제
+        if(req.user.id == 17) {
+            const design = await Design.findOne({ 
+                include: [{
+                    model: Hashtag,
+                    attributes: ['id'],
+                    through: {
+                        attributes: []
+                    }
+                }],
+                where: { id: parseInt(req.params.id,10) }});
+
+
+            await design.removeHashtags(design.hashtags.map(r=>Number(r.id))); //다대다 관계의 가운데 테이블은 직접 접근할 수 없음!!!!
+            await design.destroy({});
+
+        } else {
+
+            const design = await Design.findOne({ 
+                include: [{
+                    model: Hashtag,
+                    attributes: ['id'],
+                    through: {
+                        attributes: []
+                    }
+                }],
+                where: { id: parseInt(req.params.id,10), userId: req.user.id }});
+    
+            console.log('이게무슨값일까?????',design.hashtags.map(r=>Number(r.id))); //사용된 상품들의 아이디를 배열로 만들어버리기
+            
+            await design.removeHashtags(design.hashtags.map(r=>Number(r.id))); //다대다 관계의 가운데 테이블은 직접 접근할 수 없음!!!!
+            await design.destroy({});
+
+        }
         res.send('success');
 
     } catch (err) {

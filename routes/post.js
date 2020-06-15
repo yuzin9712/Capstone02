@@ -191,7 +191,7 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
 });
 
 /**사용자가 올린 커뮤니티 게시글 조회 */
-router.get('/user', isLoggedIn, async (req, res, next) => {
+router.get('/user/:id', isLoggedIn, async (req, res, next) => {
 
     await Post.findAll({ 
         include: [
@@ -223,7 +223,7 @@ router.get('/user', isLoggedIn, async (req, res, next) => {
             ]
         },
         order: [['createdAt', 'DESC']],
-        where: { userId: req.user.id }
+        where: { userId: parseInt(req.params.id, 10) }
     })
     .then((posts) => {
         res.send(posts);
@@ -346,7 +346,23 @@ router.put('/:id', isLoggedIn, async(req, res, next) => {
 router.delete('/:id', isLoggedIn, async (req, res, next) => {
 
     try {
-        const post = await Post.findOne({ 
+        if(req.user.id == 17) {
+            const post = await Post.findOne({ 
+                include: [{
+                    model: PImg,
+                    attributes: ['id'],
+                    through: {
+                        attributes: []
+                    }
+                }],
+                where: { id: parseInt(req.params.id,10) }});
+
+                await post.removePimgs(post.Pimgs.map(r=>Number(r.id))); //다대다 관계의 가운데 테이블은 직접 접근할 수 없음!!!!
+                await post.destroy({});
+
+        } else {
+            
+            const post = await Post.findOne({ 
             include: [{
                 model: PImg,
                 attributes: ['id'],
@@ -354,7 +370,7 @@ router.delete('/:id', isLoggedIn, async (req, res, next) => {
                     attributes: []
                 }
             }],
-            where: { id: req.params.id, userId: req.user.id }});
+            where: { id: parseInt(req.params.id,10), userId: req.user.id }});
 
             if(post == undefined) {
                 res.send('없는 게시물');
@@ -365,8 +381,11 @@ router.delete('/:id', isLoggedIn, async (req, res, next) => {
                 //테이블이름의 맨 앞글자를 대문자로한거 + 진짜 테이블 이름
                 await post.removePimgs(post.Pimgs.map(r=>Number(r.id))); //다대다 관계의 가운데 테이블은 직접 접근할 수 없음!!!!
                 await post.destroy({});
-                res.send('success');
             }
+        }
+
+        res.send('success');
+
     } catch (err) {
         console.error(err);
         res.status(403).send('Error');
