@@ -8,6 +8,7 @@ const passport = require('passport')
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const hpp = require('hpp');
+const redis = require('redis');
 const RedisStore = require('connect-redis')(session);
 require('dotenv').config({});
 const cors = require('cors');
@@ -69,6 +70,12 @@ app.use(cookieParser('process.env["COOKIE_SECRET"]'));
 //         secure: false,
 //     },
 // }));
+const client = redis.createClient({
+    host: process.env["REDIS_HOST"],
+    port: process.env["REDIS_PORT"],
+    password: process.env["REDIS_PASSWORD"],
+    logErrors: true
+});
 const sessionOption = {
     resave: false,
     saveUninitialized: false,
@@ -77,12 +84,7 @@ const sessionOption = {
         httpOnly: true,
         secure: false,
     },
-    store: new RedisStore({
-        host: process.env["REDIS_HOST"],
-        port: process.env["REDIS_PORT"],
-        pass: process.env["REDIS_PASSWORD"],
-        logErrors: true,
-    }),
+    store: new RedisStore({ client }),
 };
 
 app.use(flash());
