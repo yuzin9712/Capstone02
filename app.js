@@ -8,15 +8,15 @@ const passport = require('passport')
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const hpp = require('hpp');
+const RedisStore = require('connect-redis')(session);
 require('dotenv').config({});
 const cors = require('cors');
 const corsOptions = {
     origin: true,
     credentials: true
 };
-//테스트!!!
+
 const clientApp = path.join(__dirname + './build');
-//테스트한다!!!!!!!!!!!!
 
 const pageRouter = require('./routes/page');
 const authRouter = require('./routes/auth');
@@ -60,15 +60,30 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser('process.env["COOKIE_SECRET"]'));
-app.use(session({
+// app.use(session({
+//     resave: false,
+//     saveUninitialized: false,
+//     secret: 'process.env["COOKIE_SECRET"]',
+//     cookie: {
+//         httpOnly: true,
+//         secure: false,
+//     },
+// }));
+const sessionOption = {
     resave: false,
     saveUninitialized: false,
-    secret: 'process.env["COOKIE_SECRET"]',
+    secret: process.env["COOKIE_SECRET"],
     cookie: {
         httpOnly: true,
         secure: false,
     },
-}));
+    store: new RedisStore({
+        host: process.env["REDIS_HOST"],
+        port: process.env["REDIS_PORT"],
+        pass: process.env["REDIS_PASSWORD"],
+        logErrors: true,
+    }),
+};
 
 app.use(flash());
 app.use(passport.initialize());

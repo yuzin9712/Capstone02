@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node app",
+    "dev": "pm2 start app.js",
     "start": "nodemon app",
     "test": "exit"
   },
