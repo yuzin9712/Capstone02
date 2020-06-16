@@ -71,10 +71,7 @@ app.use(cookieParser('process.env["COOKIE_SECRET"]'));
 //     },
 // }));
 const client = redis.createClient({
-    host: process.env["REDIS_HOST"],
-    port: process.env["REDIS_PORT"],
-    password: process.env["REDIS_PASSWORD"],
-    logErrors: true
+    host: 'redis'
 });
 const sessionOption = {
     resave: false,
