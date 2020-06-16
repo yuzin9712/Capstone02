@@ -61,28 +61,31 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser('process.env["COOKIE_SECRET"]'));
-// app.use(session({
-//     resave: false,
-//     saveUninitialized: false,
-//     secret: 'process.env["COOKIE_SECRET"]',
-//     cookie: {
-//         httpOnly: true,
-//         secure: false,
-//     },
-// }));
-const client = redis.createClient({
-    host: 'redis'
-});
-const sessionOption = {
+app.use(session({
     resave: false,
     saveUninitialized: false,
-    secret: process.env["COOKIE_SECRET"],
+    secret: 'process.env["COOKIE_SECRET"]',
     cookie: {
         httpOnly: true,
         secure: false,
     },
-    store: new RedisStore({ client }),
-};
+}));
+// const client = redis.createClient({
+//     host: process.env["REDIS_HOST"],
+//     port: process.env["REDIS_PORT"],
+//     password: process.env["REDIS_PASSWORD"],
+//     logErrors: true
+// });
+// const sessionOption = {
+//     resave: false,
+//     saveUninitialized: false,
+//     secret: process.env["COOKIE_SECRET"],
+//     cookie: {
+//         httpOnly: true,
+//         secure: false,
+//     },
+//     store: new RedisStore({ client }),
+// };
 
 app.use(flash());
 app.use(passport.initialize());
