@@ -8,6 +8,7 @@ const passport = require('passport')
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const hpp = require('hpp');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 const redis = require('redis');
 const RedisStore = require('connect-redis')(session);
 require('dotenv').config({});
@@ -111,6 +112,14 @@ app.use('/api/review', reviewRouter);
 app.use('/api/shop', shopRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/', analyticsRouter);
+app.use(
+    '/images',
+    createProxyMiddleware({
+      target: 'https://swcap02.s3.ap-northeast-2.amazonaws.com',
+      changeOrigin: true,
+      pathRewrite: (path, req) => { return path.replace('/images', '/')}
+    })
+  );
 
 app.use('/', express.static('build'));
 
