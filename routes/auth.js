@@ -189,7 +189,7 @@ router.get('/status', isLoggedIn, async (req, res) => {
     if(await ShopAdmin.findOne({
         where: { userId: req.user.id, alianced: 1 }
     })) {
-        res.send({
+        return res.send({
             loginStatus: true,
             shopStatus: "shopadmin",
             name: req.user.name,

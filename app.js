@@ -62,21 +62,27 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser('process.env["COOKIE_SECRET"]'));
-app.use(session({
-    resave: false,
-    saveUninitialized: false,
-    secret: 'process.env["COOKIE_SECRET"]',
-    cookie: {
-        httpOnly: true,
-        secure: false,
-    },
-}));
+// app.use(session({
+//     resave: false,
+//     saveUninitialized: false,
+//     secret: 'process.env["COOKIE_SECRET"]',
+//     cookie: {
+//         httpOnly: true,
+//         secure: false,
+//     },
+// }));
+
 // const client = redis.createClient({
-//     host: process.env["REDIS_HOST"],
-//     port: process.env["REDIS_PORT"],
-//     password: process.env["REDIS_PASSWORD"],
-//     logErrors: true
+//     host: 'localhost',
+//     port: 6379,
 // });
+
+const client = redis.createClient({
+    host: process.env["REDIS_HOST"],
+    port: process.env["REDIS_PORT"],
+    password: process.env["REDIS_PASSWORD"],
+    logErrors: true
+});
 // const sessionOption = {
 //     resave: false,
 //     saveUninitialized: false,
@@ -87,6 +93,17 @@ app.use(session({
 //     },
 //     store: new RedisStore({ client }),
 // };
+app.use(session({
+    resave: false,
+    saveUninitialized: false,
+    secret: process.env["COOKIE_SECRET"],
+    cookie: {
+        httpOnly: true,
+        secure: false,
+    },
+    store: new RedisStore({ client }),
+}))
+
 
 app.use(flash());
 app.use(passport.initialize());
@@ -121,7 +138,7 @@ app.use(
     })
   );
 
-app.use('/', express.static('build'));
+app.use('/*', express.static('build'));
 
 
 app.use((req, res, next) => {
