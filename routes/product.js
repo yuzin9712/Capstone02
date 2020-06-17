@@ -52,7 +52,6 @@ router.get('/main', isLoggedIn, async(req, res, next) => {
                 for(let j=0; j<pidArr.length; j++){
                     if(uniquePidArr[i] == pidArr[j]){
                         uniqueCntArr[i] += cntArr[j]; //parseInt(req.params.id, 10)
-
                     }
                 }
             }
@@ -98,7 +97,7 @@ router.get('/main', isLoggedIn, async(req, res, next) => {
         await db.sequelize.query(query4, { replacements:{pArr:uniquePidArr} })
         .spread(function(result){
             query4result = result;
-
+            console.dir(query3result);
             res.send({uniqueCntArr:uniqueCntArr, products:query3result, imgs:query4result});
 
         }, function(err){
@@ -113,10 +112,118 @@ router.get('/main', isLoggedIn, async(req, res, next) => {
 });
 
 //쇼핑몰랭킹보냄
-router.get('rank', isLoggedIn, async (req, res, next) => {
+router.get('/rank', isLoggedIn, async (req, res, next) => {
     var query1 = "select productId from orderDetails where deletedAt is null";
     var query2 = "select cnt from orderDetails where deletedAt is null";
+    var query3 = "select shopAdminId from products where id IN(:pArr)";
+    var query4 = "select * from shopAdmins where id IN(:sArr)";
+    var pidArr = [];
+    var uniquePidArr = []; //pidArr의 중복을 제거한 배열
+    var cntArr = [];
+    var uniqueCntArr = []; //중복된 판매수는 누적시킨 배열
+    var shopAdminIdArr = [];
+    var uniqueShopAdminIdArr = [];
+    var cntByShopIdArr = [];
+    var query4result;
     
+    try{
+
+        await db.sequelize.query(query2)
+        .spread(function(result){
+            
+            for(let i=0; i<result.length; i++){
+                cntArr.push(result[i].cnt);
+            }
+
+            console.log(cntArr);
+
+        }, function(err){
+            console.error(err);
+            res.status(403).send('Error');
+        });
+
+        await db.sequelize.query(query1)
+        .spread(function(result){
+            
+            for(let i=0; i<result.length; i++){
+                pidArr.push(result[i].productId);
+            }
+
+            uniquePidArr = Array.from(new Set(pidArr));
+            console.log(uniquePidArr);
+
+            for(let i = 0; i<uniquePidArr.length; i++){
+                uniqueCntArr[i] = 0;
+            }
+
+            for(let i=0; i<uniquePidArr.length; i++){
+                for(let j=0; j<pidArr.length; j++){
+                    if(uniquePidArr[i] == pidArr[j]){
+                        uniqueCntArr[i] += cntArr[j]; //parseInt(req.params.id, 10)
+                    }
+                }
+            }
+        });
+
+        await db.sequelize.query(query3, { replacements:{pArr:uniquePidArr}})
+        .spread(function(result){
+
+            for(let i=0; i<result.length; i++){
+                shopAdminIdArr.push(result[i].shopAdminId);
+            }
+
+            uniqueShopAdminIdArr = Array.from(new Set(shopAdminIdArr));
+            console.log(uniqueShopAdminIdArr);
+
+            for(let i=0; i<uniqueShopAdminIdArr.length; i++){
+                cntByShopIdArr[i] = 0;
+            }
+
+            for(let i=0; i<uniqueShopAdminIdArr.length; i++){
+                for(let j=0; j<shopAdminIdArr.length; j++){
+                    if(uniqueShopAdminIdArr[i] == shopAdminIdArr[j]){
+                        cntByShopIdArr[i] += shopAdminIdArr[j];
+                    }
+                }
+            }
+
+            //uniqueShopIdArr와 cntByShopArr를 내림차순으로 정렬
+            let t;
+            let u;
+            for(let i=0; i<cntByShopIdArr.length; i++){
+                for(let j=0; j<cntByShopIdArr.length-i-1; j++){
+                    if(cntByShopIdArr[j] < cntByShopIdArr[j+1]){
+                        t = cntByShopIdArr[j];
+                        cntByShopIdArr[j] = cntByShopIdArr[j+1];
+                        cntByShopIdArr[j+1] = t;
+
+                        u = uniqueShopAdminIdArr[j];
+                        uniqueShopAdminIdArr[j] = uniqueShopAdminIdArr[j+1];
+                        uniqueShopAdminIdArr[j+1] = u;
+                    }
+                }
+            }
+        });
+
+        let k;
+        await db.sequelize.query(query4, { replacements:{sArr:uniqueShopAdminIdArr}})
+        .spread(function(result){
+            for(let i=0; i<uniqueShopAdminIdArr.length; i++){
+                for(let j=0; j<result.length; j++){
+                    if(uniqueShopAdminIdArr[i] == result[j].id){
+                        t = result[j];
+                        result[j] = result[i];
+                        result[i] = t;
+                    }
+                }
+            }
+            query4result = result;
+            res.send({shoprank : query4result, uniqueShopAdminIdArr:uniqueShopAdminIdArr, cntByShopIdArr:cntByShopIdArr});
+        });
+    }catch(err){
+        console.error(err);
+        res.status(403).send('Error');
+    }
 });
 
 
