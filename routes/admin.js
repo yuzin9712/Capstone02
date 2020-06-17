@@ -49,6 +49,58 @@ router.get('/:id', async (req, res, next) => {
     }
 });
 
+
+//일반유저조회
+router.get('/users', isLoggedIn, async (req, res, next) => {
+    
+    //var query1 = "select * from users where deletedAt is null";
+    var query1 = "select * from users";
+    var deletedUsers = [];
+    var normalUsers = [];
+
+    try{
+        await db.sequelize.query(query1)
+        .spread(function(result){
+            for(let i=0; i<result.length; i++){
+                if(result[i].deletedAt == null){
+                    normalUsers[i] = result[i];
+                }else{
+                    deletedUsers[i] = result[i];
+                }
+            }
+        });    
+
+        res.send({normalUsers : normalUsers, deletedUsers : deletedUsers});
+
+    }catch(err){
+        console.error(err);
+        res.status(500).send('server_error');
+    }
+});
+
+//일반유저삭제
+router.post('/deleteUser', isLoggedIn, async(req, res, next) => {
+    var uid = req.body.uid;
+    var query1 = "UPDATE users SET deletedAt = NOW() WHERE id = ?";
+
+    try{
+        db.sequelize.query(query1, {replacements : [uid]})
+        .spread(function(updated){
+            console.dir(updated);
+            res.send('user delete success');
+        }, function(err){
+            console.error(err);
+            res.send('user delete fail');
+        });
+
+    }catch(err){
+        console.error(err);
+        res.status(500).send('server_error');
+    }
+
+});
+
+
 /**제휴 끊기 - shopadmin id가 파라미터로 온다 */
 router.post('/:id', async (req, res, next) => {
     try {
