@@ -36,11 +36,11 @@ router.delete('/:id/follow', isLoggedIn, async(req, res, next) => {
 });
 
 /**각 유저의 팔로잉 팔로우 수 구하기 */
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', isLoggedIn, async (req, res, next) => {
     try {
-
         const userInfo =  await User.findOne({
             attributes: [
+                        'name',
                         [
                             db.sequelize.literal(`(
                                 SELECT COUNT(*) FROM Follow AS Followers WHERE Followers.followingId = user.id)`), //좋아요 수 구하기!!!!
