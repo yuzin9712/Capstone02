@@ -182,7 +182,7 @@ router.get('/rank', isLoggedIn, async (req, res, next) => {
             for(let i=0; i<uniqueShopAdminIdArr.length; i++){
                 for(let j=0; j<shopAdminIdArr.length; j++){
                     if(uniqueShopAdminIdArr[i] == shopAdminIdArr[j]){
-                        cntByShopIdArr[i] += shopAdminIdArr[j];
+                        cntByShopIdArr[i] += uniqueCntArr[j];
                     }
                 }
             }

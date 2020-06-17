@@ -126,7 +126,7 @@ router.post('/deleteReview', isLoggedIn, async (req, res, next) => {
                 console.log(err);
             });
 
-        if (uid == id) {
+        if (uid == id || uid == 17) {
             await db.sequelize.query(query1, { replacements: [rid] })
                 .spread(function (deleted1) {
                     console.log(deleted1);
@@ -170,7 +170,7 @@ router.post('/deleteComment', isLoggedIn, async (req, res, next) => {
                 console.error(err);
             });
 
-        if (uid == id) {
+        if (uid == id || uid == 17) {
             await db.sequelize.query(query, { replacements: [comid] })
                 .spread(function (deleted) {
                     console.log(deleted);
