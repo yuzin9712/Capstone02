@@ -82,7 +82,7 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
 });
 
 /**리뷰 작성하기 - 상품 아이디값이 파라미터로 옴 */
-router.post('/:id', isLoggedIn, async (req, res, next) => {
+router.post('/post/:id', isLoggedIn, async (req, res, next) => {
     console.log('------------들어옴-------------');
 
     var content = req.body.content;
