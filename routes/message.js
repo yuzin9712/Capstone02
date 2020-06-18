@@ -8,9 +8,23 @@ const { Op } = require('sequelize');
 const router = express.Router();
 
 /**쪽지함 메인화면 - 정렬 안됨..*/
-router.get('/', async (req, res, next) => {
+router.get('/', isLoggedIn, async (req, res, next) => {
     try {
         await Room.findAll({
+            attributes: {
+                include: [
+                        [
+                        db.sequelize.literal(`(
+                            SELECT name FROM users AS user WHERE user.id = room.user1Id AND user.deletedAt IS NULL)`),
+                            'user1'
+                        ],
+                        [
+                        db.sequelize.literal(`(
+                            SELECT name FROM users AS user WHERE user.id = room.user2Id AND user.deletedAt IS NULL)`),
+                            'user2'
+                        ]
+                ]
+            },
             include: {
                 model: ChatLine,
                 // limit: 1, 하나만 보내지 말라고 ..?
@@ -24,8 +38,8 @@ router.get('/', async (req, res, next) => {
             order: [[ChatLine, 'createdAt', 'DESC']], //메세지 온 거 최신순
             where: { 
                 [Op.or]: [
-                    { user1Id: 12 },
-                    { user2Id: 12 }
+                    { user1Id: req.user.id },
+                    { user2Id: req.user.id }
                 ]
              },
         })
@@ -40,7 +54,7 @@ router.get('/', async (req, res, next) => {
 });
 
 /**쪽지 보내기 - 보내고자 하는 상대의 아이디 값이 파라미터로 옴 */
-router.post('/:id', async (req, res, next) => {
+router.post('/:id', isLoggedIn, async (req, res, next) => {
 
     console.log('----시작----');
     const newLine = req.body.line; //쪽지내용
@@ -51,12 +65,12 @@ router.post('/:id', async (req, res, next) => {
         const [ room, created ] = await Room.findOrCreate({
             where: { 
                 [Op.or]: [
-                    { user1Id: 12, user2Id: parseInt(req.params.id, 10) },
-                    { user1Id: parseInt(req.params.id, 10), user2Id: 12 }
+                    { user1Id: req.user.id, user2Id: parseInt(req.params.id, 10) },
+                    { user1Id: parseInt(req.params.id, 10), user2Id: req.user.id }
                 ]
              },
              defaults: {
-                 user1Id: 12,
+                 user1Id: req.user.id,
                  user2Id: parseInt(req.params.id, 10)
              }
         });
@@ -65,7 +79,7 @@ router.post('/:id', async (req, res, next) => {
 
         await ChatLine.create({
             lines: newLine,
-            userId: 12,
+            userId: req.user.id,
             roomId: room.id
         });
 
