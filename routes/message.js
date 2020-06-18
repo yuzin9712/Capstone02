@@ -33,7 +33,7 @@ router.get('/', isLoggedIn, async (req, res, next) => {
                     model: User,
                     attributes: ['id', 'name']
                 },
-                order: [['createdAt', 'DESC']],
+                order: [['createdAt', 'ASC']],
             },
             order: [[ChatLine, 'createdAt', 'DESC']], //메세지 온 거 최신순
             where: { 
