@@ -8,7 +8,6 @@ module.exports = {
         host: 'capstone-project.cojwntxe9hru.ap-northeast-2.rds.amazonaws.com',
         dialect: 'mysql',
         operatorAliases: 'false',
-        logging: false
     },
     production: {
         username: "user",
