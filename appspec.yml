@@ -3,10 +3,8 @@ os: linux
 files:
   - source: /
     destination: /home/ubuntu/server/server-latest/
+    overwrite : yes
 hooks:
-  BeforeInstall:
-    - location: before-deploy.sh
-      timeout: 180
   AfterInstall:
     - location: execute-deploy.sh
       timeout: 180
