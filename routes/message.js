@@ -8,7 +8,7 @@ const { Op } = require('sequelize');
 const router = express.Router();
 
 /**쪽지함 메인화면 - 정렬 안됨..*/
-router.get('/',  async (req, res, next) => {
+router.get('/', isLoggedIn, async (req, res, next) => {
     try {
         await Room.findAll({
             attributes: {
@@ -27,7 +27,7 @@ router.get('/',  async (req, res, next) => {
                             db.sequelize.literal(`(
                                 SELECT chat.createdAt FROM chatLines AS chat WHERE chat.roomId = room.id order by createdAt DESC limit 1)`),
                                 'time'
-                        ]
+                        ] //정렬용으로 만들어놓은 것
                 ]
             },
             include: {
@@ -43,8 +43,8 @@ router.get('/',  async (req, res, next) => {
             //order: [[db.sequelize.col('chatLines.createdAt'), 'DESC']], //메세지 온 거 최신순
             where: { 
                 [Op.or]: [
-                    { user1Id: 12 },
-                    { user2Id: 12 }
+                    { user1Id: req.user.id },
+                    { user2Id: req.user.id }
                 ]
              },
         })
