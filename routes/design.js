@@ -41,8 +41,10 @@ router.post('/hashtag', isLoggedIn, async (req, res, next) => {
                     paranoid: false,
                     include: [{
                         model: Product,
+                        paranoid: false,
                         include: [{
                             model: ImgByColor,
+                            paranoid: false,
                         }],
                         through: {
                             attributes: []
@@ -50,7 +52,8 @@ router.post('/hashtag', isLoggedIn, async (req, res, next) => {
                     }]
                 },{
                     model: User,
-                    attributes: ['id', 'name']
+                    attributes: ['id', 'name'],
+                    paranoid: false,
                 }],
                 attributes: {
                     include: [
@@ -91,8 +94,10 @@ router.get('/best', isLoggedIn, async(req, res, next) => {
                 paranoid: false,
                 include: [{
                     model: Product,
+                    paranoid: false,
                     include: [{
                         model: ImgByColor,
+                        paranoid: false,
                     }],
                     through: {
                         attributes: []
@@ -100,7 +105,8 @@ router.get('/best', isLoggedIn, async(req, res, next) => {
                 }]
             },{
                 model: User,
-                attributes: ['id', 'name']
+                attributes: ['id', 'name'],
+                paranoid: false,
             }],
             attributes: {
                 include: [
@@ -145,8 +151,10 @@ router.get('/followpost', isLoggedIn, async(req, res, next) => {
                 paranoid: false,
                 include: [{
                     model: Product,
+                    paranoid: false,
                     include: [{
                         model: ImgByColor,
+                        paranoid: false,
                     }],
                     through: {
                         attributes: []
@@ -154,7 +162,8 @@ router.get('/followpost', isLoggedIn, async(req, res, next) => {
                 }]
             },{
                 model: User,
-                attributes: ['id', 'name']
+                attributes: ['id', 'name'],
+                paranoid: false,
             }],
             attributes: {
                 include: [
@@ -197,8 +206,10 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
             paranoid: false,
             include: [{
                 model: Product,
+                paranoid: false,
                 include: [{
                     model: ImgByColor,
+                    paranoid: false,
                 }],
                 through: {
                     attributes: []
@@ -206,7 +217,8 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
             }]
         },{
             model: User,
-            attributes: ['id', 'name']
+            attributes: ['id', 'name'],
+            paranoid: false,
         }],
         attributes: {
             include: [
@@ -244,8 +256,10 @@ router.get('/user/:id', isLoggedIn, async (req, res, next) => {
             paranoid: false,
             include: [{
                 model: Product,
+                paranoid: false,
                 include: [{
                     model: ImgByColor,
+                    paranoid: false,
                 }],
                 through: {
                     attributes: []
@@ -253,7 +267,8 @@ router.get('/user/:id', isLoggedIn, async (req, res, next) => {
             }]
         },{
             model: User,
-            attributes: ['id', 'name']
+            attributes: ['id', 'name'],
+            paranoid: false,
         }],
         attributes: {
             include: [
@@ -292,6 +307,7 @@ router.get('/:id', isLoggedIn,  async (req, res, next) => {
                 paranoid: false,
                 include: [{
                     model: Product,
+                    paranoid: false,
                     through: {
                         attributes: []
                     }

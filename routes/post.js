@@ -106,6 +106,7 @@ router.get('/followpost', isLoggedIn, async(req, res, next) => {
                 {
                     model: User,
                     attributes: ['id', 'name'],
+                    paranoid: false,
                 },
                 { //대표이미지하나가 안 뽑히고 다나옴,,,,
                     model: PImg,
@@ -154,6 +155,7 @@ router.get('/like', isLoggedIn, async (req, res, next) => {
             {
                 model: User,
                 attributes: ['id', 'name'],
+                paranoid: false,
             },
             { //대표이미지하나가 안 뽑히고 다나옴,,,,
                 model: PImg,
@@ -198,6 +200,7 @@ router.get('/user/:id', isLoggedIn, async (req, res, next) => {
             {
                 model: User,
                 attributes: ['id', 'name'],
+                paranoid: false,
             },
             { //대표이미지하나가 안 뽑히고 다나옴,,,,
                 model: PImg,
@@ -242,6 +245,7 @@ router.get('/:id', async(req, res, next) => { //게시물 아이디
         include: [{
             model: User,
             attributes: ['id', 'name'],
+            paranoid: false,
         },{
             model: PImg,
             attributes: ['img', 'closetId'],
@@ -254,8 +258,10 @@ router.get('/:id', async(req, res, next) => { //게시물 아이디
                 paranoid: false,
                 include: [{
                     model: Product,
+                    paranoid: false,
                     include: [{
                         model: ImgByColor,
+                        paranoid: false,
                     }],
                     through: {
                         attributes: []
@@ -269,6 +275,7 @@ router.get('/:id', async(req, res, next) => { //게시물 아이디
             include: [{
                 model: User,
                 attributes: ['id', 'name'],
+                paranoid: false,
             },{
                 model: CImg,
                 attributes: ['img', 'closetId'],
@@ -281,8 +288,10 @@ router.get('/:id', async(req, res, next) => { //게시물 아이디
                     paranoid: false,
                     include: [{
                         model: Product,
+                        paranoid: false,
                         include: [{
                             model: ImgByColor,
+                            paranoid: false,
                         }],
                         through: {
                             attributes: []
