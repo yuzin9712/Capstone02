@@ -15,60 +15,6 @@ router.get('/profile', isLoggedIn, (req, res) => {
 router.get('/join', isNotLoggedIn, (req, res) => {
 });
 
-/**전체 사람들 글 조회하기 */
-// router.get('/', (req, res, next) => {
-//     Post.findAll({
-//         include: [
-//             {
-//                 model: User,
-//                 attributes: ['id', 'name'],
-//             },
-//             {
-//                 model: PImg,
-//                 attributes: ['img'],
-//                 through: {
-//                     attributes: [],
-//                 }
-//             },
-//             // {
-//             //     model: PostComment,
-//             //     attributes: ['id','img','content'],
-//             //     include: {
-//             //         model: User,
-//             //         attributes: ['id', 'name'],
-//             //     },
-//             //     order: [['createdAt', 'DESC']],
-//             // },
-//         ],
-//         attributes: {
-//             include: [
-//                 [
-//                     db.sequelize.literal(`(
-//                         SELECT COUNT(*) FROM postLikes AS reaction WHERE reaction.postId = post.id AND reaction.deletedAt IS NULL)`), //좋아요 수 구하기!!!!
-//                     'likecount'
-//                 ]
-//             ]
-//         },
-//         order: [['createdAt', 'DESC']],
-//     })
-//     .then((posts) => {
-//         //     res.render('main', {
-//         //     title: 'example',
-//         //     twits: posts,
-//         //     user: req.user,
-//         //     loginError: req.flash('loginError'),
-//         // });
-//         res.send(posts);
-//         // console.log('1번', JSON.stringify(posts));
-//         console.log(`posts= ${JSON.stringify(posts)}`);
-//     })
-//     .catch((err) => {
-//         console.error(err);
-//         next(err);
-//     });
-//     // console.log(JSON.stringify(req.user));
-// });
-
 router.get('/design', isLoggedIn, async (req, res, next) => {
 
     // try {
@@ -82,18 +28,19 @@ router.get('/design', isLoggedIn, async (req, res, next) => {
                 }
             },{
                 model: Closet,
-                paranoid: false,
                 attributes: ['id'],
                 paranoid: false,
                 include: [{
                     model: Product,
+                    paranoid: false,
                     through: {
                         attributes: []
                     }
                 }]
             },{
                 model: User,
-                attributes: ['id', 'name']
+                attributes: ['id', 'name'],
+                paranoid: false,
             }],
             attributes: {
                 include: [
@@ -130,13 +77,15 @@ router.get('/bestdesign',  async (req, res, next) => {
                 paranoid: false,
                 include: [{
                     model: Product,
+                    paranoid: false,
                     through: {
                         attributes: []
                     }
                 }]
             },{
                 model: User,
-                attributes: ['id', 'name']
+                attributes: ['id', 'name'],
+                paranoid: false,
             }],
             attributes: {
                 include: [
@@ -168,6 +117,7 @@ router.get('/post', isLoggedIn, async (req, res, next) => {
                 {
                     model: User,
                     attributes: ['id', 'name'],
+                    paranoid: false,
                 },
                 { //대표이미지하나가 안 뽑히고 다나옴,,,,
                     model: PImg,
@@ -211,6 +161,7 @@ router.get('/closet/:id', isLoggedIn, async (req, res, next) => {
         include: {
             model: Product, //사용된 제품 정보도 같이 나온다.
             attributes: ['id', 'pname', 'img', 'price', 'description'],
+            paranoid: false,
             through: {
                  attributes: []//relation table의 attribute는 안뽑히게함!
             }
