@@ -22,7 +22,12 @@ router.get('/', isLoggedIn, async (req, res, next) => {
                         db.sequelize.literal(`(
                             SELECT name FROM users AS user WHERE user.id = room.user2Id AND user.deletedAt IS NULL)`),
                             'user2'
-                        ]
+                        ],
+                        [
+                            db.sequelize.literal(`(
+                                SELECT chat.createdAt FROM chatLines AS chat WHERE chat.roomId = room.id order by createdAt DESC limit 1)`),
+                                'time'
+                        ] //정렬용으로 만들어놓은 것
                 ]
             },
             include: {
@@ -33,9 +38,9 @@ router.get('/', isLoggedIn, async (req, res, next) => {
                     model: User,
                     attributes: ['id', 'name']
                 },
-                order: [['createdAt', 'ASC']],
             },
-            order: [[ChatLine, 'createdAt', 'DESC']], //메세지 온 거 최신순
+            order: [[db.sequelize.col('time'), 'DESC']],
+            //order: [[db.sequelize.col('chatLines.createdAt'), 'DESC']], //메세지 온 거 최신순
             where: { 
                 [Op.or]: [
                     { user1Id: req.user.id },

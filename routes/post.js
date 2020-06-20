@@ -265,7 +265,7 @@ router.get('/:id', async(req, res, next) => { //게시물 아이디
         },
         {
             model: PostComment,
-            attributes: ['id', 'content'],
+            attributes: ['id', 'content','createdAt','updatedAt'],
             include: [{
                 model: User,
                 attributes: ['id', 'name'],
