@@ -33,6 +33,10 @@ router.get('/design', isLoggedIn, async (req, res, next) => {
                 include: [{
                     model: Product,
                     paranoid: false,
+                    include: [{
+                        model: ImgByColor,
+                        paranoid: false,
+                    }],
                     through: {
                         attributes: []
                     }
