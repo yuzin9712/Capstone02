@@ -440,6 +440,7 @@ router.post('/deleteProductBySeller', isLoggedIn, async(req, res, nex) => {
         await db.sequelize.query(query2, {replacements : [pid]})
         .spread(function(deleted2){
             console.log(deleted2);
+            res.send('delete product success');
         }, function(err){
             console.log(err);
         });

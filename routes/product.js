@@ -82,9 +82,9 @@ router.get('/main', isLoggedIn, async(req, res, next) => {
             for(let i=0; i<uniquePidArr.length; i++){
                 for(let j=0; j<uniquePidArr.length; j++){
                     if(uniquePidArr[i] == result[j].id){
-                        temp = result[i];
+                        temp3 = result[i];
                         result[i] = result[j];
-                        result[j] = temp;
+                        result[j] = temp3;
                     }
                 }
             }
@@ -226,8 +226,6 @@ router.get('/rank', isLoggedIn, async (req, res, next) => {
     }
 });
 
-
-
 /**상품 목록 조회 */
 router.get('/', isLoggedIn, async (req, res, next) => {
 
@@ -252,7 +250,7 @@ router.get('/category/:id', isLoggedIn, async (req, res, next) => {
     var pid = [];
     var imgArr = [];
     var productRows;
-    var query = "select * from shopAdmins, products where products.shopAdminId = shopAdmins.id and products.categoryId= ?";
+    var query = "select * from shopAdmins, products where products.shopAdminId = shopAdmins.id and products.categoryId = ?";
     var query2 = "select * from `imgByColors` where `productId` IN(:productId)";
 
     await db.sequelize.query(query, {
@@ -287,7 +285,172 @@ router.get('/category/:id', isLoggedIn, async (req, res, next) => {
         console.error(err);
         res.status(403).send('Error');
     })
-})
+});
+
+//카테고리별 베스트상품리스트 조회
+router.get('/categoryBest/:id', isLoggedIn, async(req, res, next) => {
+
+    var query1 = "select productId from orderDetails where deletedAt is null";
+    var query2 = "select cnt from orderDetails where deletedAt is null";
+    var query5 = "select categoryId from products where deletedAt is null and id = ?";
+
+    var query3 = "select * from shopAdmins, products where products.shopAdminId = shopAdmins.id and products.id IN(:pArr)";
+    var query4 = "select * from `imgByColors` where `productId` IN(:pArr)";
+    //var query4 = "select * from imgByColors, products where imgByColors.productId = products.id and products.categoryId = ?";
+    //var query5 = "select * from products where categoryId = ?";
+    var query6 = "select * from shopAdmins, products where products.shopAdminId = shopAdmins.id and products.categoryId = ?";
+
+    var pidArr = [];
+    var uniquePidArr = []; //pidArr의 중복을 제거한 배열
+    var cntArr = [];
+    var uniqueCntArr = []; //중복된 판매수는 누적시킨 배열
+    var categoryArr = [];
+    
+    var query3result = [];
+    var query4result = [];
+
+    var cid = req.params.id;
+    var realPidArr = [];
+    var realCntArr = [];
+
+    var pid = [];
+
+    try{
+
+        await db.sequelize.query(query2)
+        .spread(function(result){
+            
+            for(let i=0; i<result.length; i++){
+                cntArr.push(result[i].cnt);
+            }
+
+            console.log(cntArr);
+
+        }, function(err){
+            console.error(err);
+            res.status(403).send('Error');
+        });
+
+        await db.sequelize.query(query1)
+        .spread(function(result){
+            
+            for(let i=0; i<result.length; i++){
+                pidArr.push(result[i].productId);
+            }
+
+            uniquePidArr = Array.from(new Set(pidArr));
+            console.log(uniquePidArr);
+
+            for(let i = 0; i<uniquePidArr.length; i++){
+                uniqueCntArr[i] = 0;
+            }
+
+            for(let i=0; i<uniquePidArr.length; i++){
+                for(let j=0; j<pidArr.length; j++){
+                    if(uniquePidArr[i] == pidArr[j]){
+                        uniqueCntArr[i] += cntArr[j]; //parseInt(req.params.id, 10)
+                    }
+                }
+            }
+
+            console.log('uniqueCntArr : '+uniqueCntArr);
+
+            let temp = 0;
+            let temp2 = 0;
+            for(let i=0; i<uniqueCntArr.length; i++){
+                for(let j=0; j<uniqueCntArr.length-i-1; j++){
+                    if(uniqueCntArr[j] < uniqueCntArr[j+1]){
+                        temp = uniqueCntArr[j+1];
+                        uniqueCntArr[j+1] = uniqueCntArr[j];
+                        uniqueCntArr[j] = temp;
+                        
+                        temp2 = uniquePidArr[j+1];
+                        uniquePidArr[j+1] = uniquePidArr[j];
+                        uniquePidArr[j] = temp2;
+                    }
+                }
+            }
+        }, function (err) {
+            console.error(err);
+            res.status(403).send('Error');
+        });
+
+        console.log('uniqueCntArr : ' + uniqueCntArr);
+        console.log('uniquePidArr : ' + uniquePidArr);
+
+        for (let i = 0; i < uniquePidArr.length; i++) {
+            await db.sequelize.query(query5, { replacements: [uniquePidArr[i]] })
+            .spread(function (result) {
+                categoryArr.push(result[0].categoryId);     
+            });
+        }
+        console.log('categoryArr : '+categoryArr);
+
+        for(let i=0; i < categoryArr.length; i++){
+            if(parseInt(cid, 10) == categoryArr[i]){
+                realPidArr.push(uniquePidArr[i]);
+                realCntArr.push(uniqueCntArr[i]);
+            }
+        }
+
+        console.log('realPidArr : '+realPidArr);
+        console.log('realCntArr : '+realCntArr);
+
+        let pro;
+        await db.sequelize.query(query3, { replacements : {pArr : realPidArr}})
+        .spread(function(result){
+            for(let i = 0; i < result.length; i++){
+                for(let j = 0; j < result.length; j++){
+                    if(realPidArr[i] == result[j].id){
+                        pro = result[i];
+                        result[i] = result[j];
+                        result[j] = pro;
+                    }
+                }
+            }
+            query3result = result;
+            console.log(query3result);
+        },  function(err){
+            console.error(err);
+            res.status(403).send('query3 Error');
+        });
+        
+        await db.sequelize.query(query6, { replacements : [parseInt(cid, 10)]})
+        .spread(function(result){
+
+            for(let k = 0; k<result.length; k++){
+                pid.push(result[k].id);
+            }
+
+            // for(let i = 0; i < query3result.length; i++){
+            //     for(let j = 0; j < result.length; j++){
+            //         if(query3result[i].id != result[j].id){
+            //             query3result.push(result[j]);
+            //         }
+            //     }
+            // }
+            //res.send({products : query3result, imgs : query4result});
+        },  function(err){
+            console.error(err);
+            res.status(403).send('query6 Error');
+        });
+
+        await db.sequelize.query(query4, { replacements : {pArr : pid}})
+        .spread(function(result){
+            res.send({products : query3result, imgs : result});
+        }, function(err){
+            console.error(err);
+            res.status(403).send('query4 Error');
+        });
+
+
+    }catch(err){
+        console.error(err);
+        res.status(403).send('Error');
+    }
+
+});
+
 
 /**검색 */
 router.post('/search', isLoggedIn, async (req, res, next) => {
