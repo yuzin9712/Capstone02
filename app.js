@@ -72,17 +72,17 @@ app.use(cookieParser('process.env["COOKIE_SECRET"]'));
 //     },
 // }));
 
-// const client = redis.createClient({
-//     host: 'localhost',
-//     port: 6379,
-// });
-
 const client = redis.createClient({
-    host: process.env["REDIS_HOST"],
-    port: process.env["REDIS_PORT"],
-    password: process.env["REDIS_PASSWORD"],
-    logErrors: true
+    host: 'redis',
+    port: 6379,
 });
+
+// const client = redis.createClient({
+//     host: process.env["REDIS_HOST"],
+//     port: process.env["REDIS_PORT"],
+//     password: process.env["REDIS_PASSWORD"],
+//     logErrors: true
+// });
 // const sessionOption = {
 //     resave: false,
 //     saveUninitialized: false,
