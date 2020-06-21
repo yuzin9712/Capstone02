@@ -1,6 +1,6 @@
 const express = require('express');
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
-const { Post, User, Closet, Design, Product, PostComment, Hashtag, PImg, DesignLike, PostLike } = require('../models');
+const { Post, User, Closet, Design, Product, PostComment, Hashtag, PImg, DesignLike, PostLike, ImgByColor } = require('../models');
 const db = require('../models');
 const { Op } = require('sequelize');
 
@@ -15,7 +15,7 @@ router.get('/profile', isLoggedIn, (req, res) => {
 router.get('/join', isNotLoggedIn, (req, res) => {
 });
 
-router.get('/design', isLoggedIn, async (req, res, next) => {
+router.get('/design',  async (req, res, next) => {
 
     // try {
 
