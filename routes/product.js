@@ -1,6 +1,6 @@
 const express = require('express');
 const db = require('../models');
-
+const { Product, ShopAdmin, OrderDetail, ImgByColor, ProductInfo } = require('../models');
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
 
 const router = express.Router();
@@ -467,6 +467,35 @@ router.post('/search', isLoggedIn, async (req, res, next) => {
         res.status(403).send('Error');
     })
 });
+
+/**판매순 정렬 아직 imgbycolor랑 productinfo는 같이 안보내주고 있음 ..아직 ㄴㄴ */
+// router.get('/sales/:id', async (req, res, next) => {
+//     try {
+//         await Product.findAll({
+//             attributes: {
+//                 include: [
+//                     [db.sequelize.fn('ifnull', db.sequelize.fn('sum', db.sequelize.col('orderDetails.cnt')),0), 'salesnum']
+//                 ]
+//             },
+//             include: [{
+//                 model: ShopAdmin,
+//                 attributes: ['id','shopurl','shopname'],
+//             },{
+//                 model: OrderDetail,
+//                 attributes: []
+//             }],
+//             group: ['product.id'],
+//             order: [[db.sequelize.col('salesnum'), 'DESC']],
+//             where: { categoryId: parseInt(req.params.id, 10)}
+//         })
+//         .then((products) => {
+//             res.send(products);
+//         })
+//     } catch (err) {
+//         console.error(err);
+//         res.status(403).send('Error');
+//     }
+// })
 
 /**상품 상세 정보 조회*/
 router.get('/:id', isLoggedIn, async (req, res, next) => {
