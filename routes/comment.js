@@ -112,9 +112,10 @@ router.delete('/post/:id', isLoggedIn, async (req, res, next) => {
                     attributes: []
                 }
             }],
-            where: { id: parseInt(req.params.id, 10), userId: 2 }});
+            where: { id: parseInt(req.params.id, 10), userId: req.user.id }});
 
             if(postComment == undefined) {
+                console.log('없는건데??')
                 res.send('없는 댓글!!');
             } else {
                 console.log(postComment.Cimgs.map(r=>Number(r.id)));
@@ -133,7 +134,7 @@ router.delete('/post/:id', isLoggedIn, async (req, res, next) => {
 
 /**댓글 내용 수정하기 - 댓글의 아이디값이 파라미터로 와야함!!*/
 router.put('/post/:id', isLoggedIn, async (req, res, next) => {
-    const postComment = await PostComment.findOne({ where: { id: parseInt(req.params.id, 10), userId: 2 }});
+    const postComment = await PostComment.findOne({ where: { id: parseInt(req.params.id, 10), userId: req.user.id }});
 
     try {
         if(postComment == undefined) {
