@@ -37,7 +37,8 @@ router.post('/', isLoggedIn, async (req, res, next) => {
                     return productInfo.decrement('cnt', {by: product.cnt});
                 }
                 else {
-                    throw err;
+                    console.error('수량부족');
+                    //res.status(403).send('수량부족'); --> 추가적인작업필요
                 }
             })
         });
