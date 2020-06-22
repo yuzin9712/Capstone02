@@ -436,14 +436,19 @@ router.get('/categoryBest/:id', isLoggedIn, async(req, res, next) => {
         });
 
         if (query3result.length > 0) {
+            let index = 0;
             await db.sequelize.query(query6, { replacements: [parseInt(cid, 10)] })
                 .spread(function (result) {
 
                     for (let i = 0; i < result.length; i++) {
                         for (let j = 0; j < query3result.length; j++) {
-                            if (result[i].id != query3result[j].id) {
-                                productsRemainder.push(result[i]);
+                            index = j;
+                            if (result[i].id == query3result[j].id) {      
+                                break;
                             }
+                        }
+                        if(index >= query3result.length - 1){
+                            query3result.push(result[i]);
                         }
                     }
 
@@ -456,7 +461,7 @@ router.get('/categoryBest/:id', isLoggedIn, async(req, res, next) => {
         await db.sequelize.query(query4, { replacements : {pArr : pid}})
         .spread(function(result){
             if(realPidArr.length > 0){
-                res.send({products : query3result, productsRemainder : productsRemainder, imgs : result});
+                res.send({products : query3result, imgs : result});
             }
             else{
                 res.send({products : query6result, imgs : result});
