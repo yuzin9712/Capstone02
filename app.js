@@ -83,6 +83,7 @@ app.use(session({
 //     password: process.env["REDIS_PASSWORD"],
 //     logErrors: true
 // });
+
 // const sessionOption = {
 //     resave: false,
 //     saveUninitialized: false,
@@ -93,6 +94,7 @@ app.use(session({
 //     },
 //     store: new RedisStore({ client }),
 // };
+
 // app.use(session({
 //     resave: false,
 //     saveUninitialized: false,
