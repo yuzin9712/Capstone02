@@ -77,12 +77,12 @@ app.use(session({
 //     port: 6379,
 // });
 
-// const client = redis.createClient({
-//     host: process.env["REDIS_HOST"],
-//     port: process.env["REDIS_PORT"],
-//     password: process.env["REDIS_PASSWORD"],
-//     logErrors: true
-// });
+const client = redis.createClient({
+    host: process.env["REDIS_HOST"],
+    port: process.env["REDIS_PORT"],
+    password: process.env["REDIS_PASSWORD"],
+    logErrors: true
+});
 
 // const sessionOption = {
 //     resave: false,
@@ -95,16 +95,16 @@ app.use(session({
 //     store: new RedisStore({ client }),
 // };
 
-// app.use(session({
-//     resave: false,
-//     saveUninitialized: false,
-//     secret: process.env["COOKIE_SECRET"],
-//     cookie: {
-//         httpOnly: true,
-//         secure: false,
-//     },
-//     store: new RedisStore({ client }),
-// }))
+app.use(session({
+    resave: false,
+    saveUninitialized: false,
+    secret: process.env["COOKIE_SECRET"],
+    cookie: {
+        httpOnly: true,
+        secure: false,
+    },
+    store: new RedisStore({ client }),
+}))
 
 
 app.use(flash());
