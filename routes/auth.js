@@ -77,12 +77,28 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
         }
         if(!user) {
             req.flash('loginError', info.message);
-            return res.status(403).send('존재하지 않은 유저');
+            return res.status(403).send({
+              loginStatus: false,
+              shopStatus: '',
+              name: '존재하지 않는 유저',
+              id: '',
+              designLike: '',
+              postLike: '',
+              followingInfo: ''
+          });
         }
         return req.login(user, async (loginErr) => {
             if(loginErr) {
                 console.error(loginErr);
-                return res.status(403).send('로그인 에러');
+                return res.status(403).send({
+                  loginStatus: false,
+                  shopStatus: '',
+                  name: '로그인 에러',
+                  id: '',
+                  designLike: '',
+                  postLike: '',
+                  followingInfo: ''
+              });
             }
             const designlikes = await DesignLike.findAll({
                 attributes: ['designId'],
