@@ -5,15 +5,15 @@ module.exports = (sequelize, DataTypes) => (
             allowNull: false,
         },
         img: {
-            type: DataTypes.STRING(200),
+            type: DataTypes.TEXT(),
             allowNull: true,
         },
         img2: {
-            type: DataTypes.STRING(200),
+            type: DataTypes.TEXT(),
             allowNull: true,
         },
         img3: {
-            type: DataTypes.STRING(200),
+            type: DataTypes.TEXT(),
             allowNull: true,
         },
         user_email: {

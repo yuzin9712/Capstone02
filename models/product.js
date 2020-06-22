@@ -5,11 +5,11 @@ module.exports = (sequelize, DataTypes) => (
             allowNull: false,
         },
         description: {
-            type: DataTypes.STRING(255),
+            type: DataTypes.TEXT(),
             allowNull: true
         },
         img: {
-            type: DataTypes.STRING(200),
+            type: DataTypes.TEXT(),
             allowNull: true,
         },
         price: {

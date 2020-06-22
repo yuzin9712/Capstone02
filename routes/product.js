@@ -1,6 +1,6 @@
 const express = require('express');
 const db = require('../models');
-
+const { Product, ShopAdmin, OrderDetail, ImgByColor, ProductInfo } = require('../models');
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
 
 const router = express.Router();
@@ -308,12 +308,16 @@ router.get('/categoryBest/:id', isLoggedIn, async(req, res, next) => {
     
     var query3result = [];
     var query4result = [];
+    var query6result = [];
 
     var cid = req.params.id;
     var realPidArr = [];
     var realCntArr = [];
 
     var pid = [];
+    var productsRemainder = [];
+
+    console.log('cid : '+cid);
 
     try{
 
@@ -328,7 +332,7 @@ router.get('/categoryBest/:id', isLoggedIn, async(req, res, next) => {
 
         }, function(err){
             console.error(err);
-            res.status(403).send('Error');
+            res.status(403).send('query2 Error');
         });
 
         await db.sequelize.query(query1)
@@ -372,7 +376,7 @@ router.get('/categoryBest/:id', isLoggedIn, async(req, res, next) => {
             }
         }, function (err) {
             console.error(err);
-            res.status(403).send('Error');
+            res.status(403).send('query1 Error');
         });
 
         console.log('uniqueCntArr : ' + uniqueCntArr);
@@ -397,23 +401,25 @@ router.get('/categoryBest/:id', isLoggedIn, async(req, res, next) => {
         console.log('realCntArr : '+realCntArr);
 
         let pro;
-        await db.sequelize.query(query3, { replacements : {pArr : realPidArr}})
-        .spread(function(result){
-            for(let i = 0; i < result.length; i++){
-                for(let j = 0; j < result.length; j++){
-                    if(realPidArr[i] == result[j].id){
-                        pro = result[i];
-                        result[i] = result[j];
-                        result[j] = pro;
+        if (realPidArr.length != 0) {
+            await db.sequelize.query(query3, { replacements: { pArr: realPidArr } })
+                .spread(function (result) {
+                    for (let i = 0; i < result.length; i++) {
+                        for (let j = 0; j < result.length; j++) {
+                            if (realPidArr[i] == result[j].id) {
+                                pro = result[i];
+                                result[i] = result[j];
+                                result[j] = pro;
+                            }
+                        }
                     }
-                }
-            }
-            query3result = result;
-            console.log(query3result);
-        },  function(err){
-            console.error(err);
-            res.status(403).send('query3 Error');
-        });
+                    query3result = result;
+                    console.log(query3result);
+                }, function (err) {
+                    console.error(err);
+                    res.status(403).send('query3 Error');
+                });
+        }
         
         await db.sequelize.query(query6, { replacements : [parseInt(cid, 10)]})
         .spread(function(result){
@@ -422,31 +428,47 @@ router.get('/categoryBest/:id', isLoggedIn, async(req, res, next) => {
                 pid.push(result[k].id);
             }
 
-            // for(let i = 0; i < query3result.length; i++){
-            //     for(let j = 0; j < result.length; j++){
-            //         if(query3result[i].id != result[j].id){
-            //             query3result.push(result[j]);
-            //         }
-            //     }
-            // }
-            //res.send({products : query3result, imgs : query4result});
+            query6result = result;
+
         },  function(err){
             console.error(err);
             res.status(403).send('query6 Error');
         });
 
+        if (query3result.length > 0) {
+            await db.sequelize.query(query6, { replacements: [parseInt(cid, 10)] })
+                .spread(function (result) {
+
+                    for (let i = 0; i < result.length; i++) {
+                        for (let j = 0; j < query3result.length; j++) {
+                            if (result[i].id != query3result[j].id) {
+                                productsRemainder.push(result[i]);
+                            }
+                        }
+                    }
+
+                }, function (err) {
+                    console.error(err);
+                    res.status(403).send('query6 Error');
+                });
+        }
+
         await db.sequelize.query(query4, { replacements : {pArr : pid}})
         .spread(function(result){
-            res.send({products : query3result, imgs : result});
+            if(realPidArr.length > 0){
+                res.send({products : query3result, productsRemainder : productsRemainder, imgs : result});
+            }
+            else{
+                res.send({products : query6result, imgs : result});
+            }
         }, function(err){
             console.error(err);
             res.status(403).send('query4 Error');
         });
 
-
     }catch(err){
         console.error(err);
-        res.status(403).send('Error');
+        res.status(403).send('catch Error');
     }
 
 });
@@ -467,6 +489,35 @@ router.post('/search', isLoggedIn, async (req, res, next) => {
         res.status(403).send('Error');
     })
 });
+
+/**판매순 정렬 아직 imgbycolor랑 productinfo는 같이 안보내주고 있음 ..아직 ㄴㄴ */
+// router.get('/sales/:id', async (req, res, next) => {
+//     try {
+//         await Product.findAll({
+//             attributes: {
+//                 include: [
+//                     [db.sequelize.fn('ifnull', db.sequelize.fn('sum', db.sequelize.col('orderDetails.cnt')),0), 'salesnum']
+//                 ]
+//             },
+//             include: [{
+//                 model: ShopAdmin,
+//                 attributes: ['id','shopurl','shopname'],
+//             },{
+//                 model: OrderDetail,
+//                 attributes: []
+//             }],
+//             group: ['product.id'],
+//             order: [[db.sequelize.col('salesnum'), 'DESC']],
+//             where: { categoryId: parseInt(req.params.id, 10)}
+//         })
+//         .then((products) => {
+//             res.send(products);
+//         })
+//     } catch (err) {
+//         console.error(err);
+//         res.status(403).send('Error');
+//     }
+// })
 
 /**상품 상세 정보 조회*/
 router.get('/:id', isLoggedIn, async (req, res, next) => {

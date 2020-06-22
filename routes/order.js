@@ -31,10 +31,17 @@ router.post('/', isLoggedIn, async (req, res, next) => {
             ProductInfo.findOne({ //재고 줄어듬
                 where: { productId: product.id, size: product.size, color: product.color },
             }).then(productInfo => {
-                return productInfo.decrement('cnt', {by: product.cnt})
+
+                if(product.cnt <= productInfo.cnt){
+                    console.log('살 수 있음');
+                    return productInfo.decrement('cnt', {by: product.cnt});
+                }
+                else {
+                    console.error('수량부족');
+                    //res.status(403).send('수량부족'); --> 추가적인작업필요
+                }
             })
         });
-
 
         const newOrder = await Order.create({
             name: ordererInfo.name,

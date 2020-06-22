@@ -115,6 +115,7 @@ router.delete('/post/:id', isLoggedIn, async (req, res, next) => {
             where: { id: parseInt(req.params.id, 10), userId: req.user.id }});
 
             if(postComment == undefined) {
+                console.log('없는건데??')
                 res.send('없는 댓글!!');
             } else {
                 console.log(postComment.Cimgs.map(r=>Number(r.id)));
