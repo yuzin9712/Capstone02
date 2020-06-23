@@ -70,7 +70,7 @@ router.post('/:id', isLoggedIn, async (req, res, next) => {
     try {
 
         if(user == undefined) {
-            res.status(403).send({message: '삭제된유저'});
+            res.status(403).send('삭제된유저');
         } else {
             const [ room, created ] = await Room.findOrCreate({
                 where: { 

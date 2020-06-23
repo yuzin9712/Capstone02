@@ -14,7 +14,7 @@ router.post('/:id/follow', isLoggedIn, async(req, res, next) => {
         const user = await User.findOne({ where: { id: req.user.id } });
         const newFollower = await User.findOne({ where: { id: parseInt(req.params.id, 10) }});
         if(newFollower == undefined) {
-            res.status(403).send({message: '삭제된유저'});
+            res.status(403).send('삭제된유저');
         } else {
             await user.addFollowing(parseInt(req.params.id, 10));
             res.send('success');
