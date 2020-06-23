@@ -31,7 +31,7 @@ router.get('/shops',isLoggedIn, async (req, res, next) => {
 router.get('/users',isLoggedIn, async (req, res, next) => {
     
     //var query1 = "select * from users where deletedAt is null";
-    var query1 = "select id,email,NAME, phone, provider, snsId, createdAt, updatedAt from users WHERE users.id NOT IN (SELECT userId FROM shopAdmins);";
+    var query1 = "select id,email,name, phone, provider, snsId, createdAt, updatedAt, deletedAt from users WHERE users.id NOT IN (SELECT userId FROM shopAdmins);";
     var deletedUsers = [];
     var normalUsers = [];
 
@@ -40,9 +40,9 @@ router.get('/users',isLoggedIn, async (req, res, next) => {
         .spread(function(result){
             for(let i=0; i<result.length; i++){
                 if(result[i].deletedAt == null){
-                    normalUsers[i] = result[i];
+                    normalUsers.push(user);
                 }else{
-                    deletedUsers[i] = result[i];
+                    deletedUsers.push(user);
                 }
             }
         });    

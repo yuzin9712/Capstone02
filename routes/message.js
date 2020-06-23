@@ -32,15 +32,14 @@ router.get('/', isLoggedIn, async (req, res, next) => {
             },
             include: {
                 model: ChatLine,
-                // limit: 1, 하나만 보내지 말라고 ..?
                 attributes: ['id','lines','createdAt'],
                 include: {
                     model: User,
-                    attributes: ['id', 'name']
+                    attributes: ['id', 'name'],
+                    paranoid: false,
                 },
             },
             order: [[db.sequelize.col('time'), 'DESC']],
-            //order: [[db.sequelize.col('chatLines.createdAt'), 'DESC']], //메세지 온 거 최신순
             where: { 
                 [Op.or]: [
                     { user1Id: req.user.id },
@@ -64,31 +63,38 @@ router.post('/:id', isLoggedIn, async (req, res, next) => {
     console.log('----시작----');
     const newLine = req.body.line; //쪽지내용
 
-    console.log('이거내용??',req.body.line)
+    const user = await User.findOne({
+        where: { id : parseInt(req.params.id, 10) }
+    });
 
     try {
-        const [ room, created ] = await Room.findOrCreate({
-            where: { 
-                [Op.or]: [
-                    { user1Id: req.user.id, user2Id: parseInt(req.params.id, 10) },
-                    { user1Id: parseInt(req.params.id, 10), user2Id: req.user.id }
-                ]
-             },
-             defaults: {
-                 user1Id: req.user.id,
-                 user2Id: parseInt(req.params.id, 10)
-             }
-        });
 
-        // console.log('이게뭐야', room.id, room.user1Id, room.user2Id);
-
-        await ChatLine.create({
-            lines: newLine,
-            userId: req.user.id,
-            roomId: room.id
-        });
-
-        res.send('쪽지보내기 성공!');
+        if(user == undefined) {
+            res.status(403).send('삭제된 유저');
+        } else {
+            const [ room, created ] = await Room.findOrCreate({
+                where: { 
+                    [Op.or]: [
+                        { user1Id: req.user.id, user2Id: parseInt(req.params.id, 10) },
+                        { user1Id: parseInt(req.params.id, 10), user2Id: req.user.id }
+                    ]
+                 },
+                 defaults: {
+                     user1Id: req.user.id,
+                     user2Id: parseInt(req.params.id, 10)
+                 }
+            });
+    
+            // console.log('이게뭐야', room.id, room.user1Id, room.user2Id);
+    
+            await ChatLine.create({
+                lines: newLine,
+                userId: req.user.id,
+                roomId: room.id
+            });
+    
+            res.send('쪽지보내기 성공!');
+        }
     } catch (err) {
         console.error(err);
         res.status(403).send('Error');
