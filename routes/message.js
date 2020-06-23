@@ -15,12 +15,12 @@ router.get('/', isLoggedIn, async (req, res, next) => {
                 include: [
                         [
                         db.sequelize.literal(`(
-                            SELECT name FROM users AS user WHERE user.id = room.user1Id AND user.deletedAt IS NULL)`),
+                            SELECT name FROM users AS user WHERE user.id = room.user1Id)`),
                             'user1'
                         ],
                         [
                         db.sequelize.literal(`(
-                            SELECT name FROM users AS user WHERE user.id = room.user2Id AND user.deletedAt IS NULL)`),
+                            SELECT name FROM users AS user WHERE user.id = room.user2Id)`),
                             'user2'
                         ],
                         [
@@ -70,7 +70,7 @@ router.post('/:id', isLoggedIn, async (req, res, next) => {
     try {
 
         if(user == undefined) {
-            res.status(403).send('삭제된 유저');
+            res.status(403).send({message: '삭제된유저'});
         } else {
             const [ room, created ] = await Room.findOrCreate({
                 where: { 

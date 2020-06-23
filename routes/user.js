@@ -1,7 +1,7 @@
 const express = require('express');
 
 const { isLoggedIn } = require('./middlewares');
-const { User } = require('../models');
+const { User, ShopAdmin } = require('../models');
 const db = require('../models');
 const { Op } = require('sequelize');
 
@@ -12,8 +12,13 @@ const router = express.Router();
 router.post('/:id/follow', isLoggedIn, async(req, res, next) => {
     try {
         const user = await User.findOne({ where: { id: req.user.id } });
-        await user.addFollowing(parseInt(req.params.id, 10));
-        res.send('success');
+        const newFollower = await User.findOne({ where: { id: parseInt(req.params.id, 10) }});
+        if(newFollower == undefined) {
+            res.status(403).send({message: '삭제된유저'});
+        } else {
+            await user.addFollowing(parseInt(req.params.id, 10));
+            res.send('success');
+        }
     } catch (err) {
         console.error(err);
         res.status(403).send('Error');
@@ -36,11 +41,12 @@ router.delete('/:id/follow', isLoggedIn, async(req, res, next) => {
 });
 
 /**각 유저의 팔로잉 팔로우 수 구하기 */
-router.get('/:id', isLoggedIn, async (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
     try {
         const userInfo =  await User.findOne({
+            paranoid: false,
             attributes: [
-                        'name',
+                        'id','name', 'deletedAt',
                         [
                             db.sequelize.literal(`(
                                 SELECT COUNT(*) FROM Follow AS Followers WHERE Followers.followingId = user.id)`), //좋아요 수 구하기!!!!
@@ -70,8 +76,17 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
             }],
         });
 
-        res.send(userInfo);
-
+        if(userInfo.deletedAt != undefined) {
+            res.send({type: 'deleted', userInfo});
+        } else if (await ShopAdmin.findOne({
+            where: { userId: parseInt(req.params.id, 10), alianced: 1 }
+        })) {
+            res.send({type: 'shop', userInfo});
+        } else if (await userInfo.id == 17) {
+            res.send({type: 'admin', userInfo});
+        } else {
+            res.send({type: 'user', userInfo});
+        }
     } catch (err) {
         console.error(err);
         res.status(403).send('Error');
