@@ -40,9 +40,9 @@ router.get('/users',isLoggedIn, async (req, res, next) => {
         .spread(function(result){
             for(let i=0; i<result.length; i++){
                 if(result[i].deletedAt == null){
-                    normalUsers.push(user);
+                    normalUsers.push(result[i]);
                 }else{
-                    deletedUsers.push(user);
+                    deletedUsers.push(result[i]);
                 }
             }
         });    
