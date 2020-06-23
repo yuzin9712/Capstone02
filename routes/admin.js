@@ -7,7 +7,7 @@ const { ShopAdmin } = require('../models');
 const router = express.Router();
 
 /**제휴 신청 목록 조회 */
-router.get('/', async (req, res, next) => {
+router.get('/shops',isLoggedIn, async (req, res, next) => {
 
 
     try {
@@ -27,34 +27,11 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-/**제휴 승인 - shopadmin의 id 값이 파라미터로 온다. */
-router.get('/:id', async (req, res, next) => {
-
-    try {
-           var query = "update shopAdmins set alianced=1 where id=?";
-
-           await db.sequelize.query(query, {
-               replacements: [parseInt(req.params.id, 10)]
-           })
-           .spread(function () {
-               res.send('success');
-           }, function (err) {
-               console.error(err);
-               next(err);
-           })
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error');
-    }
-});
-
-
 //일반유저조회
-router.get('/users', isLoggedIn, async (req, res, next) => {
+router.get('/users',isLoggedIn, async (req, res, next) => {
     
     //var query1 = "select * from users where deletedAt is null";
-    var query1 = "select * from users";
+    var query1 = "select id,email,NAME, phone, provider, snsId, createdAt, updatedAt from users WHERE users.id NOT IN (SELECT userId FROM shopAdmins);";
     var deletedUsers = [];
     var normalUsers = [];
 
@@ -100,9 +77,31 @@ router.post('/deleteUser', isLoggedIn, async(req, res, next) => {
 
 });
 
+/**제휴 승인 - shopadmin의 id 값이 파라미터로 온다. */
+router.get('/shops/:id', isLoggedIn, async (req, res, next) => {
+
+    try {
+           var query = "update shopAdmins set alianced=1 where id=?";
+
+           await db.sequelize.query(query, {
+               replacements: [parseInt(req.params.id, 10)]
+           })
+           .spread(function () {
+               res.send('success');
+           }, function (err) {
+               console.error(err);
+               next(err);
+           })
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
 
 /**제휴 끊기 - shopadmin id가 파라미터로 온다 */
-router.post('/:id', async (req, res, next) => {
+router.post('/shops/:id', isLoggedIn, async (req, res, next) => {
     try {
         var query = "UPDATE shopAdmins SET deletedAt = NOW(), alianced = 0 WHERE id = ?";
 
