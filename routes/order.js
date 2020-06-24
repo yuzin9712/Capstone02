@@ -38,7 +38,7 @@ router.post('/', isLoggedIn, async (req, res, next) => {
                 }
                 else {
                     console.error('수량부족');
-                    //res.status(403).send('수량부족'); --> 추가적인작업필요
+                    throw new Error('수량부족한 상품');
                 }
             })
         });
