@@ -175,22 +175,25 @@ router.get('/month', isLoggedIn, async (req, res, next) => {
 /**플랫폼 관리자 통계 1 -> 안팔린 쇼핑몰은 0으로 나오게 수정*/
 router.get('/shop',isLoggedIn, async (req, res, next) => {
     try {
-
-        await ShopAdmin.findAll({
-            attributes:['shopname',[db.sequelize.fn('ifnull', db.sequelize.fn('sum', db.sequelize.col('products->orderDetails.price')),0), 'sales']],
-            include: [{
-                model: Product,
-                attributes: [],
+        if(req.user.id == 17) {
+            await ShopAdmin.findAll({
+                attributes:['shopname',[db.sequelize.fn('ifnull', db.sequelize.fn('sum', db.sequelize.col('products->orderDetails.price')),0), 'sales']],
                 include: [{
-                    model: OrderDetail,
-                    attributes: []
-                }]
-            }],
-            group: ['shopAdmin.id']
-        })
-        .then((data) => {
-            res.send(data);
-        })
+                    model: Product,
+                    attributes: [],
+                    include: [{
+                        model: OrderDetail,
+                        attributes: []
+                    }]
+                }],
+                group: ['shopAdmin.id']
+            })
+            .then((data) => {
+                res.send(data);
+            })
+        } else {
+            throw new Error('관리자가 아닌 사용자');
+        }
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -200,15 +203,20 @@ router.get('/shop',isLoggedIn, async (req, res, next) => {
 /**플랫폼 관리자 통계 2*/
 router.get('/growth/sales',isLoggedIn, async (req, res, next) => {
     try {
-        await Order.findAll({
-            attributes: [
-                [db.sequelize.fn('concat', db.sequelize.fn('year',db.sequelize.col('order.createdAt')),'-', db.sequelize.fn('month',db.sequelize.col('order.createdAt'))), 'ym'],
-                [db.sequelize.fn('sum', db.sequelize.col('order.total')), 'sales']],
-            group: ['ym']
-        })
-        .then((data) => {
-            res.send(data);
-        })
+        if(req.user.id == 17) {
+            await Order.findAll({
+                attributes: [
+                    [db.sequelize.fn('concat', db.sequelize.fn('year',db.sequelize.col('order.createdAt')),'-', db.sequelize.fn('month',db.sequelize.col('order.createdAt'))), 'ym'],
+                    [db.sequelize.fn('sum', db.sequelize.col('order.total')), 'sales']],
+                group: ['ym']
+            })
+            .then((data) => {
+                res.send(data);
+            })
+        } else {
+            throw new Error('관리자가 아닌 사용자');
+        }
+
     } catch (err){
         console.error(err);
         res.status(500).send('Server Error');
@@ -218,32 +226,24 @@ router.get('/growth/sales',isLoggedIn, async (req, res, next) => {
 /**플랫폼 관리자 통계 3*/
 router.get('/growth/users',isLoggedIn, async (req, res, next) => {
     try {
-        await User.findAll({
-            attributes: [
-                [db.sequelize.fn('concat', db.sequelize.fn('year',db.sequelize.col('user.createdAt')),'-', db.sequelize.fn('month',db.sequelize.col('user.createdAt'))), 'ym'],
-                [db.sequelize.fn('count', db.sequelize.col('user.id')), 'users']],
-            group: ['ym']
-        })
-        .then((data) => {
-            res.send(data);
-        })
+        if(req.user.id == 17) {
+            await User.findAll({
+                attributes: [
+                    [db.sequelize.fn('concat', db.sequelize.fn('year',db.sequelize.col('user.createdAt')),'-', db.sequelize.fn('month',db.sequelize.col('user.createdAt'))), 'ym'],
+                    [db.sequelize.fn('count', db.sequelize.col('user.id')), 'users']],
+                group: ['ym']
+            })
+            .then((data) => {
+                res.send(data);
+            })
+        } else {
+            throw new Error('관리자가 아닌 사용자');
+        }
+
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
     }
 })
-
-/** 상태별 주문 조회 */
-// router.get('/orders', async (req, res, next) => {
-//     try {
-//         //status:: 미입금 -> 입금완료 // 미배송 -> 배송완료 or 미발송 -> 발송완료
-//         Order.findAll({
-
-//         })
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).send('Server Error');
-//     }
-// })
 
 module.exports = router;
