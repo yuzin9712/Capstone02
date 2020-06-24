@@ -9,7 +9,7 @@ before_deploy: # 배포하기전 하는 작업들@@테스트
   - zip -r server-latest * # node-koa-server 라는 이름으로 zip 파일 생성
   - mkdir -p server # deploy 라는 디렉터리를 만듬
   - mv server-latest.zip server/server-latest.zip # deploy 디렉터리로 node-koa-server.zip 파일을 이동
-  - mv /server /home/ubuntu/docker-image/server #docker-image 폴더로 이동
+  - mv server /home/ubuntu/docker-image/server #docker-image 폴더로 이동
 deploy: # 배포
   - provider: s3 # AWS S3를 의미
     access_key_id: $AWS_ACCESS_KEY # Travis repo settings에 설정된 값
