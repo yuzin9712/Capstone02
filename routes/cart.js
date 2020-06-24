@@ -25,6 +25,9 @@ function getCartByUserId(uid) {
 
                 resolve({ uniquePidArr: uniquePidArr, cartsByUid: cartsByUid });
             }
+            else {
+                resolve({ uniquePidArr: [], cartsByUid: [] });
+            }
         })
     });
 }
@@ -96,6 +99,8 @@ router.get('/', isLoggedIn, async (req, res, next) => {
         console.log(result1.uniquePidArr);
         console.log('result1.cartsByUid : '); 
         console.dir(result1.cartsByUid);
+
+        
 
         let result2n3 = await getProInfoByPid(result1.uniquePidArr);
         console.log('results2n3 : '); 
