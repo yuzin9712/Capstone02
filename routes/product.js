@@ -292,7 +292,7 @@ router.get('/categoryBest/:id', isLoggedIn, async(req, res, next) => {
 
     var query1 = "select productId from orderDetails where deletedAt is null";
     var query2 = "select cnt from orderDetails where deletedAt is null";
-    var query5 = "select categoryId from products where deletedAt is null and id = ?";
+    var query5 = "select categoryId from products where id = ?";
 
     var query3 = "select * from shopAdmins, products where products.shopAdminId = shopAdmins.id and products.id IN(:pArr)";
     var query4 = "select * from `imgByColors` where `productId` IN(:pArr)";
