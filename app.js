@@ -17,7 +17,7 @@ const corsOptions = {
     origin: true,
     credentials: true
 };
-//~~
+
 const clientApp = path.join(__dirname + './build');
 
 const pageRouter = require('./routes/page');
