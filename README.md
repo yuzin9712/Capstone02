@@ -85,11 +85,11 @@ burndown chart는 남은 작업과 시간을 시각적으로 보여주는 방법
 ## 🙌 PRODUCT
 ### 1. SIGN/LOG IN
 ----
-<img src="./Images/2.jpg" width="300px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img>  <img src="./Images/3.jpg" width="300px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
+<img src="./Images/2.jpg" width="300px" height="300px" title="2" alt="2"></img><br/><img src="./Images/3.jpg" width="300px" height="300px" title="3" alt="3"></img>
 
 ### 2. MAIN PAGE
 ----
-<img src="./Images/4.jpg" width="300px" height="650px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
+<img src="./Images/4.jpg" width="300px" height="650px" title="4" alt="4"></img><br/>
 
 ### 3. PRODUCT DETAIL PAGE
 ---
