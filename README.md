@@ -85,7 +85,8 @@ burndown chart는 남은 작업과 시간을 시각적으로 보여주는 방법
 ## 🙌 PRODUCT
 ### 1. SIGN/LOG IN
 ----
-<img src="./Images/2.jpg" width="300px" height="300px" title="2" alt="2"></img><br/><img src="./Images/3.jpg" width="300px" height="300px" title="3" alt="3"></img>
+![2](/Images/2.jpg)
+![3](/Images/3.jpg)
 
 ### 2. MAIN PAGE
 ----
