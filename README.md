@@ -34,7 +34,7 @@ burndown chart는 남은 작업과 시간을 시각적으로 보여주는 방법
 
 ## Main Target and Stakeholders
 ---
-<img src="./Images/21.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
+![21](https://user-images.githubusercontent.com/58067265/94992766-1ee6b900-05c7-11eb-88cf-2e6675e3d20c.JPG)
 
 
 ## Stack
@@ -54,7 +54,7 @@ burndown chart는 남은 작업과 시간을 시각적으로 보여주는 방법
 
 ## Software Architecture
 ---
-<img src="./Images/22.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
+![22](https://user-images.githubusercontent.com/58067265/94992771-25753080-05c7-11eb-9683-d086305914c7.JPG)
 
 
 ## System Architecture
@@ -85,46 +85,57 @@ burndown chart는 남은 작업과 시간을 시각적으로 보여주는 방법
 ## 🙌 PRODUCT
 ### 1. SIGN/LOG IN
 ----
-![2](/Images/2.jpg)
-![3](/Images/3.jpg)
+![2](https://user-images.githubusercontent.com/58067265/94992631-6587e380-05c6-11eb-9a8a-df8aacb7b843.JPG)
+
+![3](https://user-images.githubusercontent.com/58067265/94992640-70427880-05c6-11eb-9c5d-9f918ebe168a.jpg)
 
 ### 2. MAIN PAGE
 ----
-<img src="./Images/4.jpg" width="300px" height="650px" title="4" alt="4"></img><br/>
+![4](https://user-images.githubusercontent.com/58067265/94992650-7afd0d80-05c6-11eb-8ecc-6e9c0c350f7a.JPG)
 
 ### 3. PRODUCT DETAIL PAGE
 ---
-<img src="./Images/5.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
-<img src="./Images/6.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
+![5](https://user-images.githubusercontent.com/58067265/94992657-83554880-05c6-11eb-8d60-5c4e6905d9c9.JPG)
+
+![6](https://user-images.githubusercontent.com/58067265/94992665-8bad8380-05c6-11eb-83b8-64c80cc3d9a0.JPG)
 
 ### 4. PURCHASE PROCESS/ DELIVERY
 ---
-<img src="./Images/7.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
-<img src="./Images/8.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
-<img src="./Images/9.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
+![7](https://user-images.githubusercontent.com/58067265/94992672-99fb9f80-05c6-11eb-8b41-9851bd3491fc.JPG)
+
+![8](https://user-images.githubusercontent.com/58067265/94992678-a2ec7100-05c6-11eb-81f2-22459dcc3cfd.JPG)
+
+![9](https://user-images.githubusercontent.com/58067265/94992686-ad0e6f80-05c6-11eb-869f-714b0fba9363.JPG)
 
 ### 5. COSTUME TOOL
 ---
-<img src="./Images/10.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
+![10](https://user-images.githubusercontent.com/58067265/94992696-b4ce1400-05c6-11eb-87b5-350960cac090.JPG)
 
 ### 6. MY PAGE
 ---
-<img src="./Images/17.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
-<img src="./Images/11.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
-<img src="./Images/18.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
+![17](https://user-images.githubusercontent.com/58067265/94992744-f959af80-05c6-11eb-9b1e-27b8c0043965.JPG)
+
+![11](https://user-images.githubusercontent.com/58067265/94992703-c1526c80-05c6-11eb-9371-58e708379da3.JPG)
+
+![18](https://user-images.githubusercontent.com/58067265/94992747-04acdb00-05c7-11eb-8799-3ca0b7c514fb.JPG)
 
 ### 7. DESIGN PAGE & FASHION CARE COMMUNITY PAGE
 ---
-<img src="./Images/12.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
-<img src="./Images/13.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
-<img src="./Images/14.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
-<img src="./Images/15.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
-<img src="./Images/16.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
+![12](https://user-images.githubusercontent.com/58067265/94992714-cf07f200-05c6-11eb-8a84-34f4553e1e0c.JPG)
+
+![13](https://user-images.githubusercontent.com/58067265/94992718-d929f080-05c6-11eb-9d2c-58cfce803970.JPG)
+
+![14](https://user-images.githubusercontent.com/58067265/94992724-e1822b80-05c6-11eb-985a-f41cd5e58277.JPG)
+
+![15](https://user-images.githubusercontent.com/58067265/94992733-eb0b9380-05c6-11eb-9281-fac34a8a9276.JPG)
+
+![16](https://user-images.githubusercontent.com/58067265/94992739-f232a180-05c6-11eb-9c22-497ffbbf493d.JPG)
 
 ### 8. ANALYTICS
 ---
-<img src="./Images/19.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
-<img src="./Images/20.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
+![19](https://user-images.githubusercontent.com/58067265/94992757-0d9dac80-05c7-11eb-9244-c3c48976de99.JPG)
+
+![20](https://user-images.githubusercontent.com/58067265/94992762-18584180-05c7-11eb-8e05-62e57784b5d7.JPG)
 
 ## Contributing
 
