@@ -59,7 +59,7 @@ burndown chart는 남은 작업과 시간을 시각적으로 보여주는 방법
 
 ## System Architecture
 ---
-<img src="./Images/1.jpg" width="450px" height="300px" title="px(픽셀) 크기 설정" alt="RubberDuck"></img><br/>
+![1](https://user-images.githubusercontent.com/58067265/94992602-23f73880-05c6-11eb-9094-28d63a3b946c.JPG)
 
 
 👷‍♀️TRAVIS CI 
